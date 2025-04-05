@@ -4,7 +4,7 @@ var os = require("os")
 var Websocket = require("ws")
 var crypto = require("crypto")
 var util = require('util')
-var Utils = require('utils')
+var Utils = require('./utils')
 
 const log = new Utils.log.log(colors.green("Sandustry.web.main"), "./sandustry.web.main.txt", true);
 
