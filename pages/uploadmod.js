@@ -36,7 +36,9 @@ module.exports = {
                 const payload = await JSON.parse(body);
                 const { filename, filedata, discordInfo } = payload;
                 var modID = crypto.randomUUID();
+                var newmod = false;
                 if(payload.modID){
+                    newmod = true;
                     modID = payload.modID
                 }
                 if (!filename || !filedata) {
@@ -58,7 +60,7 @@ module.exports = {
                 const db = client.db("SandustryMods");
                 const modsCollection = db.collection("Mods");
                 const versionsCollection = db.collection("ModVersions");
-                let modEntry = await modsCollection.findOne({ "modID": modID });
+
 
                 var content = await JSZip.loadAsync(zipBuffer);
                 var fileNames = Object.keys(content.files);
@@ -66,7 +68,12 @@ module.exports = {
                 var modInfoFile = content.file(modInfoPath);
                 var modInfoContent = await modInfoFile.async('text');
                 var modinfo = JSON.parse(modInfoContent);
-
+                var modEntry = {}
+                modEntry = await modsCollection.findOne({ "modID": modID, "Author.discordID": discordInfo.id, });
+                if (!modEntry) {
+                    modEntry = await modsCollection.findOne({ "modinfo.name": modinfo.name, "Author.discordID": discordInfo.id });
+                }
+                modID = modEntry ? modEntry.modID : modID;
                 if (!modEntry) {
                     modEntry = {
                         modID: modID,
