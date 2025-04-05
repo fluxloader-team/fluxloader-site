@@ -18,7 +18,7 @@
             <h3>Mod Information</h3>
             <pre id="modInfoContent" style="white-space: pre-wrap;"></pre>
         </div>
-        <button type="submit" class="btn btn-primary" onclick="">Upload Mod</button>
+        <button type="submit" class="btn btn-primary" onclick="handleUpload()">Upload Mod</button>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -57,8 +57,49 @@
             window.location.href = '/';
         }
 
+        async function handleUpload() {
+            var fileInput = document.getElementById('ModFile');
+            var file = fileInput.files[0];
+
+            if (!file || file.type !== 'application/zip') {
+                alert('Please upload a valid ZIP file.');
+                return;
+            }
+
+            try {
+                var zipBinaryData = await file.arrayBuffer();
+                var base64Data = btoa(String.fromCharCode(...new Uint8Array(zipBinaryData)));
+
+                var jsonPayload = JSON.stringify({
+                    filename: file.name,
+                    filedata: base64Data,
+                    discordInfo: discordUser,
+                });
+
+                var response = await fetch('/uploadmod', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: jsonPayload,
+                });
+
+                var result = await response.json();
+                console.log('Server response:', result);
+
+                if (result.message) {
+                    alert(`Upload Successful: ${result.message}`);
+                }
+            } catch (error) {
+                console.error('Error processing ZIP file:', error);
+                alert('Error processing the ZIP file.');
+            }
+        }
+
+
+
         function displayModInfo(modInfo) {
-            const container = document.getElementById('ModInfo');
+            var container = document.getElementById('ModInfo');
             container.innerHTML = `
     <div class="card">
       <div class="card-header">
