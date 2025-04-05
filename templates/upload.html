@@ -57,30 +57,65 @@
       window.location.href = '/';
     }
     function displayModInfo(modInfo) {
-      var container = document.getElementById('modInfoContent');
-      var markdownDescription = modInfo.description
-              ? marked.parse(modInfo.description)
-              : 'No description provided!';
-
+      const container = document.getElementById('ModInfo');
       container.innerHTML = `
-    <strong>Name:</strong> ${modInfo.name}<br>
-    <strong>Version:</strong> ${modInfo.version}<br>
-    <strong>Author:</strong> ${modInfo.author}<br>
-    <strong>Short Description:</strong> ${modInfo.shortDescription}<br>
-    <strong>Description:</strong> ${markdownDescription}<hr>
-    <strong>Modloader Version:</strong> ${modInfo.modloaderVersion}<br>
-    <strong>Dependencies:</strong> ${
-              Object.entries(modInfo.dependencies || {})
-                      .map(([key, value]) => `${key}: ${value}`)
-                      .join('<br>') || 'None'
-      }<br>
-    <strong>Tags:</strong> ${(modInfo.tags || []).join(', ') || 'None'}<br>
-    <strong>Electron Entrypoint:</strong> ${modInfo.electronEntrypoint}<br>
-    <strong>Browser Entrypoint:</strong> ${modInfo.browserEntrypoint}<br>
-    <strong>Worker Entrypoint:</strong> ${modInfo.workerEntrypoint}<br>
-    <strong>Default Config:</strong> <pre>${JSON.stringify(modInfo.defaultConfig, null, 2)}</pre>
+    <div class="card">
+      <div class="card-header">
+        <h4>${modInfo.name} <small class="text-muted">v${modInfo.version}</small></h4>
+        <span class="badge bg-primary" style="margin-right: 10px;">Author: ${modInfo.author}</span>
+        ${modInfo.tags.map((tag) => `<span class="badge bg-secondary">${tag}</span>`).join(' ')}
+      </div>
+      <div class="card-body">
+        <h5>Short Description</h5>
+        <p class="text-muted">${modInfo.shortDescription}</p>
+        <h5>Description</h5>
+        <div>${modInfo.description ? marked.parse(modInfo.description) : '<em>No description provided.</em>'}</div>
+
+        <hr>
+
+        <h5>Details</h5>
+        <table class="table table-striped">
+          <tbody>
+            <tr>
+              <th scope="row">Modloader Version</th>
+              <td>${modInfo.modloaderVersion || 'N/A'}</td>
+            </tr>
+            <tr>
+              <th scope="row">Electron Entrypoint</th>
+              <td>${modInfo.electronEntrypoint || 'N/A'}</td>
+            </tr>
+            <tr>
+              <th scope="row">Browser Entrypoint</th>
+              <td>${modInfo.browserEntrypoint || 'N/A'}</td>
+            </tr>
+            <tr>
+              <th scope="row">Worker Entrypoint</th>
+              <td>${modInfo.workerEntrypoint || 'N/A'}</td>
+            </tr>
+            <tr>
+              <th scope="row">Dependencies</th>
+              <td>
+                ${
+              modInfo.dependencies && Object.keys(modInfo.dependencies).length
+                      ? Object.entries(modInfo.dependencies)
+                              .map(([key, value]) => `<span class="badge bg-info">${key}: ${value}</span>`)
+                              .join(' ')
+                      : '<em>No dependencies.</em>'
+      }
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <hr>
+
+        <h5>Default Configuration</h5>
+        <pre class="bg-light p-3 rounded">${modInfo.defaultConfig ? JSON.stringify(modInfo.defaultConfig, null, 2) : 'No default config available.'}</pre>
+      </div>
+    </div>
   `;
     }
+
 
     document.getElementById('ModFile').addEventListener('change', async function (event) {
       var file = event.target.files[0];
