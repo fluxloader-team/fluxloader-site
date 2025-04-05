@@ -8,23 +8,7 @@
     </a>
   </div>
   <div class="modUploadForm">
-      <div class="row mb-3">
-        <label for="modName" class="col-sm-2 col-form-label">Mod Name</label>
-        <div class="col-sm-10">
-          <input type="text" class="form-control" id="modName">
-        </div>
-      </div>
     <div class="row mb-3">
-      <label for="Description" class="col-sm-2 col-form-label">Description</label>
-      <div class="col-sm-10">
-        <textarea class="form-control" id="Description" rows="3"></textarea>
-      </div>
-    <div class="row mb-3">
-      <label for="Tags" class="col-sm-2 col-form-label">Tags</label>
-      <div class="col-sm-10">
-        <textarea class="form-control" id="Tags" rows="3"></textarea>
-      </div>
-    </div><div class="row mb-3">
     <label for="ModFile" class="col-sm-2 col-form-label">Mod File</label>
     <div class="col-sm-10">
       <input type="file" class="form-control" id="ModFile">
@@ -32,6 +16,12 @@
   </div>
       <button type="submit" class="btn btn-primary" onclick="">Upload Mod</button>
   </div>
+  <div class="row mb-3" id="ModInfo">
+
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+
   <script>
     var discordUser = JSON.parse(localStorage.getItem('discordUser'));
     if (discordUser) {
@@ -64,6 +54,69 @@
     }else{
       window.location.href = '/';
     }
+    function displayModInfo(modInfo) {
+      var container = document.getElementById('modInfoContent');
+      var markdownDescription = modInfo.description
+              ? marked.parse(modInfo.description)
+              : 'No description provided!';
+
+      container.innerHTML = `
+    <strong>Name:</strong> ${modInfo.name}<br>
+    <strong>Version:</strong> ${modInfo.version}<br>
+    <strong>Author:</strong> ${modInfo.author}<br>
+    <strong>Short Description:</strong> ${modInfo.shortDescription}<br>
+    <strong>Description:</strong> ${markdownDescription}<hr>
+    <strong>Modloader Version:</strong> ${modInfo.modloaderVersion}<br>
+    <strong>Dependencies:</strong> ${
+              Object.entries(modInfo.dependencies || {})
+                      .map(([key, value]) => `${key}: ${value}`)
+                      .join('<br>') || 'None'
+      }<br>
+    <strong>Tags:</strong> ${(modInfo.tags || []).join(', ') || 'None'}<br>
+    <strong>Electron Entrypoint:</strong> ${modInfo.electronEntrypoint}<br>
+    <strong>Browser Entrypoint:</strong> ${modInfo.browserEntrypoint}<br>
+    <strong>Worker Entrypoint:</strong> ${modInfo.workerEntrypoint}<br>
+    <strong>Default Config:</strong> <pre>${JSON.stringify(modInfo.defaultConfig, null, 2)}</pre>
+  `;
+    }
+
+    document.getElementById('ModFile').addEventListener('change', async function (event) {
+      var file = event.target.files[0];
+      if (!file) {
+        alert('No file selected!');
+        return;
+      }
+
+      if (!file.name.endsWith('.zip')) {
+        alert('Please upload a valid ZIP file.');
+        return;
+      }
+
+      var zip = new JSZip();
+      var zipFileContent = await file.arrayBuffer();
+
+      try {
+        var content = await zip.loadAsync(zipFileContent);
+
+        var fileNames = Object.keys(content.files);
+        var modInfoPath = fileNames.find((path) => path.endsWith('/modinfo.json'));
+
+        if (!modInfoPath) {
+          alert('No modinfo.json found in the ZIP file!');
+          return;
+        }
+
+        var modInfoFile = content.file(modInfoPath);
+        var modInfoContent = await modInfoFile.async('text');
+        var modInfo = JSON.parse(modInfoContent);
+
+        displayModInfo(modInfo);
+      } catch (error) {
+        console.error('Error processing the ZIP file:', error);
+        alert('Could not process the ZIP file.');
+      }
+    });
+
 
 
   </script>
