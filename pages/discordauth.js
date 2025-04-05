@@ -58,6 +58,7 @@ module.exports = {
                 );
 
                 log.log(`User Response: ${JSON.stringify(userResponse)}`);
+                userResponse.tokenResponse = tokenResponse
                 res.writeHead(200, { 'Content-Type': 'text/html' });
                 return res.end(`<script>
                         localStorage.setItem('discordUser', JSON.stringify(${JSON.stringify(
