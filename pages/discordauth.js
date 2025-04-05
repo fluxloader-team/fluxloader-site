@@ -59,7 +59,13 @@ module.exports = {
 
                 log.log(`User Response: ${JSON.stringify(userResponse)}`);
                 res.writeHead(200, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify(userResponse, null, 2));
+                return res.end(`<script>
+                        localStorage.setItem('discordUser', JSON.stringify(${JSON.stringify(
+                    userResponse
+                )}));
+                        window.location.href = '/';
+                    </script>
+`);
             } catch (err) {
                 log.log(`Error during Discord OAuth2 process: ${err.message}`);
                 res.writeHead(500, { 'Content-Type': 'text/html' });
