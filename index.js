@@ -9,12 +9,33 @@ var { exec } = require('child_process');
 var Utils = require('./utils')
 var path = require('path');
 
+const CONFIG_PATH = path.join(__dirname, 'config.json');
+var defaultConfig = {
+    discord: {
+        clientId: 'CLIENT_ID',
+        clientSecret: 'CLIENT_SECRET',
+        redirectUri: 'https://example.com/auth/discord/callback',
+    },
+    mongodb:{
+        uri: 'mongodb://localhost:27017/somejoinstring',
+    }
+};
+
 var lastRepoHash = '';
 const log = new Utils.log.log(colors.green("Sandustry.web.main"), "./sandustry.web.main.txt", true);
 
 process.on('uncaughtException', function (err) {
     log.log(`Caught exception: ${err.stack}`);
 });
+
+if (!fs.existsSync(CONFIG_PATH)) {
+    log.log('Config file not found, generating default config.json...');
+    fs.writeFileSync(CONFIG_PATH, JSON.stringify(defaultConfig, null, 2), 'utf-8');
+    log.log('Default config.json generated.');
+    process.exit(0);
+}
+globalThis.Config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
+
 
 globalThis.Templates = {"filename": "content"}
 
