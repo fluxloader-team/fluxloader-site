@@ -1,0 +1,40 @@
+<div class="pagecontainer">
+  <div class="headerContainer" id="headerContainer">
+    <div class="btn btn-secondary headerButton" style="margin-left: 15px;">Mod List</div>
+    <a href="/auth/discord" class="btn btn-primary" style="margin-right: 15px;" id="discordLogin">
+      <img src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg"
+           alt="Discord Logo"
+           style="width: 100px; height: 20px; margin-right: 5px;">
+    </a>
+  </div>
+  <div class="modUploadForm">
+      <div class="row mb-3">
+        <label for="modName" class="col-sm-2 col-form-label">Mod Name</label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control" id="modName">
+        </div>
+      </div>
+    <div class="row mb-3">
+      <label for="Tags" class="col-sm-2 col-form-label">Tags</label>
+      <div class="col-sm-10">
+        <textarea class="form-control" id="Tags" rows="3"></textarea>
+      </div>
+    </div><div class="row mb-3">
+    <label for="ModFile" class="col-sm-2 col-form-label">Mod File</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" id="ModFile">
+    </div>
+  </div>
+      <button type="submit" class="btn btn-primary" onclick="">Upload Mod</button>
+  </div>
+  <script>
+    var discordUser = JSON.parse(localStorage.getItem('discordUser'));
+    if (discordUser) {
+
+    }else{
+      window.location.href = '/';
+    }
+
+
+  </script>
+</div>
