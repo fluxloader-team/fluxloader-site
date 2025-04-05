@@ -137,7 +137,7 @@
                 var content = await zip.loadAsync(zipFileContent);
 
                 var fileNames = Object.keys(content.files);
-                var modInfoPath = fileNames.find((path) => path.endsWith('/modinfo.json'));
+                var modInfoPath = fileNames.find((path) => path.endsWith('modinfo.json'));
 
                 if (!modInfoPath) {
                     alert('No modinfo.json found in the ZIP file!');
