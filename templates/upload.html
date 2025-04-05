@@ -61,6 +61,8 @@
             var fileInput = document.getElementById('ModFile');
             var file = fileInput.files[0];
 
+            console.log('File:', !file);
+            console.log('File:', file.type);
             if (!file || file.type !== 'application/zip') {
                 alert('Please upload a valid ZIP file.');
                 return;
