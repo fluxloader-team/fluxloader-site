@@ -5,15 +5,20 @@ var Websocket = require("ws")
 var crypto = require("crypto")
 var util = require('util')
 var fs = require('fs')
+var { exec } = require('child_process');
 var Utils = require('./utils')
-
+var lastRepoHash = '';
 const log = new Utils.log.log(colors.green("Sandustry.web.main"), "./sandustry.web.main.txt", true);
 
 process.on('uncaughtException', function (err) {
     log.log(`Caught exception: ${err.stack}`);
 });
 
-var Templates = {}
+globalThis.Templates = {"filename": "content"}
+
+var pages = {"/": {
+    run: function (req,res){}
+}}
 
 var LoadTemplates = function (){
     log.log("Loading templates")
@@ -22,5 +27,68 @@ var LoadTemplates = function (){
     })
     log.log("Templates loaded")
 }
+var LoadPages = function (){
+    log.log("Loading pages")
+    fs.readdirSync( "./pages").forEach(file => {
+        if(require.resolve("./pages/"+file)){
+            delete require.cache[require.resolve("./pages/"+file)]
+        }
+        var temprequire = require("./pages/"+file)
+        temprequire.paths.forEach(path => {
+            pages[path] = temprequire;
+        })
+
+    })
+    log.log("pages loaded")
+}
+function computeRepoHash() {
+    var folderHash = crypto.createHash('sha256');
+    var repoFiles = fs.readdirSync('./');
+    for (var file of repoFiles) {
+        if (fs.statSync(file).isFile()) {
+            folderHash.update(fs.readFileSync(file));
+        }
+    }
+    return folderHash.digest('hex');
+}
+function performGitPull() {
+    exec('git pull', (error, stdout, stderr) => {
+        if (error) {
+            log.log(`Error running git pull: ${error}`);
+            return;
+        }
+        log.log(stdout);
+
+        const newRepoHash = computeRepoHash();
+
+        if (newRepoHash !== lastRepoHash) {
+            log.log('Changes detected in the repository. Reloading templates and pages...');
+            lastRepoHash = newRepoHash;
+
+            LoadTemplates();
+            LoadPages();
+        } else {
+            log.log('No changes detected.');
+        }
+    });
+}
+
 
 LoadTemplates();
+LoadPages();
+lastRepoHash = computeRepoHash();
+
+var WebRequestHandler = function (req, res){
+    var url = req.url
+    var urlSplit = url.split("?")
+    var urlName = urlSplit[0]
+    var template = pages[urlName]
+    if(template){
+        template.run(req, res)
+    }else{
+        res.writeHead(404, {"Content-Type": "text/html"})
+        res.end("404")
+    }
+}
+setInterval(performGitPull, 10000);
+var WebServer = http.createServer(WebRequestHandler).listen(20221)
