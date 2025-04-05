@@ -1,4 +1,4 @@
-var colors = require('colors');
+var colors = require('color');
 var http = require("http")
 var os = require("os")
 var Websocket = require("ws")
