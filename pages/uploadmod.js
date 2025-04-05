@@ -11,6 +11,7 @@ var Utils = require('./../utils')
 var { MongoClient } = require("mongodb");
 var { compress } = require("@mongodb-js/zstd");
 var https = require('https');
+var JSZip = require("jszip");
 const log = new Utils.log.log(colors.green("Sandustry.web.pages.upload"), "./sandustry.web.main.txt", true);
 const mongoUri = globalThis.Config.mongodb.uri;
 
@@ -58,6 +59,15 @@ module.exports = {
                 const modsCollection = db.collection("Mods");
                 const versionsCollection = db.collection("ModVersions");
                 let modEntry = await modsCollection.findOne({ "modID": modID });
+
+                var zip = await JSZip.loadAsync(zipBuffer);
+                var content = await JSZip.loadAsync(zip);
+
+                var fileNames = Object.keys(content.files);
+                var modInfoPath = fileNames.find((path) => path.endsWith('modinfo.json'));
+                var modInfoFile = content.file(modInfoPath);
+                var modInfoContent = await modInfoFile.async('text');
+                var modinfo = JSON.parse(modInfoContent);
 
                 if (!modEntry) {
                     modEntry = {
