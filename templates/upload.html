@@ -15,6 +15,11 @@
         </div>
       </div>
     <div class="row mb-3">
+      <label for="Description" class="col-sm-2 col-form-label">Description</label>
+      <div class="col-sm-10">
+        <textarea class="form-control" id="Description" rows="3"></textarea>
+      </div>
+    <div class="row mb-3">
       <label for="Tags" class="col-sm-2 col-form-label">Tags</label>
       <div class="col-sm-10">
         <textarea class="form-control" id="Tags" rows="3"></textarea>
@@ -30,7 +35,32 @@
   <script>
     var discordUser = JSON.parse(localStorage.getItem('discordUser'));
     if (discordUser) {
+      console.log('Discord User:', discordUser);
+      var headerContainer = document.getElementById('headerContainer');
+      headerContainer.removeChild(document.getElementById('discordLogin'));
 
+      var discordDropdown = document.createElement('div');
+      discordDropdown.className = 'dropdown';
+
+      discordDropdown.innerHTML = `
+                <button class="btn dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png" alt="${discordUser.global_name}" class="rounded-circle" style="width: 30px; height: 30px; margin-right: 5px;">
+                    ${discordUser.global_name}
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                    <li><a class="dropdown-item" href="/upload">Upload Mod</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#" id="logoutButton">Logout</a></li>
+                </ul>
+            `;
+
+      headerContainer.appendChild(discordDropdown);
+
+      var logoutButton = document.getElementById('logoutButton');
+      logoutButton.addEventListener('click', function () {
+        localStorage.removeItem('discordUser');
+        window.location.reload();
+      });
     }else{
       window.location.href = '/';
     }
