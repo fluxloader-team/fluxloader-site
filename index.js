@@ -41,16 +41,27 @@ var LoadPages = function (){
     })
     log.log("pages loaded")
 }
-function computeRepoHash() {
+function computeRepoHash(directory = './') {
     var folderHash = crypto.createHash('sha256');
-    var repoFiles = fs.readdirSync('./');
-    for (var file of repoFiles) {
-        if (fs.statSync(file).isFile()) {
-            folderHash.update(fs.readFileSync(file));
-        }
+
+    function hashDirectory(dir) {
+        var files = fs.readdirSync(dir);
+        files.forEach(file => {
+            var fullPath = path.join(dir, file);
+            var fileStat = fs.statSync(fullPath);
+
+            if (fileStat.isDirectory()) {
+                hashDirectory(fullPath);
+            } else if (fileStat.isFile()) {
+                folderHash.update(fs.readFileSync(fullPath));
+            }
+        });
     }
+
+    hashDirectory(directory);
     return folderHash.digest('hex');
 }
+
 function performGitPull() {
     exec('git pull', (error, stdout, stderr) => {
         if (error) {
