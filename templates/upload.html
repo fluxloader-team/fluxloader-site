@@ -1,40 +1,40 @@
 <div class="pagecontainer">
-  <div class="headerContainer" id="headerContainer">
-    <div class="btn btn-secondary headerButton" style="margin-left: 15px;">Mod List</div>
-    <a href="/auth/discord" class="btn btn-primary" style="margin-right: 15px;" id="discordLogin">
-      <img src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg"
-           alt="Discord Logo"
-           style="width: 100px; height: 20px; margin-right: 5px;">
-    </a>
-  </div>
-  <div class="modUploadForm">
-    <div class="row mb-3">
-    <label for="ModFile" class="col-sm-2 col-form-label">Mod File</label>
-    <div class="col-sm-10">
-      <input type="file" class="form-control" id="ModFile">
+    <div class="headerContainer" id="headerContainer">
+        <div class="btn btn-secondary headerButton" style="margin-left: 15px;">Mod List</div>
+        <a href="/auth/discord" class="btn btn-primary" style="margin-right: 15px;" id="discordLogin">
+            <img src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg"
+                 alt="Discord Logo"
+                 style="width: 100px; height: 20px; margin-right: 5px;">
+        </a>
     </div>
-  </div>
-      <button type="submit" class="btn btn-primary" onclick="">Upload Mod</button>
-  </div>
-  <div class="row mb-3" id="ModInfo">
-    <h3>Mod Information</h3>
-    <pre id="modInfoContent" style="white-space: pre-wrap;"></pre>
-  </div>
+    <div class="modUploadForm">
+        <div class="row mb-3">
+            <label for="ModFile" class="col-sm-2 col-form-label">Mod File</label>
+            <div class="col-sm-10">
+                <input type="file" class="form-control" id="ModFile">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary" onclick="">Upload Mod</button>
+        <div class="row mb-3" id="ModInfo">
+            <h3>Mod Information</h3>
+            <pre id="modInfoContent" style="white-space: pre-wrap;"></pre>
+        </div>
+    </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
 
-  <script>
-    var discordUser = JSON.parse(localStorage.getItem('discordUser'));
-    if (discordUser) {
-      console.log('Discord User:', discordUser);
-      var headerContainer = document.getElementById('headerContainer');
-      headerContainer.removeChild(document.getElementById('discordLogin'));
+    <script>
+        var discordUser = JSON.parse(localStorage.getItem('discordUser'));
+        if (discordUser) {
+            console.log('Discord User:', discordUser);
+            var headerContainer = document.getElementById('headerContainer');
+            headerContainer.removeChild(document.getElementById('discordLogin'));
 
-      var discordDropdown = document.createElement('div');
-      discordDropdown.className = 'dropdown';
+            var discordDropdown = document.createElement('div');
+            discordDropdown.className = 'dropdown';
 
-      discordDropdown.innerHTML = `
+            discordDropdown.innerHTML = `
                 <button class="btn dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                     <img src="https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png" alt="${discordUser.global_name}" class="rounded-circle" style="width: 30px; height: 30px; margin-right: 5px;">
                     ${discordUser.global_name}
@@ -46,19 +46,20 @@
                 </ul>
             `;
 
-      headerContainer.appendChild(discordDropdown);
+            headerContainer.appendChild(discordDropdown);
 
-      var logoutButton = document.getElementById('logoutButton');
-      logoutButton.addEventListener('click', function () {
-        localStorage.removeItem('discordUser');
-        window.location.reload();
-      });
-    }else{
-      window.location.href = '/';
-    }
-    function displayModInfo(modInfo) {
-      const container = document.getElementById('ModInfo');
-      container.innerHTML = `
+            var logoutButton = document.getElementById('logoutButton');
+            logoutButton.addEventListener('click', function () {
+                localStorage.removeItem('discordUser');
+                window.location.reload();
+            });
+        } else {
+            window.location.href = '/';
+        }
+
+        function displayModInfo(modInfo) {
+            const container = document.getElementById('ModInfo');
+            container.innerHTML = `
     <div class="card">
       <div class="card-header">
         <h4>${modInfo.name} <small class="text-muted">v${modInfo.version}</small></h4>
@@ -96,12 +97,12 @@
               <th scope="row">Dependencies</th>
               <td>
                 ${
-              modInfo.dependencies && Object.keys(modInfo.dependencies).length
-                      ? Object.entries(modInfo.dependencies)
-                              .map(([key, value]) => `<span class="badge bg-info">${key}: ${value}</span>`)
-                              .join(' ')
-                      : '<em>No dependencies.</em>'
-      }
+                modInfo.dependencies && Object.keys(modInfo.dependencies).length
+                    ? Object.entries(modInfo.dependencies)
+                        .map(([key, value]) => `<span class="badge bg-info">${key}: ${value}</span>`)
+                        .join(' ')
+                    : '<em>No dependencies.</em>'
+            }
               </td>
             </tr>
           </tbody>
@@ -114,47 +115,46 @@
       </div>
     </div>
   `;
-    }
-
-
-    document.getElementById('ModFile').addEventListener('change', async function (event) {
-      var file = event.target.files[0];
-      if (!file) {
-        alert('No file selected!');
-        return;
-      }
-
-      if (!file.name.endsWith('.zip')) {
-        alert('Please upload a valid ZIP file.');
-        return;
-      }
-
-      var zip = new JSZip();
-      var zipFileContent = await file.arrayBuffer();
-
-      try {
-        var content = await zip.loadAsync(zipFileContent);
-
-        var fileNames = Object.keys(content.files);
-        var modInfoPath = fileNames.find((path) => path.endsWith('/modinfo.json'));
-
-        if (!modInfoPath) {
-          alert('No modinfo.json found in the ZIP file!');
-          return;
         }
 
-        var modInfoFile = content.file(modInfoPath);
-        var modInfoContent = await modInfoFile.async('text');
-        var modInfo = JSON.parse(modInfoContent);
 
-        displayModInfo(modInfo);
-      } catch (error) {
-        console.error('Error processing the ZIP file:', error);
-        alert('Could not process the ZIP file.');
-      }
-    });
+        document.getElementById('ModFile').addEventListener('change', async function (event) {
+            var file = event.target.files[0];
+            if (!file) {
+                alert('No file selected!');
+                return;
+            }
+
+            if (!file.name.endsWith('.zip')) {
+                alert('Please upload a valid ZIP file.');
+                return;
+            }
+
+            var zip = new JSZip();
+            var zipFileContent = await file.arrayBuffer();
+
+            try {
+                var content = await zip.loadAsync(zipFileContent);
+
+                var fileNames = Object.keys(content.files);
+                var modInfoPath = fileNames.find((path) => path.endsWith('/modinfo.json'));
+
+                if (!modInfoPath) {
+                    alert('No modinfo.json found in the ZIP file!');
+                    return;
+                }
+
+                var modInfoFile = content.file(modInfoPath);
+                var modInfoContent = await modInfoFile.async('text');
+                var modInfo = JSON.parse(modInfoContent);
+
+                displayModInfo(modInfo);
+            } catch (error) {
+                console.error('Error processing the ZIP file:', error);
+                alert('Could not process the ZIP file.');
+            }
+        });
 
 
-
-  </script>
+    </script>
 </div>
