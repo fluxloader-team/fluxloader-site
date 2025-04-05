@@ -10,7 +10,7 @@ var { exec } = require('child_process');
 var Utils = require('./../utils')
 var { MongoClient } = require("mongodb");
 var { compress } = require("@mongodb-js/zstd");
-
+var https = require('https');
 const log = new Utils.log.log(colors.green("Sandustry.web.pages.upload"), "./sandustry.web.main.txt", true);
 const mongoUri = globalThis.Config.mongodb.uri;
 
