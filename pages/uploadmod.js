@@ -52,7 +52,7 @@ module.exports = {
 
                 var zipBuffer = await Buffer.from(filedata, 'base64');
                 const compressedZipBuffer = await compress(zipBuffer,10);
-
+                log.log(`zip buffer : ${zipBuffer.toString('base64')}`)
                 //upload to mongodb
                 await client.connect();
                 const db = client.db("SandustryMods");
@@ -60,7 +60,7 @@ module.exports = {
                 const versionsCollection = db.collection("ModVersions");
                 let modEntry = await modsCollection.findOne({ "modID": modID });
 
-                var zip = await JSZip.loadAsync(zipBuffer);
+                var zip = await JSZip.loadAsync(zipBuffer.toString('base64'));
                 var content = await JSZip.loadAsync(zip);
 
                 var fileNames = Object.keys(content.files);
