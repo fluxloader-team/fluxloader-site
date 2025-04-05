@@ -50,7 +50,8 @@ module.exports = {
                     throw new Error('Discord user validation failed. The provided user cannot be verified.');
                 }
 
-                var zipBuffer = await Buffer.from(filedata, 'base64');
+                const zipBuffer = Buffer.from(filedata, "base64");
+
                 const compressedZipBuffer = await compress(zipBuffer,10);
                 //upload to mongodb
                 await client.connect();
@@ -59,9 +60,7 @@ module.exports = {
                 const versionsCollection = db.collection("ModVersions");
                 let modEntry = await modsCollection.findOne({ "modID": modID });
 
-                var zip = await JSZip.loadAsync(zipBuffer);
-                var content = await JSZip.loadAsync(zip);
-
+                var content = await JSZip.loadAsync(zipBuffer);
                 var fileNames = Object.keys(content.files);
                 var modInfoPath = fileNames.find((path) => path.endsWith('modinfo.json'));
                 var modInfoFile = content.file(modInfoPath);

