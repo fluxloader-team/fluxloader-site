@@ -33,7 +33,8 @@
             console.log('Discord User:', discordUser);
             var headerContainer = document.getElementById('headerContainer')
             headerContainer.removeChild(document.getElementById('discordLogin'));
-            var discordusername = document.createElement('div').innerHTML = discordUser.username;
+            var discordusername = document.createElement('div')
+            discordusername.innerHTML = discordUser.username;
             headerContainer.appendChild(discordusername);
         }
 
