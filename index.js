@@ -60,7 +60,7 @@ function performGitPull() {
         log.log(stdout);
 
         const newRepoHash = computeRepoHash();
-
+        log.log(newRepoHash)
         if (newRepoHash !== lastRepoHash) {
             log.log('Changes detected in the repository. Reloading templates and pages...');
             lastRepoHash = newRepoHash;
@@ -77,7 +77,7 @@ function performGitPull() {
 LoadTemplates();
 LoadPages();
 lastRepoHash = computeRepoHash();
-
+log.log(lastRepoHash)
 var WebRequestHandler = function (req, res){
     var url = req.url
     var urlSplit = url.split("?")
