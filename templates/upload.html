@@ -80,15 +80,6 @@
                     filedata: base64Data,
                     discordInfo: discordUser,
                 });
-
-                await fetch(yourServerUrl, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: jsonPayload,
-                });
-
-
-
                 var response = await fetch('/uploadmod', {
                     method: 'POST',
                     headers: {
