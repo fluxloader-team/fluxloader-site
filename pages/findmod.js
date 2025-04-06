@@ -27,7 +27,7 @@ module.exports = {
                 querys[varsplit[0]] = varsplit[1]
             })
             if (querys["search"] == undefined && (["modid"] == undefined || querys["option"] == undefined)) {
-                res.writeHead(502, {"Content-Type": "text/html"});
+                res.writeHead(201, {"Content-Type": "text/html"});
                 res.end(JSON.stringify({
                         error: "Missing required query parameters",
                         missing: {
@@ -39,7 +39,7 @@ module.exports = {
                 return;
             }
             if (querys["search"] !== undefined && (["modid"] !== undefined || querys["option"] !== undefined)) {
-                res.writeHead(502, {"Content-Type": "text/html"});
+                res.writeHead(201, {"Content-Type": "text/html"});
                 res.end(JSON.stringify({
                         error: "Incorrect query parameters. Cannot use both search and modid/option.",
                         parameters: {
@@ -109,7 +109,7 @@ module.exports = {
                         return;
                     }
 
-                    res.writeHead(200, {"Content-Type": "application/json"});
+                    res.writeHead(201, {"Content-Type": "application/json"});
                     res.end(JSON.stringify({
                         message: "Search results successfully fetched",
                         resultsCount: mods.length,
@@ -118,7 +118,7 @@ module.exports = {
                 } catch (error) {
                     console.error("Error occurred while searching mods:", error);
 
-                    res.writeHead(500, {"Content-Type": "application/json"});
+                    res.writeHead(201, {"Content-Type": "application/json"});
                     res.end(JSON.stringify({
                         error: "An error occurred while processing your search.",
                         details: error.message
@@ -127,7 +127,7 @@ module.exports = {
 
             }
         } catch (error) {
-            res.writeHead(500, {"Content-Type": "application/json"});
+            res.writeHead(201, {"Content-Type": "application/json"});
             res.end(JSON.stringify({
                 error: "An error occurred while processing your request."
             }));
