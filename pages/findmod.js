@@ -27,7 +27,7 @@ module.exports = {
                 var varsplit = urlvar.split('=')
                 querys[varsplit[0]] = varsplit[1]
             })
-            if (querys["search"] == undefined && (["modid"] == undefined || querys["option"] == undefined)) {
+            if (querys["search"] == undefined && (querys["modid"] == undefined || querys["option"] == undefined)) {
                 res.writeHead(201, {"Content-Type": "application/json"});
                 res.end(JSON.stringify({
                         error: "Missing required query parameters",
@@ -46,17 +46,143 @@ module.exports = {
             if (querys["search"] == undefined) {
                 switch (querys["option"]) {
                     case "download":
+                        try {
+                            var modID = querys["modid"];
+                            if (!modID) {
+                                res.writeHead(201, { "Content-Type": "application/json" });
+                                res.end(JSON.stringify({
+                                    error: "ModID is required to download the mod."
+                                }));
+                                return;
+                            }
+
+                            var query = { modID };
+
+                            if (querys["version"]) {
+                                query["modinfo.version"] = querys["version"];
+                            }
+
+                            var modData = await versionsCollection
+                                .find(query)
+                                .sort({ uploadTime: -1 })
+                                .limit(1)
+                                .toArray();
+
+                            if (modData.length === 0) {
+                                res.writeHead(201, { "Content-Type": "application/json" });
+                                res.end(JSON.stringify({
+                                    error: "No mod version found for the specified mod ID and version.",
+                                    modID,
+                                    version: querys["version"] || "latest"
+                                }));
+                                return;
+                            }
+
+                            var modfileCompressed = modData[0].modfile;
+
+
+                            var modfileEncoded = await require("@mongodb-js/zstd").decompress(modfileCompressed);
+                            var decodedDecompressedZip = Buffer.from(modfileEncoded, "base64");
+                            res.writeHead(201, {
+                                "Content-Type": "application/zip",
+                                "Content-Disposition": `attachment; filename=${modData[0].modinfo.name}.zip`
+                            });
+
+                            res.end(decodedDecompressedZip);
+                        } catch (error) {
+                            log.log("Error processing mod download: " + error.message);
+                            res.writeHead(201, { "Content-Type": "application/json" });
+                            res.end(JSON.stringify({
+                                error: "An error occurred while processing the download.",
+                                details: error.message
+                            }));
+                        }
 
                         break;
                     case "info":
+                        try {
+                            var modID = querys["modid"];
+                            if (!modID) {
+                                res.writeHead(201, { "Content-Type": "application/json" });
+                                res.end(JSON.stringify({
+                                    error: "ModID is required to fetch the mod information."
+                                }));
+                                return;
+                            }
+                            var modQuery = { modID };
+                            if (querys["version"]) {
+                                modQuery["modinfo.version"] = querys["version"];
+                            }
+                            var modVersion = await versionsCollection
+                                .find(modQuery)
+                                .sort({ uploadTime: -1 })
+                                .project({ modfile: 0 })
+                                .limit(1)
+                                .toArray();
+
+                            if (modVersion.length === 0) {
+                                res.writeHead(201, { "Content-Type": "application/json" });
+                                res.end(JSON.stringify({
+                                    message: "No mod version found for the specified mod ID and version.",
+                                    modID,
+                                    version: querys["version"] || "latest"
+                                }));
+                                return;
+                            }
+
+                            res.writeHead(201, { "Content-Type": "application/json" });
+                            res.end(JSON.stringify({ mod: modVersion[0] }));
+                        } catch (err) {
+                            log.log("Error fetching mod info: " + err.message);
+                            res.writeHead(201, { "Content-Type": "application/json" });
+                            res.end(JSON.stringify({
+                                error: "An internal server error occurred while fetching mod information.",
+                                details: err.message
+                            }));
+                        }
 
                         break;
                     case "versions":
+                        try {
+                            var modID = querys["modid"];
+                            if (!modID) {
+                                res.writeHead(201, { "Content-Type": "application/json" });
+                                res.end(JSON.stringify({
+                                    error: "ModID is required to fetch versions."
+                                }));
+                                return;
+                            }
+
+                            var versions = await versionsCollection
+                                .find({ modID: modID })
+                                .project({ modfile: 0 })
+                                .toArray();
+
+                            if (versions.length === 0) {
+                                res.writeHead(201, { "Content-Type": "application/json" });
+                                res.end(JSON.stringify({
+                                    message: "No versions found for the specified mod ID.",
+                                    modID: modID
+                                }));
+                                return;
+                            }
+
+                            res.writeHead(201, { "Content-Type": "application/json" });
+                            res.end(JSON.stringify({ versions }));
+                        } catch (err) {
+                            log.log("Error fetching versions: " + err.message);
+                            res.writeHead(201, { "Content-Type": "application/json" });
+                            res.end(JSON.stringify({
+                                error: "An internal server error occurred while fetching versions.",
+                                details: err.message
+                            }));
+                        }
 
                         break;
                     default:
                 }
-            } else {
+            }
+            else {
                 try {
                     var searchQuery = decodeURIComponent(querys["search"]);
 
@@ -104,7 +230,7 @@ module.exports = {
                         mods
                     }));
                 } catch (error) {
-                    console.error("Error occurred while searching mods:", error);
+                    log.log("Error occurred while searching mods:", error);
 
                     res.writeHead(201, {"Content-Type": "application/json"});
                     res.end(JSON.stringify({
