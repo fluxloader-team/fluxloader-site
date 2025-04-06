@@ -116,7 +116,8 @@ module.exports = {
         } catch (error) {
             res.writeHead(201, {"Content-Type": "application/json"});
             res.end(JSON.stringify({
-                error: "An error occurred while processing your request."
+                error: "An error occurred while processing your request.",
+                details: error.message
             }));
         }
 
