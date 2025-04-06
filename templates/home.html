@@ -131,6 +131,7 @@
 
                 setSortingEvents();
             }
+
             function setSortingEvents() {
                 var headers = document.querySelectorAll(".sortable");
 
@@ -160,15 +161,16 @@
                     };
                 });
             }
+
             async function loadModInfo(modID) {
                 try {
                     console.log("Fetching details for mod ID:", modID);
 
-                    const latestInfoUrl = `https://sandustrymods.shadow.computer/mods?modid=${modID}&option=info`;
-                    const versionsUrl = `https://sandustrymods.shadow.computer/mods?modid=${modID}&option=versions`;
+                    var latestInfoUrl = `https://sandustrymods.shadow.computer/mods?modid=${modID}&option=info`;
+                    var versionsUrl = `https://sandustrymods.shadow.computer/mods?modid=${modID}&option=versions`;
 
-                    const latestInfoResponse = await fetch(latestInfoUrl);
-                    const versionsResponse = await fetch(versionsUrl);
+                    var latestInfoResponse = await fetch(latestInfoUrl);
+                    var versionsResponse = await fetch(versionsUrl);
 
                     if (!latestInfoResponse.ok) {
                         console.error("Failed to fetch latest mod info:", await latestInfoResponse.text());
@@ -180,8 +182,8 @@
                         throw new Error("Unable to fetch version history.");
                     }
 
-                    const latestInfo = await latestInfoResponse.json();
-                    const versions = await versionsResponse.json();
+                    var latestInfo = await latestInfoResponse.json();
+                    var versions = await versionsResponse.json();
 
                     console.log("Fetched Latest Info:", latestInfo);
                     console.log("Fetched Versions:", versions);
@@ -197,20 +199,39 @@
                         '<div class="alert alert-danger">Failed to load mod details.</div>';
                 }
             }
+
             function renderModInfo(modID, modInfo, versions) {
                 if (versions && versions.versions) {
                     versions = versions.versions;
                 }
+
                 if (!Array.isArray(versions) || versions.length === 0) {
                     modDisplayContainer.innerHTML =
                         '<div class="alert alert-danger">No version history available for this mod.</div>';
                     return;
                 }
+                var modName = modInfo.name || "Unknown Mod Name";
+                var modVersion = modInfo.version || "Unknown Version";
+                var modAuthor = modInfo.author || "Unknown Author";
+                var modDescriptionRaw = modInfo.description || "No description available";
+                var modDescription = marked.parse(modDescriptionRaw);
 
-                const modName = modInfo.name || "Unknown Mod Name";
-                const modVersion = modInfo.version || "Unknown Version";
-                const modAuthor = modInfo.author || "Unknown Author";
-                const modDescription = modInfo.description || "No description available";
+                var dependencies = modInfo.dependencies
+                    ? Object.entries(modInfo.dependencies)
+                        .map(([key, value]) => `<li><strong>${key}</strong>: ${value}</li>`)
+                        .join("")
+                    : "<li>Not available</li>";
+
+                var tags = modInfo.tags && modInfo.tags.length > 0
+                    ? modInfo.tags.map(tag => `<span class="badge bg-secondary me-1">${tag}</span>`).join("")
+                    : "Not available";
+
+                var modloaderVersion = modInfo.modloaderVersion || "Not specified";
+                var defaultConfig = modInfo.defaultConfig
+                    ? `<pre>${JSON.stringify(modInfo.defaultConfig, null, 2)}</pre>`
+                    : "Not available";
+                var downloadCount = modInfo.downloadCount || 0;
+
                 modDisplayContainer.innerHTML = `
         <div class="row mb-3">
             <div class="col-9">
@@ -224,7 +245,27 @@
         </div>
         <div class="mb-3">
             <strong>Description:</strong>
-            <p>${modDescription}</p>
+            <div>${modDescription}</div>
+        </div>
+        <div class="mb-3">
+            <strong>Dependencies:</strong>
+            <ul>${dependencies}</ul>
+        </div>
+        <div class="mb-3">
+            <strong>Tags:</strong>
+            <div>${tags}</div>
+        </div>
+        <div class="mb-3">
+            <strong>Modloader Version:</strong>
+            <p>${modloaderVersion}</p>
+        </div>
+        <div class="mb-3">
+            <strong>Default Configuration:</strong>
+            <div>${defaultConfig}</div>
+        </div>
+        <div class="mb-3">
+            <strong>Download Count:</strong>
+            <p>${downloadCount}</p>
         </div>
         <div class="mb-3">
             <label for="versionSelect" class="form-label">Version History:</label>
@@ -244,6 +285,7 @@
         </div>
     `;
             }
+
 
             async function loadSpecificVersion(modId) {
                 var versionSelect = document.getElementById("versionSelect");
