@@ -78,7 +78,7 @@ module.exports = {
                                 return;
                             }
 
-                            var modfileCompressed = modData[0].modfile;
+                            var modfileCompressed = modData[0].modfile.$binary.base64;
                             log.log("Mod file compressed: " + modfileCompressed);
                             var modfileEncoded = Buffer.from(modfileCompressed, "base64");
                             log.log("Mod file encoded: " + modfileEncoded);
