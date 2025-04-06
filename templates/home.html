@@ -197,7 +197,11 @@
                 }
             }
             function renderModInfo(modID, modInfo, versions) {
-                if (!Array.isArray(versions)) {
+                if (versions && versions.versions) {
+                    versions = versions.versions;
+                }
+
+                if (!Array.isArray(versions) || versions.length === 0) {
                     modDisplayContainer.innerHTML =
                         '<div class="alert alert-danger">No version history available for this mod.</div>';
                     return;
@@ -205,21 +209,29 @@
 
                 modDisplayContainer.innerHTML = `
         <div class="row mb-3">
-            <div class="col-9"><h3>${modInfo.name}</h3></div>
-            <div class="col-3 text-end"><button class="btn btn-primary" onclick="returnModId('${modID}')">Download</button></div>
+            <div class="col-9">
+                <h3>${modInfo.name}</h3>
+                <p><small><strong>By:</strong> ${modInfo.author}</small></p>
+            </div>
+            <div class="col-3 text-end">
+                <button class="btn btn-primary" onclick="returnModId('${modID}')">Download</button>
+            </div>
         </div>
         <div class="mb-3">
-            <strong>Author:</strong> ${modInfo.author}<br>
-            <strong>Current Version:</strong> ${modInfo.version}<br>
-            <strong>Description:</strong> ${modInfo.description}
+            <strong>Description:</strong>
+            <p>${modInfo.description ? modInfo.description : "No description available"}</p>
         </div>
         <div class="mb-3">
             <label for="versionSelect" class="form-label">Version History:</label>
-            <select class="form-select" id="versionSelect" onchange="loadSpecificVersion('${modID}')">
+            <select class="form-select" id="versionSelect">
                 ${versions
                     .map(
                         (version) => `
-                        <option value="${version}">${version}</option>
+                        <option value="${version.modinfo.version}">
+                            Version: ${version.modinfo.version} (Uploaded: ${new Date(
+                            version.uploadTime
+                        ).toLocaleDateString()})
+                        </option>
                     `
                     )
                     .join("")}
@@ -227,6 +239,7 @@
         </div>
     `;
             }
+
             async function loadSpecificVersion(modId) {
                 var versionSelect = document.getElementById("versionSelect");
                 var selectedVersion = versionSelect.value;
