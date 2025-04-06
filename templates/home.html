@@ -82,6 +82,11 @@
                 }
 
                 renderTable(mods);
+                if (mods[0]) {
+                    const firstModId = mods[0].modID;
+                    await loadModInfo(firstModId);
+                }
+
             } catch (error) {
                 modListContainer.innerHTML =
                     '<div class="alert alert-danger">Unable to load mods.</div>';
