@@ -27,7 +27,7 @@ module.exports = {
                 querys[varsplit[0]] = varsplit[1]
             })
             if (querys["search"] == undefined && (["modid"] == undefined || querys["option"] == undefined)) {
-                res.writeHead(201, {"Content-Type": "text/html"});
+                res.writeHead(201, {"Content-Type": "application/json"});
                 res.end(JSON.stringify({
                         error: "Missing required query parameters",
                         missing: {
@@ -39,7 +39,7 @@ module.exports = {
                 return;
             }
             if (querys["search"] !== undefined && (["modid"] !== undefined || querys["option"] !== undefined)) {
-                res.writeHead(201, {"Content-Type": "text/html"});
+                res.writeHead(201, {"Content-Type": "application/json"});
                 res.end(JSON.stringify({
                         error: "Incorrect query parameters. Cannot use both search and modid/option.",
                         parameters: {
