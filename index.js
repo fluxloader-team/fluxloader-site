@@ -116,7 +116,7 @@ var WebRequestHandler = function (req, res){
     var url = req.url
     var urlSplit = url.split("?")
     var urlName = urlSplit[0]
-    var template = Object.keys(pages).find(key => urlName.includes(key))
+    var template = pages[Object.keys(pages).find(key => urlName.includes(key))]
     if(template){
         template.run(req, res)
     }else{
