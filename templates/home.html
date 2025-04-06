@@ -207,9 +207,7 @@
                 }
             }
 
-            function renderModInfo(mod) {
-                var modInfo = mod.modinfo;
-                console.log("Mod:", mod);
+            function renderModInfo(mod,modInfo,versions) {
                 var modDisplayContainer = document.querySelector(".modDisplay");
                 modDisplayContainer.innerHTML = `
         <div class="card-body">
