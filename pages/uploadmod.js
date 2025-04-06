@@ -65,10 +65,14 @@ module.exports = {
                 var content = await JSZip.loadAsync(zipBuffer);
                 var fileNames = Object.keys(content.files);
                 var modInfoPath = fileNames.find((path) => path.endsWith('modinfo.json'));
-                var modInfoFile = content.file(modInfoPath);
+                var modInfoFile = await content.file(modInfoPath);
                 var modInfoContent = await modInfoFile.async('text');
                 var modinfo = await JSON.parse(modInfoContent);
-                modinfo = await sanitizeHtml(modinfo);
+                Object.keys(modinfo).forEach(key => {
+                    if(typeof modinfo[key] === "string"){
+                        modinfo[key] = sanitizeHtml(modinfo[key]);
+                    }
+                });
                 var modEntry = {}
                 modEntry = await modsCollection.findOne({ "modID": modID, "Author.discordID": discordInfo.id, });
                 if (!modEntry) {
