@@ -19,6 +19,7 @@ module.exports = {
     paths: ['/mods'],
     run: async function (req, res) {
         try {
+            var client = new MongoClient(mongoUri);
             var queryurl = req.url.split('?')[1]
             var query = queryurl.split('&')
             var querys = {}
