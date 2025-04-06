@@ -9,7 +9,7 @@ var ejs = require('ejs')
 var {exec} = require('child_process');
 var Utils = require('./../utils')
 var {MongoClient} = require("mongodb");
-var {compress} = require("@mongodb-js/zstd");
+var {compress,decompress} = require("@mongodb-js/zstd");
 var https = require('https');
 var JSZip = require("jszip");
 var log = new Utils.log.log(colors.green("Sandustry.web.pages.search"), "./sandustry.web.main.txt", true);
@@ -78,9 +78,11 @@ module.exports = {
                                 return;
                             }
 
-                            var modfileCompressed = modData[0].modfile.$binary;
+                            var modfileCompressed = Buffer.from(
+                                modData[0].modfile.$binary, "binary");
+
                             //log.log("Mod file compressed: " + modfileCompressed);
-                            var decodedDecompressedZip = await require("@mongodb-js/zstd").decompress(modfileCompressed);
+                            var decodedDecompressedZip = decompress(modfileCompressed);
                             log.log("Decompressed mod file: " + decodedDecompressedZip);
                             res.writeHead(201, {
                                 "Content-Type": "application/zip",
