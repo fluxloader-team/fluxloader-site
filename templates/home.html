@@ -57,6 +57,42 @@
                 window.location.reload();
             });
         }
+        document.addEventListener('DOMContentLoaded', async () => {
+            var modListContainer = document.querySelector('.modList');
+
+            try {
+                var response = await fetch("/mods");
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status} ${response.statusText}`);
+                }
+
+                var mods = await response.json();
+
+                if (mods.length === 0) {
+                    modListContainer.innerHTML = '<p>No mods available.</p>';
+                    return;
+                }
+
+                mods.forEach(modData => {
+                    var mod = modData.modinfo; 
+
+                    var modElement = document.createElement('div');
+                    modElement.className = 'modItem'; 
+
+                    modElement.innerHTML = `
+                    <h2>${mod.name} <small>(v${mod.version})</small></h2>
+                    <p><strong>Author:</strong> ${mod.author}</p>
+                    <p>${mod.shortDescription}</p>
+                    <p><strong>Tags:</strong> ${mod.tags.join(', ')}</p>
+                `;
+
+                    modListContainer.appendChild(modElement);
+                });
+            } catch (error) {
+                console.error('Error fetching mods:', error);
+                modListContainer.innerHTML = '<p>Failed to load mods. Please try again later.</p>';
+            }
+        });
 
 
     </script>
