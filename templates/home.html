@@ -208,23 +208,16 @@
             }
 
             function renderModInfo(mod) {
-                var {
-                    description = "No description available.",
-                    shortDescription = "No short description available.",
-                    modloaderVersion,
-                    entrypoints = {},
-                    dependencies = [],
-                    defaultConfig = {},
-                } = mod.modinfo;
+                var modInfo = mod.modinfo;
 
-                var { electron = "N/A", browser = "N/A", worker = "N/A" } = entrypoints;
-
+                var modDisplayContainer = document.querySelector(".modDisplay");
                 modDisplayContainer.innerHTML = `
         <div class="card-body">
             <h5>Short Description</h5>
-            <p class="text-muted">${shortDescription}</p>
+            <p class="text-muted">${modInfo.shortDescription}</p>
+
             <h5>Description</h5>
-            <div>${marked.parse(description)}</div>
+            <div>${marked(modInfo.description)}</div>
 
             <hr>
 
@@ -233,24 +226,28 @@
                 <tbody>
                     <tr>
                         <th scope="row">Modloader Version</th>
-                        <td>${modloaderVersion || "N/A"}</td>
+                        <td>${modInfo.modloaderVersion}</td>
                     </tr>
                     <tr>
                         <th scope="row">Electron Entrypoint</th>
-                        <td>${electron}</td>
+                        <td>${modInfo.electronEntrypoint}</td>
                     </tr>
                     <tr>
                         <th scope="row">Browser Entrypoint</th>
-                        <td>${browser}</td>
+                        <td>${modInfo.browserEntrypoint}</td>
                     </tr>
                     <tr>
                         <th scope="row">Worker Entrypoint</th>
-                        <td>${worker}</td>
+                        <td>${modInfo.workerEntrypoint}</td>
                     </tr>
                     <tr>
                         <th scope="row">Dependencies</th>
                         <td>
-                            ${dependencies.map(dep => `<span class="badge bg-info">${dep.name}: ${dep.version}</span>`).join(" ")}
+                            ${
+                    Object.keys(modInfo.dependencies)
+                        .map(dep => `<span class="badge bg-info">${dep}: ${modInfo.dependencies[dep]}</span>`)
+                        .join(" ")
+                }
                         </td>
                     </tr>
                 </tbody>
@@ -259,9 +256,11 @@
             <hr>
 
             <h5>Default Configuration</h5>
-            <pre class="p-3 rounded">${JSON.stringify(defaultConfig, null, 2)}</pre>
-        </div>`;
+            <pre class="p-3 rounded">${JSON.stringify(modInfo.defaultConfig, null, 2)}</pre>
+        </div>
+    `;
             }
+
 
 
 
