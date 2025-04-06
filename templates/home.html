@@ -59,6 +59,7 @@
         }
         document.addEventListener('DOMContentLoaded', async () => {
             var modListContainer = document.querySelector('.modList');
+            var mods = [];
 
             try {
                 var response = await fetch("/mods");
@@ -66,28 +67,38 @@
                     throw new Error("Failed to fetch mods.");
                 }
 
-                var mods = await response.json();
+                mods = await response.json();
 
                 if (mods.length === 0) {
                     modListContainer.innerHTML = '<div class="alert alert-info">No mods available.</div>';
                     return;
                 }
 
-                var headerRow = document.createElement('div');
-                headerRow.className = 'row border-bottom py-2 fw-bold text-center';
+                renderTable(mods);
+            } catch (error) {
+                modListContainer.innerHTML = '<div class="alert alert-danger">Unable to load mods.</div>';
+            }
+
+            function renderTable(mods) {
+                modListContainer.innerHTML = "";
+
+                var headerRow = document.createElement("div");
+                headerRow.className = "row border-bottom py-2 fw-bold text-center";
+
                 headerRow.innerHTML = `
-                <div class="col-3">Name</div>
-                <div class="col-2">Version</div>
-                <div class="col-3">Author</div>
+                <div class="col-3 sortable" data-sort="name">Name <span class="sort-indicator">▲▼</span></div>
+                <div class="col-2 sortable" data-sort="version">Version <span class="sort-indicator">▲▼</span></div>
+                <div class="col-3 sortable" data-sort="author">Author <span class="sort-indicator">▲▼</span></div>
                 <div class="col-4">Tags</div>
             `;
+
                 modListContainer.appendChild(headerRow);
 
                 mods.forEach(modData => {
                     var mod = modData.modinfo;
 
-                    var listItem = document.createElement('div');
-                    listItem.className = 'row border-bottom py-2 text-center';
+                    var listItem = document.createElement("div");
+                    listItem.className = "row border-bottom py-2 text-center";
 
                     listItem.innerHTML = `
                     <div class="col-3">${mod.name}</div>
@@ -98,15 +109,35 @@
 
                     modListContainer.appendChild(listItem);
                 });
-            } catch (error) {
-                modListContainer.innerHTML = '<div class="alert alert-danger">Unable to load mods.</div>';
+
+                addSorting();
+            }
+
+            function addSorting() {
+                var headers = document.querySelectorAll(".sortable");
+                headers.forEach(header => {
+                    var sortOrder = 1;
+                    header.addEventListener("click", () => {
+                        var sortKey = header.dataset.sort;
+
+                        sortOrder = sortOrder * -1;
+
+                        mods.sort((a, b) => {
+                            var aValue = a.modinfo[sortKey].toString().toLowerCase();
+                            var bValue = b.modinfo[sortKey].toString().toLowerCase();
+
+                            if (aValue < bValue) return -1 * sortOrder;
+                            if (aValue > bValue) return 1 * sortOrder;
+                            return 0;
+                        });
+
+                        document.querySelectorAll(".sort-indicator").forEach(el => el.innerHTML = "▲▼");
+                        header.querySelector(".sort-indicator").innerHTML = sortOrder === 1 ? "▲" : "▼";
+
+                        renderTable(mods);
+                    });
+                });
             }
         });
-
-
-
-
-
-
     </script>
 </div>
