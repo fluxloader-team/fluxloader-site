@@ -195,8 +195,21 @@ module.exports = {
 
                             case "tags":
                                 var tagsArray = value.split(",");
-                                queryCriteria["modinfo.tags"] = {$all: tagsArray.map(tag => new RegExp(tag, "i"))};
+                                var includeTags = tagsArray.filter(tag => !tag.startsWith("-"));
+                                var excludeTags = tagsArray.filter(tag => tag.startsWith("-")).map(tag => tag.substring(1));
+
+                                if (includeTags.length > 0) {
+                                    queryCriteria["modinfo.tags"] = { $in: includeTags.map(tag => new RegExp(tag, "i")) };
+                                }
+
+                                if (excludeTags.length > 0) {
+                                    queryCriteria["modinfo.tags"] = {
+                                        ...queryCriteria["modinfo.tags"],
+                                        $nin: excludeTags.map(tag => new RegExp(tag, "i"))
+                                    };
+                                }
                                 break;
+
 
                             case "name":
                                 queryCriteria["modinfo.name"] = {$regex: new RegExp(value, "i")};
