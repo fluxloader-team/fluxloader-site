@@ -77,15 +77,13 @@ module.exports = {
                                 }));
                                 return;
                             }
-                            var compressedBuffer = Buffer.from(modData[0].modfile, "latin1");
-                            res.writeHead(200, { "Content-Type": "application/json" });
-                            res.end(
-                                JSON.stringify({
-                                    success: true,
-                                    compressedBuffer:compressedBuffer
-                                })
-                            );
-
+                            var compressedBuffer = Buffer.from(modData[0].modfile, "base64");
+                            var decompressedBuffer = await decompress(rawBuffer);
+                            res.writeHead(200, {
+                                "Content-Type": "application/zip",
+                                "Content-Disposition": `attachment; filename=${modData[0].modinfo.name}.zip`
+                            });
+                            res.end(decompressedBuffer);
 
                         } catch (error) {
                             log.log("Error processing mod download: " + error.message);
