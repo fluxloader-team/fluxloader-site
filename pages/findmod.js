@@ -77,11 +77,15 @@ module.exports = {
                                 }));
                                 return;
                             }
+                            var modfileCompressed = await Buffer.from(modData[0].modfile, "base64");
+                            var decompressedModfile = await decompress(modfileCompressed);
 
-                            res.writeHead(201, { "Content-Type": "application/json" });
-                            res.end(JSON.stringify({
-                                details: modData[0].modfile
-                            }));
+                            res.writeHead(200, {
+                                "Content-Type": "application/zip",
+                                "Content-Disposition": `attachment; filename=${modData[0].modinfo.name}.zip`
+                            });
+                            res.end(decompressedModfile);
+
                         } catch (error) {
                             log.log("Error processing mod download: " + error.message);
                             res.writeHead(201, { "Content-Type": "application/json" });
