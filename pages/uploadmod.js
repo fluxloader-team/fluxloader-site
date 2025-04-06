@@ -12,9 +12,9 @@ var { MongoClient } = require("mongodb");
 var { compress } = require("@mongodb-js/zstd");
 var https = require('https');
 var JSZip = require("jszip");
-const log = new Utils.log.log(colors.green("Sandustry.web.pages.upload"), "./sandustry.web.main.txt", true);
-const mongoUri = globalThis.Config.mongodb.uri;
-
+var log = new Utils.log.log(colors.green("Sandustry.web.pages.upload"), "./sandustry.web.main.txt", true);
+var mongoUri = globalThis.Config.mongodb.uri;
+var sanitizeHtml = require('sanitize-html');
 module.exports = {
     paths: ['/uploadmod'],
     run: function (req, res) {
@@ -30,11 +30,11 @@ module.exports = {
         });
 
         req.on('end', async () => {
-            const client = new MongoClient(mongoUri);
+            var client = new MongoClient(mongoUri);
 
             try {
-                const payload = await JSON.parse(body);
-                const { filename, filedata, discordInfo } = payload;
+                var payload = await JSON.parse(body);
+                var { filename, filedata, discordInfo } = payload;
                 var modID = crypto.randomUUID();
                 var newmod = false;
                 if(payload.modID){
@@ -52,14 +52,14 @@ module.exports = {
                     throw new Error('Discord user validation failed. The provided user cannot be verified.');
                 }
 
-                const zipBuffer = Buffer.from(filedata, "base64");
+                var zipBuffer = Buffer.from(filedata, "base64");
 
-                const compressedZipBuffer = await compress(zipBuffer,10);
+                var compressedZipBuffer = await compress(zipBuffer,10);
                 //upload to mongodb
                 await client.connect();
-                const db = client.db("SandustryMods");
-                const modsCollection = db.collection("Mods");
-                const versionsCollection = db.collection("ModVersions");
+                var db = client.db("SandustryMods");
+                var modsCollection = db.collection("Mods");
+                var versionsCollection = db.collection("ModVersions");
 
 
                 var content = await JSZip.loadAsync(zipBuffer);
@@ -68,6 +68,7 @@ module.exports = {
                 var modInfoFile = content.file(modInfoPath);
                 var modInfoContent = await modInfoFile.async('text');
                 var modinfo = JSON.parse(modInfoContent);
+                modinfo = sanitizeHtml(modinfo);
                 var modEntry = {}
                 modEntry = await modsCollection.findOne({ "modID": modID, "Author.discordID": discordInfo.id, });
                 if (!modEntry) {
@@ -85,7 +86,7 @@ module.exports = {
                     };
                     await modsCollection.insertOne(modEntry);
                 }
-                const modVersionEntry = {
+                var modVersionEntry = {
                     modID: modEntry.modID,
                     modfile: compressedZipBuffer,
                     modinfo: modinfo,
@@ -110,7 +111,7 @@ module.exports = {
 
 function verifyDiscordUser(userId, accessToken) {
     return new Promise((resolve, reject) => {
-        const options = {
+        var options = {
             hostname: 'discord.com',
             path: '/api/users/@me',
             method: 'GET',
@@ -119,7 +120,7 @@ function verifyDiscordUser(userId, accessToken) {
             },
         };
 
-        const req = https.request(options, (res) => {
+        var req = https.request(options, (res) => {
             let data = '';
 
             res.on('data', (chunk) => {
@@ -128,7 +129,7 @@ function verifyDiscordUser(userId, accessToken) {
 
             res.on('end', () => {
                 try {
-                    const userResponse = JSON.parse(data);
+                    var userResponse = JSON.parse(data);
 
                     // Check if the user ID matches the ID from the token response
                     if (res.statusCode === 200 && userResponse.id === userId) {
