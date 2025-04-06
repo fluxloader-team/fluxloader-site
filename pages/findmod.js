@@ -79,7 +79,7 @@ module.exports = {
                             }
 
                             var modfileCompressed = Buffer.from(
-                                modData[0].modfile.$binary, "binary");
+                                modData[0].modfile, "binary");
 
                             //log.log("Mod file compressed: " + modfileCompressed);
                             var decodedDecompressedZip = decompress(modfileCompressed);
