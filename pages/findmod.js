@@ -43,9 +43,9 @@ module.exports = {
                 res.end(JSON.stringify({
                         error: "Incorrect query parameters. Cannot use both search and modid/option.",
                         parameters: {
-                            search: querys["search"] === undefined,
-                            modid: querys["modid"] === undefined,
-                            option: querys["option"] === undefined
+                            search: querys["search"],
+                            modid: querys["modid"],
+                            option: querys["option"]
                         }
                     })
                 );
