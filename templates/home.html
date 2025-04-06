@@ -208,16 +208,16 @@
             }
 
             function renderModInfo(mod) {
-                const {
+                var {
                     description = "No description available.",
                     shortDescription = "No short description available.",
                     modloaderVersion,
                     entrypoints = {},
                     dependencies = [],
                     defaultConfig = {},
-                } = mod;
+                } = mod.modinfo;
 
-                const { electron = "N/A", browser = "N/A", worker = "N/A" } = entrypoints;
+                var { electron = "N/A", browser = "N/A", worker = "N/A" } = entrypoints;
 
                 modDisplayContainer.innerHTML = `
         <div class="card-body">
