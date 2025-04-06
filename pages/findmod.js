@@ -78,7 +78,7 @@ module.exports = {
                                 return;
                             }
                             var compressedBuffer = Buffer.from(modData[0].modfile, "base64");
-                            var decompressedBuffer = await decompress(rawBuffer);
+                            var decompressedBuffer = await decompress(compressedBuffer);
                             res.writeHead(200, {
                                 "Content-Type": "application/zip",
                                 "Content-Disposition": `attachment; filename=${modData[0].modinfo.name}.zip`
