@@ -1,40 +1,38 @@
 <div class="pagecontainer">
-    <div class="headerContainer" id="headerContainer">
-        <div class="btn btn-secondary headerButton" style="margin-left: 15px;">Mod List</div>
-        <a href="/auth/discord" class="btn btn-primary" style="margin-right: 15px;" id="discordLogin">
-            <img src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg"
-                 alt="Discord Logo"
-                 style="width: 100px; height: 20px; margin-right: 5px;">
-        </a>
-    </div>
-    <div class="modUploadForm">
-        <div class="row mb-3">
-            <label for="ModFile" class="col-sm-2 col-form-label">Mod File</label>
-            <div class="col-sm-10">
-                <input type="file" class="form-control" id="ModFile">
-            </div>
-        </div>
-        <div class="betterrow mb-3" id="ModInfo">
-            <h3>Mod Information</h3>
-            <pre id="modInfoContent" style="white-space: pre-wrap;"></pre>
-        </div>
-        <button type="submit" class="btn btn-primary" onclick="handleUpload()">Upload Mod</button>
-    </div>
+	<div class="headerContainer" id="headerContainer">
+		<div class="btn btn-secondary headerButton" style="margin-left: 15px">Mod List</div>
+		<a href="/auth/discord" class="btn btn-primary" style="margin-right: 15px" id="discordLogin">
+			<img src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg" alt="Discord Logo" style="width: 100px; height: 20px; margin-right: 5px" />
+		</a>
+	</div>
+	<div class="modUploadForm">
+		<div class="row mb-3">
+			<label for="ModFile" class="col-sm-2 col-form-label">Mod File</label>
+			<div class="col-sm-10">
+				<input type="file" class="form-control" id="ModFile" />
+			</div>
+		</div>
+		<div class="mb-3" id="ModInfo">
+			<h3>Mod Information</h3>
+			<pre id="modInfoContent" style="white-space: pre-wrap"></pre>
+		</div>
+		<button type="submit" class="btn btn-primary" onclick="handleUpload()">Upload Mod</button>
+	</div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
 
-    <script>
-        var discordUser = JSON.parse(localStorage.getItem('discordUser'));
-        if (discordUser) {
-            console.log('Discord User:', discordUser);
-            var headerContainer = document.getElementById('headerContainer');
-            headerContainer.removeChild(document.getElementById('discordLogin'));
+	<script>
+		var discordUser = JSON.parse(localStorage.getItem("discordUser"));
+		if (discordUser) {
+			console.log("Discord User:", discordUser);
+			var headerContainer = document.getElementById("headerContainer");
+			headerContainer.removeChild(document.getElementById("discordLogin"));
 
-            var discordDropdown = document.createElement('div');
-            discordDropdown.className = 'dropdown';
+			var discordDropdown = document.createElement("div");
+			discordDropdown.className = "dropdown";
 
-            discordDropdown.innerHTML = `
+			discordDropdown.innerHTML = `
                 <button class="btn dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                     <img src="https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png" alt="${discordUser.global_name}" class="rounded-circle" style="width: 30px; height: 30px; margin-right: 5px;">
                     ${discordUser.global_name}
@@ -46,76 +44,74 @@
                 </ul>
             `;
 
-            headerContainer.appendChild(discordDropdown);
+			headerContainer.appendChild(discordDropdown);
 
-            var logoutButton = document.getElementById('logoutButton');
-            logoutButton.addEventListener('click', function () {
-                localStorage.removeItem('discordUser');
-                window.location.reload();
-            });
-        } else {
-            window.location.href = '/';
-        }
+			var logoutButton = document.getElementById("logoutButton");
+			logoutButton.addEventListener("click", function () {
+				localStorage.removeItem("discordUser");
+				window.location.reload();
+			});
+		} else {
+			window.location.href = "/";
+		}
 
-        async function handleUpload() {
-            var fileInput = document.getElementById('ModFile');
-            var file = fileInput.files[0];
+		async function handleUpload() {
+			var fileInput = document.getElementById("ModFile");
+			var file = fileInput.files[0];
 
-            console.log('File:', !file);
-            console.log('File:', file.type);
-            if (!file || (file.type !== 'application/zip' && file.type !== 'application/x-zip-compressed')) {
-                alert('Please upload a valid ZIP file.');
-                return;
-            }
+			console.log("File:", !file);
+			console.log("File:", file.type);
+			if (!file || (file.type !== "application/zip" && file.type !== "application/x-zip-compressed")) {
+				alert("Please upload a valid ZIP file.");
+				return;
+			}
 
-            try {
-                function arrayBufferToBase64(buffer) {
-                    const byteArray = new Uint8Array(buffer);
-                    return window.btoa(byteArray.reduce((data, byte) => data + String.fromCharCode(byte), ""));
-                }
-                const zipBinaryData = await file.arrayBuffer();
-                const base64Data = arrayBufferToBase64(zipBinaryData);
-                const jsonPayload = JSON.stringify({
-                    filename: file.name,
-                    filedata: base64Data,
-                    discordInfo: discordUser,
-                });
-                var response = await fetch('/uploadmod', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: jsonPayload,
-                });
+			try {
+				function arrayBufferToBase64(buffer) {
+					const byteArray = new Uint8Array(buffer);
+					return window.btoa(byteArray.reduce((data, byte) => data + String.fromCharCode(byte), ""));
+				}
+				const zipBinaryData = await file.arrayBuffer();
+				const base64Data = arrayBufferToBase64(zipBinaryData);
+				const jsonPayload = JSON.stringify({
+					filename: file.name,
+					filedata: base64Data,
+					discordInfo: discordUser,
+				});
+				var response = await fetch("/uploadmod", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: jsonPayload,
+				});
 
-                var result = await response.json();
-                console.log('Server response:', result);
+				var result = await response.json();
+				console.log("Server response:", result);
 
-                if (result.message) {
-                    alert(`Upload Successful: ${result.message}`);
-                }
-            } catch (error) {
-                console.error('Error processing ZIP file:', error);
-                alert('Error processing the ZIP file.');
-            }
-        }
+				if (result.message) {
+					alert(`Upload Successful: ${result.message}`);
+				}
+			} catch (error) {
+				console.error("Error processing ZIP file:", error);
+				alert("Error processing the ZIP file.");
+			}
+		}
 
-
-
-        function displayModInfo(modInfo) {
-            var container = document.getElementById('ModInfo');
-            container.innerHTML = `
+		function displayModInfo(modInfo) {
+			var container = document.getElementById("ModInfo");
+			container.innerHTML = `
     <div class="card">
       <div class="card-header">
         <h4>${modInfo.name} <small class="text-muted">v${modInfo.version}</small></h4>
         <span class="badge bg-primary" style="margin-right: 10px;">Author: ${modInfo.author}</span>
-        ${modInfo.tags.map((tag) => `<span class="badge bg-secondary">${tag}</span>`).join(' ')}
+        ${modInfo.tags.map((tag) => `<span class="badge bg-secondary">${tag}</span>`).join(" ")}
       </div>
       <div class="card-body">
         <h5>Short Description</h5>
         <p class="text-muted">${modInfo.shortDescription}</p>
         <h5>Description</h5>
-        <div>${modInfo.description ? marked.parse(modInfo.description) : '<em>No description provided.</em>'}</div>
+        <div>${modInfo.description ? marked.parse(modInfo.description) : "<em>No description provided.</em>"}</div>
 
         <hr>
 
@@ -124,30 +120,30 @@
           <tbody>
             <tr>
               <th scope="row">Modloader Version</th>
-              <td>${modInfo.modloaderVersion || 'N/A'}</td>
+              <td>${modInfo.modloaderVersion || "N/A"}</td>
             </tr>
             <tr>
               <th scope="row">Electron Entrypoint</th>
-              <td>${modInfo.electronEntrypoint || 'N/A'}</td>
+              <td>${modInfo.electronEntrypoint || "N/A"}</td>
             </tr>
             <tr>
               <th scope="row">Browser Entrypoint</th>
-              <td>${modInfo.browserEntrypoint || 'N/A'}</td>
+              <td>${modInfo.browserEntrypoint || "N/A"}</td>
             </tr>
             <tr>
               <th scope="row">Worker Entrypoint</th>
-              <td>${modInfo.workerEntrypoint || 'N/A'}</td>
+              <td>${modInfo.workerEntrypoint || "N/A"}</td>
             </tr>
             <tr>
               <th scope="row">Dependencies</th>
               <td>
                 ${
-                modInfo.dependencies && Object.keys(modInfo.dependencies).length
-                    ? Object.entries(modInfo.dependencies)
-                        .map(([key, value]) => `<span class="badge bg-info">${key}: ${value}</span>`)
-                        .join(' ')
-                    : '<em>No dependencies.</em>'
-            }
+					modInfo.dependencies && Object.keys(modInfo.dependencies).length
+						? Object.entries(modInfo.dependencies)
+								.map(([key, value]) => `<span class="badge bg-info">${key}: ${value}</span>`)
+								.join(" ")
+						: "<em>No dependencies.</em>"
+				}
               </td>
             </tr>
           </tbody>
@@ -156,50 +152,47 @@
         <hr>
 
         <h5>Default Configuration</h5>
-        <pre class="p-3 rounded">${modInfo.defaultConfig ? JSON.stringify(modInfo.defaultConfig, null, 2) : 'No default config available.'}</pre>
+        <pre class="p-3 rounded">${modInfo.defaultConfig ? JSON.stringify(modInfo.defaultConfig, null, 2) : "No default config available."}</pre>
       </div>
     </div>
   `;
-        }
+		}
 
+		document.getElementById("ModFile").addEventListener("change", async function (event) {
+			var file = event.target.files[0];
+			if (!file) {
+				alert("No file selected!");
+				return;
+			}
 
-        document.getElementById('ModFile').addEventListener('change', async function (event) {
-            var file = event.target.files[0];
-            if (!file) {
-                alert('No file selected!');
-                return;
-            }
+			if (!file.name.endsWith(".zip")) {
+				alert("Please upload a valid ZIP file.");
+				return;
+			}
 
-            if (!file.name.endsWith('.zip')) {
-                alert('Please upload a valid ZIP file.');
-                return;
-            }
+			var zip = new JSZip();
+			var zipFileContent = await file.arrayBuffer();
 
-            var zip = new JSZip();
-            var zipFileContent = await file.arrayBuffer();
+			try {
+				var content = await zip.loadAsync(zipFileContent);
 
-            try {
-                var content = await zip.loadAsync(zipFileContent);
+				var fileNames = Object.keys(content.files);
+				var modInfoPath = fileNames.find((path) => path.endsWith("modinfo.json"));
 
-                var fileNames = Object.keys(content.files);
-                var modInfoPath = fileNames.find((path) => path.endsWith('modinfo.json'));
+				if (!modInfoPath) {
+					alert("No modinfo.json found in the ZIP file!");
+					return;
+				}
 
-                if (!modInfoPath) {
-                    alert('No modinfo.json found in the ZIP file!');
-                    return;
-                }
+				var modInfoFile = content.file(modInfoPath);
+				var modInfoContent = await modInfoFile.async("text");
+				var modInfo = JSON.parse(modInfoContent);
 
-                var modInfoFile = content.file(modInfoPath);
-                var modInfoContent = await modInfoFile.async('text');
-                var modInfo = JSON.parse(modInfoContent);
-
-                displayModInfo(modInfo);
-            } catch (error) {
-                console.error('Error processing the ZIP file:', error);
-                alert('Could not process the ZIP file.');
-            }
-        });
-
-
-    </script>
+				displayModInfo(modInfo);
+			} catch (error) {
+				console.error("Error processing the ZIP file:", error);
+				alert("Could not process the ZIP file.");
+			}
+		});
+	</script>
 </div>
