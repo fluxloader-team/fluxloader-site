@@ -77,7 +77,7 @@ module.exports = {
                                 }));
                                 return;
                             }
-                            var modfileCompressed = await Buffer.from(modData[0].modfile, "base64");
+                            var modfileCompressed = Buffer.from(modfile, "binary");
                             res.writeHead(201, { "Content-Type": "application/json" });
                             res.end(JSON.stringify({
                                 details: modfileCompressed
