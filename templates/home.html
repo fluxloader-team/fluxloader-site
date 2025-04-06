@@ -59,6 +59,7 @@
         }
         document.addEventListener("DOMContentLoaded", async () => {
             var modListContainer = document.querySelector(".modList");
+            var modDisplayContainer = document.querySelector(".modDisplay");
             var mods = [];
 
             try {
@@ -104,7 +105,8 @@
                     var mod = modData.modinfo;
 
                     var listItem = document.createElement("div");
-                    listItem.className = "row border-bottom py-2 text-center";
+                    listItem.className = "row border-bottom py-2 text-center mod-item";
+                    listItem.dataset.modid = modData.id;
 
                     listItem.innerHTML = `
                     <div class="col-3">${mod.name}</div>
@@ -113,13 +115,17 @@
                     <div class="col-4 text-muted">${mod.tags.join(", ")}</div>
                 `;
 
+                    listItem.addEventListener("click", function () {
+                        loadModInfo(modData.id);
+                    });
+
                     modListContainer.appendChild(listItem);
                 });
 
-                setSortingEvents(mods);
+                setSortingEvents();
             }
 
-            function setSortingEvents(mods) {
+            function setSortingEvents() {
                 var headers = document.querySelectorAll(".sortable");
 
                 headers.forEach(function (header) {
@@ -144,30 +150,97 @@
                         header.querySelector(".sort-indicator").innerHTML =
                             newOrder === "asc" ? "▲" : "▼";
 
-                        modListContainer.querySelectorAll(".row:not(:first-child)").forEach(function (row) {
-                            row.remove();
-                        });
-
-                        mods.forEach(function (modData) {
-                            var mod = modData.modinfo;
-
-                            var listItem = document.createElement("div");
-                            listItem.className = "row border-bottom py-2 text-center";
-
-                            listItem.innerHTML = `
-                            <div class="col-3">${mod.name}</div>
-                            <div class="col-2">${mod.version}</div>
-                            <div class="col-3">${mod.author}</div>
-                            <div class="col-4 text-muted">${mod.tags.join(", ")}</div>
-                        `;
-
-                            modListContainer.appendChild(listItem);
-                        });
+                        renderTable(mods);
                     };
                 });
             }
+
+            async function loadModInfo(modId) {
+                try {
+                    var latestInfoResponse = await fetch(
+                        `https://sandustrymods.shadow.computer/mods?modid=${modId}&option=info`
+                    );
+                    var versionsResponse = await fetch(
+                        `https://sandustrymods.shadow.computer/mods?modid=${modId}&option=versions`
+                    );
+
+                    if (!latestInfoResponse.ok || !versionsResponse.ok) {
+                        throw new Error("Failed to fetch mod info.");
+                    }
+
+                    var latestInfo = await latestInfoResponse.json();
+                    var versionList = await versionsResponse.json();
+
+                    renderModInfo(modId, latestInfo, versionList);
+                } catch (error) {
+                    modDisplayContainer.innerHTML =
+                        '<div class="alert alert-danger">Failed to load mod details.</div>';
+                }
+            }
+
+            function renderModInfo(modId, modInfo, versions) {
+                modDisplayContainer.innerHTML = `
+                <div class="row mb-3">
+                    <div class="col-9"><h3>${modInfo.name}</h3></div>
+                    <div class="col-3 text-end"><button class="btn btn-primary" onclick="returnModId('${modId}')">Download</button></div>
+                </div>
+                <div class="mb-3">
+                    <strong>Author:</strong> ${modInfo.author}<br>
+                    <strong>Current Version:</strong> ${modInfo.version}<br>
+                    <strong>Description:</strong> ${modInfo.description}
+                </div>
+                <div class="mb-3">
+                    <label for="versionSelect" class="form-label">Version History:</label>
+                    <select class="form-select" id="versionSelect" onchange="loadSpecificVersion('${modId}')">
+                        ${versions
+                    .map(
+                        (version) => `
+                            <option value="${version}">${version}</option>
+                        `
+                    )
+                    .join("")}
+                    </select>
+                </div>
+            `;
+            }
+
+            async function loadSpecificVersion(modId) {
+                var versionSelect = document.getElementById("versionSelect");
+                var selectedVersion = versionSelect.value;
+
+                try {
+                    var response = await fetch(
+                        `https://sandustrymods.shadow.computer/mods?modid=${modId}&option=info&version=${selectedVersion}`
+                    );
+
+                    if (!response.ok) {
+                        throw new Error("Failed to fetch version-specific info.");
+                    }
+
+                    var modInfo = await response.json();
+                    renderVersionInfo(modInfo);
+                } catch (error) {
+                    modDisplayContainer.innerHTML =
+                        '<div class="alert alert-danger">Failed to load mod details for selected version.</div>';
+                }
+            }
+
+            function renderVersionInfo(modInfo) {
+                var versionDetails = document.createElement("div");
+                versionDetails.className = "mt-3";
+                versionDetails.innerHTML = `
+                <div>
+                    <strong>Version:</strong> ${modInfo.version}<br>
+                    <strong>Changelog:</strong><br>${modInfo.description}
+                </div>
+            `;
+
+                modDisplayContainer.appendChild(versionDetails);
+            }
+
+            window.returnModId = function (modId) {
+                console.log("Mod ID:", modId);
+            };
         });
-
-
     </script>
 </div>
