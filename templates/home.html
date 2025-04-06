@@ -227,7 +227,7 @@
                             })
                             .then(data => {
                                 console.log(data)
-                                renderModInfo(data.mod, data.mod.modinfo, versionsData);
+                                renderModInfo(data.mod.modID, data.mod.modinfo, versionsData);
                             })
                             .catch(err => {
                                 console.error(err);
