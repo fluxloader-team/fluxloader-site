@@ -92,7 +92,7 @@ module.exports = {
                 }
                 var modVersionEntry = {
                     modID: modEntry.modID,
-                    modfile: compressedZipBuffer,
+                    modfile: compressedZipBuffer.toString("base64"),
                     modinfo: modinfo,
                     uploadTime: new Date(),
                     downloadCount: 0
