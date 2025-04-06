@@ -18,112 +18,119 @@ var sanitizeHtml = require('sanitize-html');
 module.exports = {
     paths: ['/mods'],
     run: async function (req, res) {
-        var queryurl = req.url.split('?')[1]
-        var query = queryurl.split('&')
-        var querys = {}
-        query.forEach(function (urlvar) {
-            var varsplit = urlvar.split('=')
-            querys[varsplit[0]] = varsplit[1]
-        })
-        if (querys["search"] == undefined && (["modid"] == undefined || querys["option"] == undefined)) {
-            res.writeHead(502, {"Content-Type": "text/html"});
-            res.end(JSON.stringify({
-                    error: "Missing required query parameters",
-                    missing: {
-                        modid: querys["modid"] === undefined,
-                        option: querys["option"] === undefined
-                    }
-                })
-            );
-            return;
-        }
-        if (querys["search"] !== undefined && (["modid"] !== undefined || querys["option"] !== undefined)) {
-            res.writeHead(502, {"Content-Type": "text/html"});
-            res.end(JSON.stringify({
-                    error: "Incorrect query parameters. Cannot use both search and modid/option.",
-                parameters: {
-                        search: querys["search"] === undefined,
-                        modid: querys["modid"] === undefined,
-                        option: querys["option"] === undefined
-                    }
-                })
-            );
-            return;
-        }
-        await client.connect();
-        var db = client.db("SandustryMods");
-        var modsCollection = db.collection("Mods");
-        var versionsCollection = db.collection("ModVersions");
-        if(querys["search"] == undefined){
-            switch (querys["option"]) {
-                case "download":
-
-                    break;
-                case "info":
-
-                    break;
-                case "versions":
-
-                    break;
-                default:
+        try {
+            var queryurl = req.url.split('?')[1]
+            var query = queryurl.split('&')
+            var querys = {}
+            query.forEach(function (urlvar) {
+                var varsplit = urlvar.split('=')
+                querys[varsplit[0]] = varsplit[1]
+            })
+            if (querys["search"] == undefined && (["modid"] == undefined || querys["option"] == undefined)) {
+                res.writeHead(502, {"Content-Type": "text/html"});
+                res.end(JSON.stringify({
+                        error: "Missing required query parameters",
+                        missing: {
+                            modid: querys["modid"] === undefined,
+                            option: querys["option"] === undefined
+                        }
+                    })
+                );
+                return;
             }
-        }else {
-            try {
-                var searchQuery = decodeURIComponent(querys["search"]);
+            if (querys["search"] !== undefined && (["modid"] !== undefined || querys["option"] !== undefined)) {
+                res.writeHead(502, {"Content-Type": "text/html"});
+                res.end(JSON.stringify({
+                        error: "Incorrect query parameters. Cannot use both search and modid/option.",
+                        parameters: {
+                            search: querys["search"] === undefined,
+                            modid: querys["modid"] === undefined,
+                            option: querys["option"] === undefined
+                        }
+                    })
+                );
+                return;
+            }
+            await client.connect();
+            var db = client.db("SandustryMods");
+            var modsCollection = db.collection("Mods");
+            var versionsCollection = db.collection("ModVersions");
+            if (querys["search"] == undefined) {
+                switch (querys["option"]) {
+                    case "download":
 
-                var queryCriteria = {};
+                        break;
+                    case "info":
 
-                var conditions = searchQuery.split(" ");
-                for (let condition of conditions) {
-                    var [key, value] = condition.split(":");
+                        break;
+                    case "versions":
 
-                    switch (key) {
-                        case "author":
-                            queryCriteria["modinfo.author"] = { $regex: new RegExp(value, "i") };
-                            break;
-
-                        case "tags":
-                            var tagsArray = value.split(",");
-                            queryCriteria["modinfo.tags"] = { $all: tagsArray.map(tag => new RegExp(tag, "i")) };
-                            break;
-
-                        case "name":
-                            queryCriteria["modinfo.name"] = { $regex: new RegExp(value, "i") };
-                            break;
-
-                        default:
-                            log.log(`Unknown search field: ${key}`);
-                            break;
-                    }
+                        break;
+                    default:
                 }
+            } else {
+                try {
+                    var searchQuery = decodeURIComponent(querys["search"]);
 
-                var mods = await modsCollection.find(queryCriteria).toArray();
+                    var queryCriteria = {};
 
-                if (mods.length === 0) {
-                    res.writeHead(201, { "Content-Type": "application/json" });
+                    var conditions = searchQuery.split(" ");
+                    for (let condition of conditions) {
+                        var [key, value] = condition.split(":");
+
+                        switch (key) {
+                            case "author":
+                                queryCriteria["modinfo.author"] = {$regex: new RegExp(value, "i")};
+                                break;
+
+                            case "tags":
+                                var tagsArray = value.split(",");
+                                queryCriteria["modinfo.tags"] = {$all: tagsArray.map(tag => new RegExp(tag, "i"))};
+                                break;
+
+                            case "name":
+                                queryCriteria["modinfo.name"] = {$regex: new RegExp(value, "i")};
+                                break;
+
+                            default:
+                                log.log(`Unknown search field: ${key}`);
+                                break;
+                        }
+                    }
+
+                    var mods = await modsCollection.find(queryCriteria).toArray();
+
+                    if (mods.length === 0) {
+                        res.writeHead(201, {"Content-Type": "application/json"});
+                        res.end(JSON.stringify({
+                            message: "No mods found matching your search query.",
+                            searchQuery
+                        }));
+                        return;
+                    }
+
+                    res.writeHead(200, {"Content-Type": "application/json"});
                     res.end(JSON.stringify({
-                        message: "No mods found matching your search query.",
-                        searchQuery
+                        message: "Search results successfully fetched",
+                        resultsCount: mods.length,
+                        mods
                     }));
-                    return;
+                } catch (error) {
+                    console.error("Error occurred while searching mods:", error);
+
+                    res.writeHead(500, {"Content-Type": "application/json"});
+                    res.end(JSON.stringify({
+                        error: "An error occurred while processing your search.",
+                        details: error.message
+                    }));
                 }
 
-                res.writeHead(200, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({
-                    message: "Search results successfully fetched",
-                    resultsCount: mods.length,
-                    mods
-                }));
-            } catch (error) {
-                console.error("Error occurred while searching mods:", error);
-
-                res.writeHead(500, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({
-                    error: "An error occurred while processing your search.",
-                    details: error.message
-                }));
             }
-
+        } catch (error) {
+            res.writeHead(500, {"Content-Type": "application/json"});
+            res.end(JSON.stringify({
+                error: "An error occurred while processing your request."
+            }));
         }
 
     }
