@@ -77,15 +77,36 @@ module.exports = {
                                 }));
                                 return;
                             }
+                            try {
+                                var zipBuffer = Buffer.from(modData[0].modfile, "base64");
+                                var zip = await JSZip.loadAsync(zipBuffer);
+                                var fileNames = Object.keys(zip.files);
+                                var filesData = {};
 
-                            var modfileCompressed = Buffer.from(modData[0].modfile, "base64");
-                            var decompressedModfile = await decompress(modfileCompressed);
-                            res.writeHead(201, { "Content-Type": "application/json" });
-                            res.end(JSON.stringify({
-                                modfileCompressed: modfileCompressed.toString("base64"),
-                                modfile: modData[0].modfile,
-                                decompressedModfile: decompressedModfile.toString("base64")
-                            }));
+                                for (var fileName of fileNames) {
+                                    var file = zip.files[fileName];
+                                    if (!file.dir) {
+                                        filesData[fileName] = await file.async("text");
+                                    }
+                                }
+
+                                var response = {
+                                    success: true,
+                                    fileNames,
+                                    filesData,
+                                };
+
+                                res.writeHead(201, { "Content-Type": "application/json" });
+                                res.end(JSON.stringify(response));
+                            } catch (error) {
+                                var response = {
+                                    success: false,
+                                    error: error.message,
+                                };
+
+                                res.writeHead(201, { "Content-Type": "application/json" });
+                                res.end(JSON.stringify(response));
+                            }
 
                         } catch (error) {
                             log.log("Error processing mod download: " + error.message);
