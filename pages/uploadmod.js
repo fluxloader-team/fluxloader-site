@@ -16,7 +16,7 @@ var log = new Utils.log.log(colors.green("Sandustry.web.pages.upload"), "./sandu
 var mongoUri = globalThis.Config.mongodb.uri;
 var sanitizeHtml = require('sanitize-html');
 module.exports = {
-    paths: ['/uploadmod'],
+    paths: ['/api/uploadmod'],
     run: function (req, res) {
         if (req.method !== "POST") {
             res.writeHead(404, { "Content-Type": "text/html" });

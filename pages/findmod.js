@@ -16,7 +16,7 @@ var log = new Utils.log.log(colors.green("Sandustry.web.pages.search"), "./sandu
 var mongoUri = globalThis.Config.mongodb.uri;
 var sanitizeHtml = require('sanitize-html');
 module.exports = {
-    paths: ['/mods'],
+    paths: ['/api/mods'],
     run: async function (req, res) {
         try {
             var client = new MongoClient(mongoUri);
