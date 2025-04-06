@@ -57,63 +57,78 @@ module.exports = {
             // Generate a random number of versions between 1 and 5
             const numVersions = Math.floor(Math.random() * 5) + 1;
 
-            // Create a new zip archive
-            const zip = new JSZip();
+            // Create a main zip archive to hold all version zips
+            const mainZip = new JSZip();
 
             // Generate a random mod name
             const modName = `testmod-${randomString(5)}`;
 
-            // Generate the first version
+            // Start with the first version
             let currentVersion = { major: 1, minor: 0, patch: 0 };
 
-            // Generate mod files for each version
+            // Generate `.zip` files for each version
             for (let i = 0; i < numVersions; i++) {
                 const versionString = `${currentVersion.major}.${currentVersion.minor}.${currentVersion.patch}`;
-                const modFolder = zip.folder(`${modName}-v${versionString}`);
 
-                // Create modinfo.json for this version
+                // Create a zip archive for this version
+                const versionZip = new JSZip();
+
+                // Add modinfo.json to this version archive
                 const modInfo = generateModInfo(modName, versionString);
-                modFolder.file(
+                versionZip.file(
                     'modinfo.json',
                     JSON.stringify(modInfo, null, 2) // Prettify JSON
                 );
 
-                // Add entry point files for this version
-                modFolder.file(
+                // Add entry point files to the version zip
+                versionZip.file(
                     'entry.electron.js',
-                    `// Electron entry point placeholder for version ${versionString}`
+                    `// Electron entry point for version ${versionString}`
                 );
-                modFolder.file(
+                versionZip.file(
                     'entry.browser.js',
-                    `// Browser entry point placeholder for version ${versionString}`
+                    `// Browser entry point for version ${versionString}`
                 );
-                modFolder.file(
+                versionZip.file(
                     'entry.worker.js',
-                    `// Worker entry point placeholder for version ${versionString}`
+                    `// Worker entry point for version ${versionString}`
+                );
+
+                // Generate the content of this version's zip
+                const versionZipContent = await versionZip.generateAsync({
+                    type: 'nodebuffer',
+                });
+
+                // Add this version zip to the main zip archive
+                mainZip.file(
+                    `${modName}-v${versionString}.zip`,
+                    versionZipContent
                 );
 
                 // Increment to the next version
                 currentVersion = incrementSemVer(currentVersion);
             }
 
-            // Generate the zip file
-            const zipContent = await zip.generateAsync({ type: 'nodebuffer' });
+            // Generate the main zip file
+            const mainZipContent = await mainZip.generateAsync({
+                type: 'nodebuffer',
+            });
 
-            // Set correct headers and send the zip file
+            // Set correct headers and send the main zip file
             res.writeHead(200, {
                 'Content-Type': 'application/zip',
                 'Content-Disposition': `attachment; filename=${modName}-versions.zip`,
             });
 
-            res.end(zipContent);
+            res.end(mainZipContent);
 
             // Log success
             log.success(
-                `Generated mod with ${numVersions} versions: ${modName}`
+                `Generated mod with ${numVersions} version zips: ${modName}`
             );
         } catch (error) {
             // Handle errors here
-            log.error('Error generating mod:', error);
+            log.error('Error generating mod versions:', error);
             res.writeHead(500, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: 'Failed to generate mod versions' }));
         }
