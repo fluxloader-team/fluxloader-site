@@ -216,7 +216,7 @@
                     var selectedVersion = versions.find(v => v.modID === selectedModID)?.modinfo.version;
 
                     if (selectedVersion) {
-                        var fetchUrl = `https://sandustrymods.shadow.computer/mods?modid=${mod.modID}&option=info&version=${selectedVersion}`;
+                        var fetchUrl = `https://sandustrymods.shadow.computer/mods?modid=${mod}&option=info&version=${selectedVersion}`;
 
                         fetch(fetchUrl)
                             .then(response => {
@@ -226,6 +226,7 @@
                                 return response.json();
                             })
                             .then(data => {
+                                console.log(data)
                                 renderModInfo(data.mod, data.mod.modinfo, versionsData);
                             })
                             .catch(err => {
