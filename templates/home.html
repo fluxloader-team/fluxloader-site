@@ -57,8 +57,8 @@
                 window.location.reload();
             });
         }
-        document.addEventListener('DOMContentLoaded', async () => {
-            var modListContainer = document.querySelector('.modList');
+        document.addEventListener("DOMContentLoaded", async () => {
+            var modListContainer = document.querySelector(".modList");
             var mods = [];
 
             try {
@@ -70,31 +70,37 @@
                 mods = await response.json();
 
                 if (mods.length === 0) {
-                    modListContainer.innerHTML = '<div class="alert alert-info">No mods available.</div>';
+                    modListContainer.innerHTML =
+                        '<div class="alert alert-info">No mods available.</div>';
                     return;
                 }
 
                 renderTable(mods);
             } catch (error) {
-                modListContainer.innerHTML = '<div class="alert alert-danger">Unable to load mods.</div>';
+                modListContainer.innerHTML =
+                    '<div class="alert alert-danger">Unable to load mods.</div>';
             }
 
             function renderTable(mods) {
                 modListContainer.innerHTML = "";
-
                 var headerRow = document.createElement("div");
                 headerRow.className = "row border-bottom py-2 fw-bold text-center";
 
                 headerRow.innerHTML = `
-                <div class="col-3 sortable" data-sort="name">Name <span class="sort-indicator">▲▼</span></div>
-                <div class="col-2 sortable" data-sort="version">Version <span class="sort-indicator">▲▼</span></div>
-                <div class="col-3 sortable" data-sort="author">Author <span class="sort-indicator">▲▼</span></div>
+                <div class="col-3 sortable" data-sort="name" data-order="asc">
+                    Name <span class="sort-indicator">▲▼</span>
+                </div>
+                <div class="col-2 sortable" data-sort="version" data-order="asc">
+                    Version <span class="sort-indicator">▲▼</span>
+                </div>
+                <div class="col-3 sortable" data-sort="author" data-order="asc">
+                    Author <span class="sort-indicator">▲▼</span>
+                </div>
                 <div class="col-4">Tags</div>
             `;
-
                 modListContainer.appendChild(headerRow);
 
-                mods.forEach(modData => {
+                mods.forEach(function (modData) {
                     var mod = modData.modinfo;
 
                     var listItem = document.createElement("div");
@@ -115,29 +121,34 @@
 
             function addSorting() {
                 var headers = document.querySelectorAll(".sortable");
-                headers.forEach(header => {
-                    var sortOrder = 1;
-                    header.addEventListener("click", () => {
+
+                headers.forEach(function (header) {
+                    header.addEventListener("click", function () {
                         var sortKey = header.dataset.sort;
+                        var currentOrder = header.dataset.order;
+                        var newOrder = currentOrder === "asc" ? "desc" : "asc";
+                        header.dataset.order = newOrder;
 
-                        sortOrder = sortOrder * -1;
-
-                        mods.sort((a, b) => {
+                        mods.sort(function (a, b) {
                             var aValue = a.modinfo[sortKey].toString().toLowerCase();
                             var bValue = b.modinfo[sortKey].toString().toLowerCase();
 
-                            if (aValue < bValue) return -1 * sortOrder;
-                            if (aValue > bValue) return 1 * sortOrder;
+                            if (aValue < bValue) return newOrder === "asc" ? -1 : 1;
+                            if (aValue > bValue) return newOrder === "asc" ? 1 : -1;
                             return 0;
                         });
 
-                        document.querySelectorAll(".sort-indicator").forEach(el => el.innerHTML = "▲▼");
-                        header.querySelector(".sort-indicator").innerHTML = sortOrder === 1 ? "▲" : "▼";
+                        document.querySelectorAll(".sort-indicator").forEach(function (el) {
+                            el.innerHTML = "▲▼";
+                        });
+                        header.querySelector(".sort-indicator").innerHTML =
+                            newOrder === "asc" ? "▲" : "▼";
 
                         renderTable(mods);
                     });
                 });
             }
         });
+
     </script>
 </div>
