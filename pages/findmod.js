@@ -237,11 +237,15 @@ module.exports = {
 
             }
         } catch (error) {
-            res.writeHead(201, {"Content-Type": "application/json"});
-            res.end(JSON.stringify({
-                error: "An error occurred while processing your request.",
-                details: error.message
-            }));
+            await client.connect();
+            var db = client.db("SandustryMods");
+            var modsCollection = db.collection("Mods");
+
+            var allMods = await modsCollection.find({}).toArray();
+
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify(allMods));
+
         }
 
     }
