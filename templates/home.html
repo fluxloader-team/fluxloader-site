@@ -207,61 +207,82 @@
                 }
             }
 
-            function renderModInfo(mod,modInfo,versions) {
+            function renderModInfo(mod, modInfo, versions) {
                 var modDisplayContainer = document.querySelector(".modDisplay");
                 modDisplayContainer.innerHTML = `
-        <div class="card-body">
-            <h5>Short Description</h5>
-            <p class="text-muted">${modInfo.shortDescription}</p>
+    <div class="card-body">
+        <h2 class="mb-3">
+            ${modInfo.name}
+            ${modInfo.tags.map(tag => `<span class="badge bg-secondary ms-2">${tag}</span>`).join("")}
+        </h2>
 
-            <h5>Description</h5>
-            <div>${marked.parse(modInfo.description)}</div>
+        <h5 class="mt-4">Short Description</h5>
+        <p class="text-muted">${modInfo.shortDescription}</p>
 
-            <hr>
+        <h5>Description</h5>
+        <div>${marked.parse(modInfo.description)}</div>
 
-            <h5>Details</h5>
-            <table class="table table-striped">
-                <tbody>
-                    <tr>
-                        <th scope="row">Modloader Version</th>
-                        <td>${modInfo.modloaderVersion}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Electron Entrypoint</th>
-                        <td>${modInfo.electronEntrypoint}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Browser Entrypoint</th>
-                        <td>${modInfo.browserEntrypoint}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Worker Entrypoint</th>
-                        <td>${modInfo.workerEntrypoint}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Dependencies</th>
-                        <td>
-                            ${
+        <hr>
+
+        <h5>Details</h5>
+        <table class="table table-striped">
+            <tbody>
+                <tr>
+                    <th scope="row">Modloader Version</th>
+                    <td>${modInfo.modloaderVersion}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Electron Entrypoint</th>
+                    <td>${modInfo.electronEntrypoint}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Browser Entrypoint</th>
+                    <td>${modInfo.browserEntrypoint}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Worker Entrypoint</th>
+                    <td>${modInfo.workerEntrypoint}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Dependencies</th>
+                    <td>
+                        ${
                     Object.keys(modInfo.dependencies)
                         .map(dep => `<span class="badge bg-info">${dep}: ${modInfo.dependencies[dep]}</span>`)
                         .join(" ")
                 }
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
 
-            <hr>
+        <hr>
 
-            <h5>Default Configuration</h5>
-            <pre class="p-3 rounded">${JSON.stringify(modInfo.defaultConfig, null, 2)}</pre>
+        <h5>Default Configuration</h5>
+        <pre class="p-3 rounded">${JSON.stringify(modInfo.defaultConfig, null, 2)}</pre>
+
+        <div class="d-flex align-items-center mt-4">
+            <button
+                id="copyModIDButton"
+                class="btn btn-primary me-3"
+                onclick="navigator.clipboard.writeText('${mod.modID}')">
+                Copy Mod ID
+            </button>
+
+            <select id="versionSelector" class="form-select" style="width: auto;">
+                ${
+                    versions.map(versionInfo =>
+                        `<option value="${versionInfo.modID}" ${
+                            versionInfo.modID === mod.modID ? "selected" : ""}>
+                            ${versionInfo.modinfo.version}
+                        </option>`
+                    ).join("")
+                }
+            </select>
         </div>
+    </div>
     `;
             }
-
-
-
-
             async function loadSpecificVersion(modId) {
                 var versionSelect = document.getElementById("versionSelect");
                 var selectedVersion = versionSelect.value;
