@@ -38,19 +38,6 @@ module.exports = {
                 );
                 return;
             }
-            if (querys["search"] != undefined && (["modid"] != undefined || querys["option"] != undefined)) {
-                res.writeHead(201, {"Content-Type": "application/json"});
-                res.end(JSON.stringify({
-                        error: "Incorrect query parameters. Cannot use both search and modid/option.",
-                        parameters: {
-                            search: `${querys["search"]}`,
-                            modid: `${querys["modid"]}`,
-                            option: `${querys["option"]}`
-                        }
-                    })
-                );
-                return;
-            }
             await client.connect();
             var db = client.db("SandustryMods");
             var modsCollection = db.collection("Mods");
