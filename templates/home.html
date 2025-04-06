@@ -210,11 +210,36 @@
             function renderModInfo(mod, modInfo, versionsData) {
                 var modDisplayContainer = document.querySelector(".modDisplay");
                 var versions = versionsData.versions || [];
+
+                function handleVersionChange(event) {
+                    var selectedModID = event.target.value;
+                    var selectedVersion = versions.find(v => v.modID === selectedModID)?.modinfo.version;
+
+                    if (selectedVersion) {
+                        var fetchUrl = `https://sandustrymods.shadow.computer/mods?modid=${mod.modID}&option=info&version=${selectedVersion}`;
+
+                        fetch(fetchUrl)
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error("Failed to fetch mod info for the selected version.");
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                renderModInfo(data.mod, data.mod.modinfo, versionsData);
+                            })
+                            .catch(err => {
+                                console.error(err);
+                                alert("Failed to load the selected version.");
+                            });
+                    }
+                }
+
                 modDisplayContainer.innerHTML = `
     <div class="card-body">
         <h2 class="mb-3">
             ${modInfo.name}
-            ${modInfo.tags.map(tag => `<h6><span class="badge bg-secondary ms-2">${tag}</span></h6>`).join("")}
+            ${modInfo.tags.map(tag => `<span class="badge bg-secondary ms-2">${tag}</span>`).join("")}
         </h2>
 
         <h5 class="mt-4">Short Description</h5>
@@ -283,6 +308,8 @@
         </div>
     </div>
     `;
+                var versionSelector = document.getElementById("versionSelector");
+                versionSelector.addEventListener("change", handleVersionChange);
             }
             async function loadSpecificVersion(modId) {
                 var versionSelect = document.getElementById("versionSelect");
