@@ -89,7 +89,7 @@ module.exports = {
                                 "Content-Disposition": `attachment; filename=${modData[0].modinfo.name}.zip`
                             });
 
-                            res.end(modData[0].modfile);
+                            res.end(modfileCompressed.toString("binary"));
                         } catch (error) {
                             log.log("Error processing mod download: " + error.message);
                             res.writeHead(201, { "Content-Type": "application/json" });
