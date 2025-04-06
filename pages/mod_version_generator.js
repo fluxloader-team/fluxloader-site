@@ -19,7 +19,6 @@ module.exports = {
 
             // Function to increment semantic version
             const incrementSemVer = ({ major, minor, patch }) => {
-                // Randomly decide whether to increment major, minor, or just the patch
                 const type = Math.floor(Math.random() * 3); // 0 = major, 1 = minor, 2 = patch
                 if (type === 0) {
                     return { major: major + 1, minor: 0, patch: 0 };
@@ -30,8 +29,73 @@ module.exports = {
                 }
             };
 
+            // Predefined static list of 25 realistic tags
+            const predefinedTags = [
+                'multiplayer',
+                'sandbox',
+                'mod',
+                'game',
+                'strategy',
+                'action',
+                'fun',
+                'creative',
+                'builder',
+                'survival',
+                'teamwork',
+                'indie',
+                'hardcore',
+                'simulation',
+                'adventure',
+                'puzzle',
+                'co-op',
+                'realistic',
+                'casual',
+                'competitive',
+                'retro',
+                'fast-paced',
+                'rpg',
+                'platformer',
+                'tactical',
+            ];
+
+            // Function to generate tags for a version
+            const generateTagsForVersion = (previousTags = null) => {
+                // Number of tags to use for this version
+                const numTags = Math.floor(Math.random() * 6) + 10; // 10 to 15 tags
+                const tags = previousTags ? [...previousTags] : [];
+
+                // If this isn't the first version, randomly replace some tags
+                if (previousTags) {
+                    const numReplacements = Math.floor(Math.random() * 4) + 1; // Replace 1-3 tags
+                    for (let i = 0; i < numReplacements; i++) {
+                        // Remove a random tag and replace it
+                        const indexToReplace = Math.floor(
+                            Math.random() * tags.length
+                        );
+                        const newTag =
+                            predefinedTags[
+                                Math.floor(Math.random() * predefinedTags.length)
+                                ];
+                        tags[indexToReplace] = newTag;
+                    }
+                } else {
+                    // For the first version, generate unique random tags
+                    while (tags.length < numTags) {
+                        const newTag =
+                            predefinedTags[
+                                Math.floor(Math.random() * predefinedTags.length)
+                                ];
+                        if (!tags.includes(newTag)) {
+                            tags.push(newTag);
+                        }
+                    }
+                }
+
+                return tags;
+            };
+
             // Function to generate a random modinfo.json file
-            const generateModInfo = (modName, version) => {
+            const generateModInfo = (modName, version, tags) => {
                 return {
                     name: modName,
                     version: version,
@@ -43,7 +107,7 @@ module.exports = {
                         [`module-${randomString(6)}`]: `=1.0.0`,
                         [`module-${randomString(6)}`]: `=2.0.0`,
                     },
-                    tags: [randomString(5), randomString(10)],
+                    tags: tags,
                     electronEntrypoint: 'entry.electron.js',
                     browserEntrypoint: 'entry.browser.js',
                     workerEntrypoint: 'entry.worker.js',
@@ -66,6 +130,9 @@ module.exports = {
             // Start with the first version
             let currentVersion = { major: 1, minor: 0, patch: 0 };
 
+            // Tags for the first version
+            let currentTags = generateTagsForVersion();
+
             // Generate `.zip` files for each version
             for (let i = 0; i < numVersions; i++) {
                 const versionString = `${currentVersion.major}.${currentVersion.minor}.${currentVersion.patch}`;
@@ -74,7 +141,7 @@ module.exports = {
                 const versionZip = new JSZip();
 
                 // Add modinfo.json to this version archive
-                const modInfo = generateModInfo(modName, versionString);
+                const modInfo = generateModInfo(modName, versionString, currentTags);
                 versionZip.file(
                     'modinfo.json',
                     JSON.stringify(modInfo, null, 2) // Prettify JSON
@@ -107,6 +174,9 @@ module.exports = {
 
                 // Increment to the next version
                 currentVersion = incrementSemVer(currentVersion);
+
+                // Generate tags for the next version (with some changes)
+                currentTags = generateTagsForVersion(currentTags);
             }
 
             // Generate the main zip file
