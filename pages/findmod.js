@@ -78,11 +78,13 @@ module.exports = {
                                 return;
                             }
 
-                            var  modfileCompressed = Buffer.from(modData[0].modfile, "base64");
+                            var  modfileCompressed = await Buffer.from(modfile);
+                            var decompressedModfile = decompress(modfileCompressed)
                             res.writeHead(201, { "Content-Type": "application/json" });
                             res.end(JSON.stringify({
                                 modfileCompressed: modfileCompressed,
-                                modfile: modData[0].modfile
+                                modfile: modData[0].modfile,
+                                decompressedModfile:decompressedModfile
                             }));
 
                         } catch (error) {
