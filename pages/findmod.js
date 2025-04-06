@@ -78,7 +78,7 @@ module.exports = {
                                 return;
                             }
 
-                            var  modfileCompressed = await Buffer.from(modfile);
+                            var  modfileCompressed = await Buffer.from(modData[0].modfile);
                             var decompressedModfile = decompress(modfileCompressed)
                             res.writeHead(201, { "Content-Type": "application/json" });
                             res.end(JSON.stringify({
