@@ -78,8 +78,8 @@ module.exports = {
                                 return;
                             }
 
-                            var modfileCompressed = modData[0].modfile.$binary.base64;
-                            log.log("Mod file compressed: " + modfileCompressed);
+                            var modfileCompressed = modData[0].modfile.$binary;
+                            //log.log("Mod file compressed: " + modfileCompressed);
                             var modfileEncoded = Buffer.from(modfileCompressed, "base64");
                             log.log("Mod file encoded: " + modfileEncoded);
                             var decodedDecompressedZip = await require("@mongodb-js/zstd").decompress(modfileEncoded);
