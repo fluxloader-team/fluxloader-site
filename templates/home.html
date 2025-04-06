@@ -157,26 +157,41 @@
 
             async function loadModInfo(modId) {
                 try {
-                    var latestInfoResponse = await fetch(
-                        `https://sandustrymods.shadow.computer/mods?modid=${modId}&option=info`
-                    );
-                    var versionsResponse = await fetch(
-                        `https://sandustrymods.shadow.computer/mods?modid=${modId}&option=versions`
-                    );
+                    console.log("Fetching details for mod ID:", modId);
 
-                    if (!latestInfoResponse.ok || !versionsResponse.ok) {
-                        throw new Error("Failed to fetch mod info.");
+                    var latestInfoUrl = `https://sandustrymods.shadow.computer/mods?modid=${modId}&option=info`;
+                    var versionsUrl = `https://sandustrymods.shadow.computer/mods?modid=${modId}&option=versions`;
+
+                    console.log("Latest Info URL:", latestInfoUrl);
+                    console.log("Versions URL:", versionsUrl);
+
+                    var latestInfoResponse = await fetch(latestInfoUrl);
+                    var versionsResponse = await fetch(versionsUrl);
+
+                    if (!latestInfoResponse.ok) {
+                        console.error("Failed to fetch latest info:", await latestInfoResponse.text());
+                        throw new Error("Unable to fetch latest mod info.");
+                    }
+
+                    if (!versionsResponse.ok) {
+                        console.error("Failed to fetch versions:", await versionsResponse.text());
+                        throw new Error("Unable to fetch version history.");
                     }
 
                     var latestInfo = await latestInfoResponse.json();
                     var versionList = await versionsResponse.json();
 
+                    console.log("Fetched Latest Info:", latestInfo);
+                    console.log("Fetched Versions:", versionList);
+
                     renderModInfo(modId, latestInfo, versionList);
                 } catch (error) {
+                    console.error("Error loading mod info:", error);
                     modDisplayContainer.innerHTML =
                         '<div class="alert alert-danger">Failed to load mod details.</div>';
                 }
             }
+
 
             function renderModInfo(modId, modInfo, versions) {
                 modDisplayContainer.innerHTML = `
