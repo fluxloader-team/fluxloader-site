@@ -78,7 +78,7 @@
 					filedata: base64Data,
 					discordInfo: discordUser,
 				});
-				var response = await fetch("/uploadmod", {
+				var response = await fetch("/api/uploadmod", {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
