@@ -77,36 +77,65 @@ module.exports = {
                                 }));
                                 return;
                             }
-                            try {
-                                var zipBuffer = Buffer.from(modData[0].modfile, "base64");
-                                var zip = await JSZip.loadAsync(zipBuffer);
-                                var fileNames = Object.keys(zip.files);
-                                var filesData = {};
+                            const diagnostics = {}; // For collecting debug information
 
-                                for (var fileName of fileNames) {
-                                    var file = zip.files[fileName];
+                            try {
+                                const compressedBuffer = Buffer.from(modData[0].modfile, "latin1");
+                                diagnostics.compressedBufferLength = compressedBuffer.length;
+
+                                if (compressedBuffer.length === 0) {
+                                    throw new Error("Compressed buffer from Base64 is empty.");
+                                }
+
+                                const decompressedBuffer = await decompress(compressedBuffer);
+                                diagnostics.decompressedBufferLength = decompressedBuffer.length;
+
+                                if (decompressedBuffer.length === 0) {
+                                    throw new Error("Decompressed buffer is empty. Zstd decompression failed.");
+                                }
+
+                                // Step 2: Base64 Decoding
+                                const zipBuffer = Buffer.from(decompressedBuffer.toString(), "base64");
+                                diagnostics.zipBufferLength = zipBuffer.length;
+
+                                if (zipBuffer.length === 0) {
+                                    throw new Error("Base64 decoding produced an empty buffer.");
+                                }
+
+                                // Step 3: Process ZIP File
+                                const zip = await JSZip.loadAsync(zipBuffer);
+                                diagnostics.fileNames = Object.keys(zip.files);
+
+                                // Step 4: Extract Files from ZIP
+                                const extractedFiles = {};
+                                for (const fileName of diagnostics.fileNames) {
+                                    const file = zip.files[fileName];
                                     if (!file.dir) {
-                                        filesData[fileName] = await file.async("text");
+                                        extractedFiles[fileName] = await file.async("text");
                                     }
                                 }
 
-                                var response = {
-                                    success: true,
-                                    fileNames,
-                                    filesData,
-                                };
-
-                                res.writeHead(201, { "Content-Type": "application/json" });
-                                res.end(JSON.stringify(response));
+                                // Step 5: Respond with Results
+                                res.writeHead(200, { "Content-Type": "application/json" });
+                                res.end(
+                                    JSON.stringify({
+                                        success: true,
+                                        diagnostics,
+                                        files: extractedFiles
+                                    })
+                                );
                             } catch (error) {
-                                var response = {
-                                    success: false,
-                                    error: error.message,
-                                };
-
-                                res.writeHead(201, { "Content-Type": "application/json" });
-                                res.end(JSON.stringify(response));
+                                // Handle errors and provide diagnostics
+                                diagnostics.error = error.message;
+                                res.writeHead(500, { "Content-Type": "application/json" });
+                                res.end(
+                                    JSON.stringify({
+                                        success: false,
+                                        diagnostics
+                                    })
+                                );
                             }
+
 
                         } catch (error) {
                             log.log("Error processing mod download: " + error.message);
