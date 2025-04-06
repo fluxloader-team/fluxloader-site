@@ -164,17 +164,14 @@
                 try {
                     console.log("Fetching details for mod ID:", modID);
 
-                    var latestInfoUrl = `https://sandustrymods.shadow.computer/mods?modid=${modID}&option=info`;
-                    var versionsUrl = `https://sandustrymods.shadow.computer/mods?modid=${modID}&option=versions`;
+                    const latestInfoUrl = `https://sandustrymods.shadow.computer/mods?modid=${modID}&option=info`;
+                    const versionsUrl = `https://sandustrymods.shadow.computer/mods?modid=${modID}&option=versions`;
 
-                    console.log("Latest Info URL:", latestInfoUrl);
-                    console.log("Versions URL:", versionsUrl);
-
-                    var latestInfoResponse = await fetch(latestInfoUrl);
-                    var versionsResponse = await fetch(versionsUrl);
+                    const latestInfoResponse = await fetch(latestInfoUrl);
+                    const versionsResponse = await fetch(versionsUrl);
 
                     if (!latestInfoResponse.ok) {
-                        console.error("Failed to fetch latest info:", await latestInfoResponse.text());
+                        console.error("Failed to fetch latest mod info:", await latestInfoResponse.text());
                         throw new Error("Unable to fetch latest mod info.");
                     }
 
@@ -183,13 +180,17 @@
                         throw new Error("Unable to fetch version history.");
                     }
 
-                    var latestInfo = await latestInfoResponse.json();
-                    var versionList = await versionsResponse.json();
+                    const latestInfo = await latestInfoResponse.json();
+                    const versions = await versionsResponse.json();
 
                     console.log("Fetched Latest Info:", latestInfo);
-                    console.log("Fetched Versions:", versionList);
+                    console.log("Fetched Versions:", versions);
 
-                    renderModInfo(modID, latestInfo, versionList);
+                    renderModInfo(
+                        modID,
+                        latestInfo.mod.modinfo || {},
+                        versions
+                    );
                 } catch (error) {
                     console.error("Error loading mod info:", error);
                     modDisplayContainer.innerHTML =
@@ -200,18 +201,22 @@
                 if (versions && versions.versions) {
                     versions = versions.versions;
                 }
-
                 if (!Array.isArray(versions) || versions.length === 0) {
                     modDisplayContainer.innerHTML =
                         '<div class="alert alert-danger">No version history available for this mod.</div>';
                     return;
                 }
 
+                const modName = modInfo.name || "Unknown Mod Name";
+                const modVersion = modInfo.version || "Unknown Version";
+                const modAuthor = modInfo.author || "Unknown Author";
+                const modDescription = modInfo.description || "No description available";
                 modDisplayContainer.innerHTML = `
         <div class="row mb-3">
             <div class="col-9">
-                <h3>${modInfo.name}</h3>
-                <p><small><strong>By:</strong> ${modInfo.author}</small></p>
+                <h3>${modName}</h3>
+                <p><small><strong>By:</strong> ${modAuthor}</small></p>
+                <p><strong>Current Version:</strong> ${modVersion}</p>
             </div>
             <div class="col-3 text-end">
                 <button class="btn btn-primary" onclick="returnModId('${modID}')">Download</button>
@@ -219,7 +224,7 @@
         </div>
         <div class="mb-3">
             <strong>Description:</strong>
-            <p>${modInfo.description ? modInfo.description : "No description available"}</p>
+            <p>${modDescription}</p>
         </div>
         <div class="mb-3">
             <label for="versionSelect" class="form-label">Version History:</label>
@@ -228,7 +233,7 @@
                     .map(
                         (version) => `
                         <option value="${version.modinfo.version}">
-                            Version: ${version.modinfo.version} (Uploaded: ${new Date(
+                            Version ${version.modinfo.version} (Uploaded: ${new Date(
                             version.uploadTime
                         ).toLocaleDateString()})
                         </option>
