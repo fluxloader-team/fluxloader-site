@@ -98,7 +98,7 @@
 			}
 		}
 
-		function displayModInfo(modInfo) {
+		function displayModInfo(modInfo, description) {
 			var container = document.getElementById("ModInfo");
 			container.innerHTML = `
     <div class="card">
@@ -111,7 +111,7 @@
         <h5>Short Description</h5>
         <p class="text-muted">${modInfo.shortDescription}</p>
         <h5>Description</h5>
-        <div>${modInfo.description ? marked.parse(modInfo.description) : "<em>No description provided.</em>"}</div>
+        <div>${description ? marked.parse(description) : "<em>No description provided.</em>"}</div>
 
         <hr>
 
@@ -188,7 +188,11 @@
 				var modInfoContent = await modInfoFile.async("text");
 				var modInfo = JSON.parse(modInfoContent);
 
-				displayModInfo(modInfo);
+				var readmePath = fileNames.find((path) => path.endsWith("README.md"));
+				var readmeFile = await content.file(readmePath);
+				var rawDescription = await readmeFile.async("text");
+
+				displayModInfo(modInfo, rawDescription);
 			} catch (error) {
 				console.error("Error processing the ZIP file:", error);
 				alert("Could not process the ZIP file.");
