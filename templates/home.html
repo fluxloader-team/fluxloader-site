@@ -207,91 +207,62 @@
                 }
             }
 
-            function renderModInfo(modID, modInfo, versions) {
-                if (versions && versions.versions) {
-                    versions = versions.versions;
-                }
+            function renderModInfo(mod) {
+                const {
+                    description = "No description available.",
+                    shortDescription = "No short description available.",
+                    modloaderVersion,
+                    entrypoints = {},
+                    dependencies = [],
+                    defaultConfig = {},
+                } = mod;
 
-                if (!Array.isArray(versions) || versions.length === 0) {
-                    modDisplayContainer.innerHTML =
-                        '<div class="alert alert-danger">No version history available for this mod.</div>';
-                    return;
-                }
-                var modName = modInfo.name || "Unknown Mod Name";
-                var modVersion = modInfo.version || "Unknown Version";
-                var modAuthor = modInfo.author || "Unknown Author";
-                var modDescriptionRaw = modInfo.description || "No description available";
-                var modDescription = marked.parse(modDescriptionRaw);
-
-                var dependencies = modInfo.dependencies
-                    ? Object.entries(modInfo.dependencies)
-                        .map(([key, value]) => `<li><strong>${key}</strong>: ${value}</li>`)
-                        .join("")
-                    : "<li>Not available</li>";
-
-                var tags = modInfo.tags && modInfo.tags.length > 0
-                    ? modInfo.tags.map(tag => `<span class="badge bg-secondary me-1">${tag}</span>`).join("")
-                    : "Not available";
-
-                var modloaderVersion = modInfo.modloaderVersion || "Not specified";
-                var defaultConfig = modInfo.defaultConfig
-                    ? `<pre>${JSON.stringify(modInfo.defaultConfig, null, 2)}</pre>`
-                    : "Not available";
-                var downloadCount = modInfo.downloadCount || 0;
+                const { electron = "N/A", browser = "N/A", worker = "N/A" } = entrypoints;
 
                 modDisplayContainer.innerHTML = `
-        <div class="row mb-3">
-            <div class="col-9">
-                <h3>${modName}</h3>
-                <p><small><strong>By:</strong> ${modAuthor}</small></p>
-                <p><strong>Current Version:</strong> ${modVersion}</p>
-            </div>
-        </div>
-        <div class="mb-3">
-            <strong>Description:</strong>
-            <div>${modDescription}</div>
-        </div>
-        <div class="mb-3">
-            <strong>Dependencies:</strong>
-            <ul>${dependencies}</ul>
-        </div>
-        <div class="mb-3">
-            <strong>Tags:</strong>
-            <div>${tags}</div>
-        </div>
-        <div class="mb-3">
-            <strong>Modloader Version:</strong>
-            <p>${modloaderVersion}</p>
-        </div>
-        <div class="mb-3">
-            <strong>Default Configuration:</strong>
-            <div>${defaultConfig}</div>
-        </div>
-        <div class="mb-3">
-            <strong>Download Count:</strong>
-            <p>${downloadCount}</p>
-        </div>
-        <div class="mb-3">
-            <label for="versionSelect" class="form-label">Version History:</label>
-            <select class="form-select" id="versionSelect">
-                ${versions
-                    .map(
-                        (version) => `
-                        <option value="${version.modinfo.version}">
-                            Version ${version.modinfo.version} (Uploaded: ${new Date(
-                            version.uploadTime
-                        ).toLocaleDateString()})
-                        </option>
-                    `
-                    )
-                    .join("")}
-            </select>
-        </div>
-        <div class="col-3 text-end">
-                <button class="btn btn-primary" onclick='navigator.clipboard.writeText("${modID}")'>Copy ID</button>
-            </div>
-    `;
+        <div class="card-body">
+            <h5>Short Description</h5>
+            <p class="text-muted">${shortDescription}</p>
+            <h5>Description</h5>
+            <div>${marked(description)}</div>
+
+            <hr>
+
+            <h5>Details</h5>
+            <table class="table table-striped">
+                <tbody>
+                    <tr>
+                        <th scope="row">Modloader Version</th>
+                        <td>${modloaderVersion || "N/A"}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Electron Entrypoint</th>
+                        <td>${electron}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Browser Entrypoint</th>
+                        <td>${browser}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Worker Entrypoint</th>
+                        <td>${worker}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Dependencies</th>
+                        <td>
+                            ${dependencies.map(dep => `<span class="badge bg-info">${dep.name}: ${dep.version}</span>`).join(" ")}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <hr>
+
+            <h5>Default Configuration</h5>
+            <pre class="p-3 rounded">${JSON.stringify(defaultConfig, null, 2)}</pre>
+        </div>`;
             }
+
 
 
             async function loadSpecificVersion(modId) {
