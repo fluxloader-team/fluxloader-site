@@ -78,18 +78,10 @@ module.exports = {
                                 return;
                             }
 
-                            var modfileCompressed = await Buffer.from(
-                                modData[0].modfile, "binary");
-
-                            //log.log("Mod file compressed: " + modfileCompressed);
-                            var decodedDecompressedZip = await decompress(modfileCompressed);
-                            log.log("Decompressed mod file: " + decodedDecompressedZip.toString("binary"));
-                            res.writeHead(201, {
-                                "Content-Type": "application/zip",
-                                "Content-Disposition": `attachment; filename=${modData[0].modinfo.name}.zip`
-                            });
-
-                            res.end(modfileCompressed.toString("binary"));
+                            res.writeHead(201, { "Content-Type": "application/json" });
+                            res.end(JSON.stringify({
+                                details: modData[0].modfile
+                            }));
                         } catch (error) {
                             log.log("Error processing mod download: " + error.message);
                             res.writeHead(201, { "Content-Type": "application/json" });
