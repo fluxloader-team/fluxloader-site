@@ -69,9 +69,23 @@
                 var mods = await response.json();
 
                 if (mods.length === 0) {
-                    modListContainer.innerHTML = '<ul class="list-group"><li class="list-group-item">No mods available.</li></ul>';
+                    modListContainer.innerHTML = '<div class="alert alert-info">No mods available.</div>';
                     return;
                 }
+
+                var headerRow = document.createElement('div');
+                headerRow.className = 'd-flex justify-content-between align-items-center mb-3';
+
+                headerRow.innerHTML = `
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="sortByName">Sort by Name</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="sortByVersion">Sort by Version</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="sortByAuthor">Sort by Author</button>
+                </div>
+                <span class="text-muted">Showing ${mods.length} mods</span>
+            `;
+
+                modListContainer.appendChild(headerRow);
 
                 var listGroup = document.createElement('ul');
                 listGroup.className = 'list-group';
@@ -80,22 +94,66 @@
                     var mod = modData.modinfo;
 
                     var listItem = document.createElement('li');
-                    listItem.className = 'list-group-item';
+                    listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
 
                     listItem.innerHTML = `
-                        <h5>${mod.name} <span class="badge bg-secondary">v${mod.version}</span></h5>
-                        <p>${mod.shortDescription}</p>
-                        <small><strong>Author:</strong> ${mod.author}</small>
-                    `;
+                    <div class="mod-info">
+                        <strong>${mod.name}</strong>
+                        <span class="badge bg-secondary ms-2">v${mod.version}</span>
+                    </div>
+                    <div class="mod-author">
+                        ${mod.author}
+                    </div>
+                    <div class="mod-tags text-muted">
+                        ${mod.tags.join(", ")}
+                    </div>
+                `;
 
                     listGroup.appendChild(listItem);
                 });
 
                 modListContainer.appendChild(listGroup);
+
+                function sortList(criteria) {
+                    mods.sort((a, b) => {
+                        var modA = a.modinfo[criteria].toString().toLowerCase();
+                        var modB = b.modinfo[criteria].toString().toLowerCase();
+                        return modA.localeCompare(modB);
+                    });
+
+                    listGroup.innerHTML = '';
+
+                    mods.forEach(modData => {
+                        var mod = modData.modinfo;
+
+                        var listItem = document.createElement('li');
+                        listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+
+                        listItem.innerHTML = `
+                        <div class="mod-info">
+                            <strong>${mod.name}</strong>
+                            <span class="badge bg-secondary ms-2">v${mod.version}</span>
+                        </div>
+                        <div class="mod-author">
+                            ${mod.author}
+                        </div>
+                        <div class="mod-tags text-muted">
+                            ${mod.tags.join(", ")}
+                        </div>
+                    `;
+
+                        listGroup.appendChild(listItem);
+                    });
+                }
+
+                document.getElementById('sortByName').addEventListener('click', () => sortList('name'));
+                document.getElementById('sortByVersion').addEventListener('click', () => sortList('version'));
+                document.getElementById('sortByAuthor').addEventListener('click', () => sortList('author'));
             } catch (error) {
                 modListContainer.innerHTML = '<div class="alert alert-danger">Unable to load mods.</div>';
             }
         });
+
 
 
 
