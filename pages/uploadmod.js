@@ -67,8 +67,8 @@ module.exports = {
                 var modInfoPath = fileNames.find((path) => path.endsWith('modinfo.json'));
                 var modInfoFile = content.file(modInfoPath);
                 var modInfoContent = await modInfoFile.async('text');
-                var modinfo = JSON.parse(modInfoContent);
-                modinfo = sanitizeHtml(modinfo);
+                var modinfo = await JSON.parse(modInfoContent);
+                modinfo = await sanitizeHtml(modinfo);
                 var modEntry = {}
                 modEntry = await modsCollection.findOne({ "modID": modID, "Author.discordID": discordInfo.id, });
                 if (!modEntry) {
