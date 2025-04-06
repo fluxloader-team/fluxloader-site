@@ -63,48 +63,40 @@
             try {
                 var response = await fetch("/mods");
                 if (!response.ok) {
-                    throw new Error(`Error: ${response.status} ${response.statusText}`);
+                    throw new Error("Failed to fetch mods.");
                 }
 
                 var mods = await response.json();
 
                 if (mods.length === 0) {
-                    modListContainer.innerHTML = '<div class="alert alert-info">No mods available.</div>';
+                    modListContainer.innerHTML = '<ul class="list-group"><li class="list-group-item">No mods available.</li></ul>';
                     return;
                 }
 
-                var row = document.createElement('div');
-                row.className = 'row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4';
+                var listGroup = document.createElement('ul');
+                listGroup.className = 'list-group';
 
                 mods.forEach(modData => {
-                    var mod = modData.modinfo; 
+                    var mod = modData.modinfo;
 
-                    var col = document.createElement('div');
-                    col.className = 'col';
+                    var listItem = document.createElement('li');
+                    listItem.className = 'list-group-item';
 
-                    col.innerHTML = `
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">${mod.name} <span class="badge bg-secondary">v${mod.version}</span></h5>
-                            <p class="card-text">${mod.shortDescription}</p>
-                        </div>
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item"><strong>Author:</strong> ${mod.author}</li>
-                            <li class="list-group-item"><strong>Tags:</strong> ${mod.tags.join(', ')}</li>
-                        </ul>
-                    </div>
-                `;
+                    listItem.innerHTML = `
+                        <h5>${mod.name} <span class="badge bg-secondary">v${mod.version}</span></h5>
+                        <p>${mod.shortDescription}</p>
+                        <small><strong>Author:</strong> ${mod.author}</small>
+                    `;
 
-                    row.appendChild(col);
+                    listGroup.appendChild(listItem);
                 });
 
-                modListContainer.appendChild(row);
+                modListContainer.appendChild(listGroup);
             } catch (error) {
-                console.error('Error fetching mods:', error);
-                modListContainer.innerHTML = '<div class="alert alert-danger">Failed to load mods. Please try again later.</div>';
+                modListContainer.innerHTML = '<div class="alert alert-danger">Unable to load mods.</div>';
             }
-
         });
+
 
 
     </script>
