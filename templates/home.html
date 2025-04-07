@@ -77,6 +77,7 @@
 					await loadModInfo(firstModId);
 				}
 			} catch (error) {
+				console.error(`Failed to load mods: ${error}`);
 				modListContainer.innerHTML = '<div class="alert alert-danger">Unable to load mods.</div>';
 			}
 
