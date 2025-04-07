@@ -187,7 +187,7 @@
 				var readmeFile = await content.file(readmePath);
 				var description = await readmeFile.async("text");
 
-				// Load the modinfo and sanitize it
+				// Load the modinfo
 				var modInfoPath = fileNames.find((path) => path.endsWith("modinfo.json"));
 				if (!modInfoPath) {
 					alert("No modinfo.json found in the ZIP file!");
@@ -196,11 +196,6 @@
 				var modInfoFile = await content.file(modInfoPath);
 				var modInfoContent = await modInfoFile.async("text");
 				var modInfo = await JSON.parse(modInfoContent);
-				Object.keys(modInfo).forEach((key) => {
-					if (typeof modInfo[key] === "string") {
-						modInfo[key] = sanitizeHtml(modInfo[key]);
-					}
-				});
 
 				// Add extra information to modinfo to create moddata
 				var modData = {
