@@ -182,7 +182,7 @@
 					console.log("Fetched Latest Info:", latestInfo);
 					console.log("Fetched Versions:", versions);
 
-					renderModInfo(modID, latestInfo.mod.modinfo || {}, versions);
+					renderModInfo(modID, latestInfo.mod.modData || {}, versions);
 				} catch (error) {
 					console.error("Error loading mod info:", error);
 					modDisplayContainer.innerHTML = '<div class="alert alert-danger">Failed to load mod details.</div>';
