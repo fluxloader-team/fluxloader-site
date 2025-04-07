@@ -63,29 +63,39 @@ module.exports = {
 
 				var content = await JSZip.loadAsync(zipBuffer);
 				var fileNames = Object.keys(content.files);
+
+				// Load the README.md file
+				var readmePath = fileNames.find((path) => path.endsWith("README.md"));
+				var readmeFile = await content.file(readmePath);
+				var description = await readmeFile.async("text");
+
+				// Load the modinfo and sanitize it
 				var modInfoPath = fileNames.find((path) => path.endsWith("modinfo.json"));
 				var modInfoFile = await content.file(modInfoPath);
 				var modInfoContent = await modInfoFile.async("text");
 				var modinfo = await JSON.parse(modInfoContent);
-				var readmePath = fileNames.find((path) => path.endsWith("README.md"));
-				var readmeFile = await content.file(readmePath);
-				var rawDescription = await readmeFile.async("text");
-				var compressedDescription = (await compress(Buffer.from(rawDescription), 10)).toString("base64");
 				Object.keys(modinfo).forEach((key) => {
 					if (typeof modinfo[key] === "string") {
 						modinfo[key] = sanitizeHtml(modinfo[key]);
 					}
 				});
+
+				// Add extra information to modinfo to create moddata
+				var moddata = {
+					...modinfo,
+					description: description,
+				};
+
 				var modEntry = {};
 				modEntry = await modsCollection.findOne({ modID: modID, "Author.discordID": discordInfo.id });
 				if (!modEntry) {
-					modEntry = await modsCollection.findOne({ "modinfo.name": modinfo.name, "Author.discordID": discordInfo.id });
+					modEntry = await modsCollection.findOne({ "moddata.name": moddata.name, "Author.discordID": discordInfo.id });
 				}
 				modID = modEntry ? modEntry.modID : modID;
 				if (!modEntry) {
 					modEntry = {
 						modID: modID,
-						modinfo: modinfo,
+						moddata: moddata,
 						Author: {
 							discordID: discordInfo.id,
 							discordUsername: discordInfo.username,
@@ -96,8 +106,7 @@ module.exports = {
 				var modVersionEntry = {
 					modID: modEntry.modID,
 					modfile: compressedZipBuffer.toString("base64"),
-					modinfo: modinfo,
-					description: compressedDescription,
+					moddata: moddata,
 					uploadTime: new Date(),
 					downloadCount: 0,
 				};

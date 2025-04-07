@@ -1,48 +1,39 @@
 <div class="pagecontainer">
-    <div class="headerContainer" id="headerContainer">
-        <div class="btn btn-secondary headerButton" style="margin-left: 15px;">Mod List</div>
-        <div class="input-group mb-3" style="width: 50%; padding-top: 15px;">
-            <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
-                    data-bs-toggle="dropdown" aria-expanded="false">
-                <span class="visually-hidden">Toggle Dropdown</span>
-            </button>
-            <div class="dropdown-menu">
-                <h3 class="dropdown-item">Search Help</h3>
-                <p class="dropdown-item">Click to add to search</p>
-                <p class="dropdown-item">Tag: <input class="form-control form-control-sm" type="text"
-                                                     placeholder="Tag name"></p>
-                <p class="dropdown-item">Author: <input class="form-control form-control-sm" type="text"
-                                                        placeholder="Authors name"></p>
-            </div>
-            <input type="text" class="form-control">
-        </div>
-        <a href="/auth/discord" class="btn btn-primary" style="margin-right: 15px;" id="discordLogin">
-            <img src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg"
-                 alt="Discord Logo"
-                 style="width: 100px; height: 20px; margin-right: 5px;">
-        </a>
-    </div>
-    <div class="modDisplayHolder">
-        <div class="modList">
+	<div class="headerContainer" id="headerContainer">
+		<div class="btn btn-secondary headerButton" style="margin-left: 15px">Mod List</div>
+		<div class="input-group mb-3" style="width: 50%; padding-top: 15px">
+			<button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+				<span class="visually-hidden">Toggle Dropdown</span>
+			</button>
+			<div class="dropdown-menu">
+				<h3 class="dropdown-item">Search Help</h3>
+				<p class="dropdown-item">Click to add to search</p>
+				<p class="dropdown-item">Tag: <input class="form-control form-control-sm" type="text" placeholder="Tag name" /></p>
+				<p class="dropdown-item">Author: <input class="form-control form-control-sm" type="text" placeholder="Authors name" /></p>
+			</div>
+			<input type="text" class="form-control" />
+		</div>
+		<a href="/auth/discord" class="btn btn-primary" style="margin-right: 15px" id="discordLogin">
+			<img src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg" alt="Discord Logo" style="width: 100px; height: 20px; margin-right: 5px" />
+		</a>
+	</div>
+	<div class="modDisplayHolder">
+		<div class="modList"></div>
+		<div class="modDisplay"></div>
+	</div>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+	<script>
+		var discordUser = JSON.parse(localStorage.getItem("discordUser"));
+		if (discordUser) {
+			console.log("Discord User:", discordUser);
+			var headerContainer = document.getElementById("headerContainer");
+			headerContainer.removeChild(document.getElementById("discordLogin"));
 
-        </div>
-        <div class="modDisplay">
+			var discordDropdown = document.createElement("div");
+			discordDropdown.className = "dropdown";
 
-        </div>
-    </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
-    <script>
-        var discordUser = JSON.parse(localStorage.getItem('discordUser'));
-        if (discordUser) {
-            console.log('Discord User:', discordUser);
-            var headerContainer = document.getElementById('headerContainer');
-            headerContainer.removeChild(document.getElementById('discordLogin'));
-
-            var discordDropdown = document.createElement('div');
-            discordDropdown.className = 'dropdown';
-
-            discordDropdown.innerHTML = `
+			discordDropdown.innerHTML = `
                 <button class="btn dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                     <img src="https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png" alt="${discordUser.global_name}" class="rounded-circle" style="width: 30px; height: 30px; margin-right: 5px;">
                     ${discordUser.global_name}
@@ -54,50 +45,47 @@
                 </ul>
             `;
 
-            headerContainer.appendChild(discordDropdown);
+			headerContainer.appendChild(discordDropdown);
 
-            var logoutButton = document.getElementById('logoutButton');
-            logoutButton.addEventListener('click', function () {
-                localStorage.removeItem('discordUser');
-                window.location.reload();
-            });
-        }
-        document.addEventListener("DOMContentLoaded", async () => {
-            var modListContainer = document.querySelector(".modList");
-            var modDisplayContainer = document.querySelector(".modDisplay");
-            var mods = [];
+			var logoutButton = document.getElementById("logoutButton");
+			logoutButton.addEventListener("click", function () {
+				localStorage.removeItem("discordUser");
+				window.location.reload();
+			});
+		}
+		document.addEventListener("DOMContentLoaded", async () => {
+			var modListContainer = document.querySelector(".modList");
+			var modDisplayContainer = document.querySelector(".modDisplay");
+			var mods = [];
 
-            try {
-                var response = await fetch("/api/mods");
-                if (!response.ok) {
-                    throw new Error("Failed to fetch mods.");
-                }
+			try {
+				var response = await fetch("/api/mods");
+				if (!response.ok) {
+					throw new Error("Failed to fetch mods.");
+				}
 
-                mods = await response.json();
+				mods = await response.json();
 
-                if (mods.length === 0) {
-                    modListContainer.innerHTML =
-                        '<div class="alert alert-info">No mods available.</div>';
-                    return;
-                }
+				if (mods.length === 0) {
+					modListContainer.innerHTML = '<div class="alert alert-info">No mods available.</div>';
+					return;
+				}
 
-                renderTable(mods);
-                if (mods[0]) {
-                    const firstModId = mods[0].modID;
-                    await loadModInfo(firstModId);
-                }
+				renderTable(mods);
+				if (mods[0]) {
+					const firstModId = mods[0].modID;
+					await loadModInfo(firstModId);
+				}
+			} catch (error) {
+				modListContainer.innerHTML = '<div class="alert alert-danger">Unable to load mods.</div>';
+			}
 
-            } catch (error) {
-                modListContainer.innerHTML =
-                    '<div class="alert alert-danger">Unable to load mods.</div>';
-            }
+			function renderTable(mods) {
+				modListContainer.innerHTML = "";
+				var headerRow = document.createElement("div");
+				headerRow.className = "row border-bottom py-2 fw-bold text-center";
 
-            function renderTable(mods) {
-                modListContainer.innerHTML = "";
-                var headerRow = document.createElement("div");
-                headerRow.className = "row border-bottom py-2 fw-bold text-center";
-
-                headerRow.innerHTML = `
+				headerRow.innerHTML = `
         <div class="col-3 sortable" data-sort="name" data-order="asc">
             Name <span class="sort-indicator">▲▼</span>
         </div>
@@ -109,138 +97,132 @@
         </div>
         <div class="col-4">Tags</div>
     `;
-                modListContainer.appendChild(headerRow);
+				modListContainer.appendChild(headerRow);
 
-                mods.forEach(function (modData) {
-                    var mod = modData.modinfo;
+				mods.forEach(function (modData) {
+					var mod = modData.modinfo;
 
-                    if (!modData.modID) {
-                        console.error("Mod data does not contain modID:", modData);
-                        return;
-                    }
+					if (!modData.modID) {
+						console.error("Mod data does not contain modID:", modData);
+						return;
+					}
 
-                    var listItem = document.createElement("div");
-                    listItem.className = "row border-bottom py-2 text-center mod-item";
-                    listItem.dataset.modid = modData.modID;
+					var listItem = document.createElement("div");
+					listItem.className = "row border-bottom py-2 text-center mod-item";
+					listItem.dataset.modid = modData.modID;
 
-                    listItem.innerHTML = `
+					listItem.innerHTML = `
             <div class="col-3">${mod.name}</div>
             <div class="col-2">${mod.version}</div>
             <div class="col-3">${mod.author}</div>
             <div class="col-4 text-muted">${mod.tags.join(", ")}</div>
         `;
-                    listItem.addEventListener("click", function () {
-                        loadModInfo(modData.modID);
-                    });
+					listItem.addEventListener("click", function () {
+						loadModInfo(modData.modID);
+					});
 
-                    modListContainer.appendChild(listItem);
-                });
+					modListContainer.appendChild(listItem);
+				});
 
-                setSortingEvents();
-            }
+				setSortingEvents();
+			}
 
-            function setSortingEvents() {
-                var headers = document.querySelectorAll(".sortable");
+			function setSortingEvents() {
+				var headers = document.querySelectorAll(".sortable");
 
-                headers.forEach(function (header) {
-                    header.onclick = function () {
-                        var sortKey = header.dataset.sort;
-                        var currentOrder = header.dataset.order;
-                        var newOrder = currentOrder === "asc" ? "desc" : "asc";
-                        header.dataset.order = newOrder;
+				headers.forEach(function (header) {
+					header.onclick = function () {
+						var sortKey = header.dataset.sort;
+						var currentOrder = header.dataset.order;
+						var newOrder = currentOrder === "asc" ? "desc" : "asc";
+						header.dataset.order = newOrder;
 
-                        mods.sort(function (a, b) {
-                            var aValue = a.modinfo[sortKey].toString().toLowerCase();
-                            var bValue = b.modinfo[sortKey].toString().toLowerCase();
+						mods.sort(function (a, b) {
+							var aValue = a.modinfo[sortKey].toString().toLowerCase();
+							var bValue = b.modinfo[sortKey].toString().toLowerCase();
 
-                            if (aValue < bValue) return newOrder === "asc" ? -1 : 1;
-                            if (aValue > bValue) return newOrder === "asc" ? 1 : -1;
-                            return 0;
-                        });
+							if (aValue < bValue) return newOrder === "asc" ? -1 : 1;
+							if (aValue > bValue) return newOrder === "asc" ? 1 : -1;
+							return 0;
+						});
 
-                        document.querySelectorAll(".sort-indicator").forEach(function (el) {
-                            el.innerHTML = "▲▼";
-                        });
-                        header.querySelector(".sort-indicator").innerHTML =
-                            newOrder === "asc" ? "▲" : "▼";
+						document.querySelectorAll(".sort-indicator").forEach(function (el) {
+							el.innerHTML = "▲▼";
+						});
+						header.querySelector(".sort-indicator").innerHTML = newOrder === "asc" ? "▲" : "▼";
 
-                        renderTable(mods);
-                    };
-                });
-            }
+						renderTable(mods);
+					};
+				});
+			}
 
-            async function loadModInfo(modID) {
-                try {
-                    console.log("Fetching details for mod ID:", modID);
+			async function loadModInfo(modID) {
+				try {
+					console.log("Fetching details for mod ID:", modID);
 
-                    var latestInfoUrl = `https://sandustrymods.shadow.computer/api/mods?modid=${modID}&option=info`;
-                    var versionsUrl = `https://sandustrymods.shadow.computer/api/mods?modid=${modID}&option=versions`;
+					var latestInfoUrl = `https://sandustrymods.shadow.computer/api/mods?modid=${modID}&option=info`;
+					var versionsUrl = `https://sandustrymods.shadow.computer/api/mods?modid=${modID}&option=versions`;
 
-                    var latestInfoResponse = await fetch(latestInfoUrl);
-                    var versionsResponse = await fetch(versionsUrl);
+					var latestInfoResponse = await fetch(latestInfoUrl);
+					var versionsResponse = await fetch(versionsUrl);
 
-                    if (!latestInfoResponse.ok) {
-                        console.error("Failed to fetch latest mod info:", await latestInfoResponse.text());
-                        throw new Error("Unable to fetch latest mod info.");
-                    }
+					if (!latestInfoResponse.ok) {
+						console.error("Failed to fetch latest mod info:", await latestInfoResponse.text());
+						throw new Error("Unable to fetch latest mod info.");
+					}
 
-                    if (!versionsResponse.ok) {
-                        console.error("Failed to fetch versions:", await versionsResponse.text());
-                        throw new Error("Unable to fetch version history.");
-                    }
+					if (!versionsResponse.ok) {
+						console.error("Failed to fetch versions:", await versionsResponse.text());
+						throw new Error("Unable to fetch version history.");
+					}
 
-                    var latestInfo = await latestInfoResponse.json();
-                    var versions = await versionsResponse.json();
+					var latestInfo = await latestInfoResponse.json();
+					var versions = await versionsResponse.json();
 
-                    console.log("Fetched Latest Info:", latestInfo);
-                    console.log("Fetched Versions:", versions);
+					console.log("Fetched Latest Info:", latestInfo);
+					console.log("Fetched Versions:", versions);
 
-                    renderModInfo(
-                        modID,
-                        latestInfo.mod.modinfo || {},
-                        versions
-                    );
-                } catch (error) {
-                    console.error("Error loading mod info:", error);
-                    modDisplayContainer.innerHTML =
-                        '<div class="alert alert-danger">Failed to load mod details.</div>';
-                }
-            }
+					renderModInfo(modID, latestInfo.mod.modinfo || {}, versions);
+				} catch (error) {
+					console.error("Error loading mod info:", error);
+					modDisplayContainer.innerHTML = '<div class="alert alert-danger">Failed to load mod details.</div>';
+				}
+			}
 
-            function renderModInfo(mod, modInfo, versionsData) {
-                var modDisplayContainer = document.querySelector(".modDisplay");
-                var versions = versionsData.versions || [];
+			function renderModInfo(mod, modInfo, versionsData) {
+				var modDisplayContainer = document.querySelector(".modDisplay");
+				var versions = versionsData.versions || [];
 
-                function handleVersionChange(event) {
-                    var selectedModID = event.target.value;
-                    var selectedVersion = versions.find(v => v.modID === selectedModID)?.modinfo.version;
+				function handleVersionChange(event) {
+					var selectedModID = event.target.value;
+					var selectedVersion = versions.find((v) => v.modID === selectedModID)?.modinfo.version;
 
-                    if (selectedVersion) {
-                        var fetchUrl = `https://sandustrymods.shadow.computer/api/mods?modid=${mod}&option=info&version=${selectedVersion}`;
+					if (selectedVersion) {
+						var fetchUrl = `https://sandustrymods.shadow.computer/api/mods?modid=${mod}&option=info&version=${selectedVersion}`;
 
-                        fetch(fetchUrl)
-                            .then(response => {
-                                if (!response.ok) {
-                                    throw new Error("Failed to fetch mod info for the selected version.");
-                                }
-                                return response.json();
-                            })
-                            .then(data => {
-                                console.log(data)
-                                renderModInfo(data.mod.modID, data.mod.modinfo, versionsData);
-                            })
-                            .catch(err => {
-                                console.error(err);
-                                alert("Failed to load the selected version.");
-                            });
-                    }
-                }
+						fetch(fetchUrl)
+							.then((response) => {
+								if (!response.ok) {
+									throw new Error("Failed to fetch mod info for the selected version.");
+								}
+								return response.json();
+							})
+							.then((data) => {
+								console.log(data);
+								renderModInfo(data.mod.modID, data.mod.modinfo, versionsData);
+							})
+							.catch((err) => {
+								console.error(err);
+								alert("Failed to load the selected version.");
+							});
+					}
+				}
 
-                modDisplayContainer.innerHTML = `
+				modDisplayContainer.innerHTML = `
     <div class="card-body">
         <h2 class="mb-3">
             ${modInfo.name}
-            ${modInfo.tags.map(tag => `<h6><span class="badge bg-secondary ms-2">${tag}</span></h6>`).join("")}
+            ${modInfo.tags.map((tag) => `<h6><span class="badge bg-secondary ms-2">${tag}</span></h6>`).join("")}
         </h2>
 
         <h5 class="mt-4">Short Description</h5>
@@ -273,11 +255,9 @@
                 <tr>
                     <th scope="row">Dependencies</th>
                     <td>
-                        ${
-                    Object.keys(modInfo.dependencies)
-                        .map(dep => `<span class="badge bg-info">${dep}: ${modInfo.dependencies[dep]}</span>`)
-                        .join(" ")
-                }
+                        ${Object.keys(modInfo.dependencies)
+							.map((dep) => `<span class="badge bg-info">${dep}: ${modInfo.dependencies[dep]}</span>`)
+							.join(" ")}
                     </td>
                 </tr>
             </tbody>
@@ -297,58 +277,55 @@
             </button>
 
             <select id="versionSelector" class="form-select" style="width: auto;">
-                ${
-                    versions.map(versionInfo =>
-                        `<option value="${versionInfo.modID}" ${
-                            versionInfo.modID === mod.modID ? "selected" : ""}>
+                ${versions
+					.map(
+						(versionInfo) =>
+							`<option value="${versionInfo.modID}" ${versionInfo.modID === mod.modID ? "selected" : ""}>
                             ${versionInfo.modinfo.version}
                         </option>`
-                    ).join("")
-                }
+					)
+					.join("")}
             </select>
         </div>
     </div>
     `;
-                var versionSelector = document.getElementById("versionSelector");
-                versionSelector.addEventListener("change", handleVersionChange);
-            }
-            async function loadSpecificVersion(modId) {
-                var versionSelect = document.getElementById("versionSelect");
-                var selectedVersion = versionSelect.value;
+				var versionSelector = document.getElementById("versionSelector");
+				versionSelector.addEventListener("change", handleVersionChange);
+			}
+			async function loadSpecificVersion(modId) {
+				var versionSelect = document.getElementById("versionSelect");
+				var selectedVersion = versionSelect.value;
 
-                try {
-                    var response = await fetch(
-                        `https://sandustrymods.shadow.computer/api/mods?modid=${modId}&option=info&version=${selectedVersion}`
-                    );
+				try {
+					var response = await fetch(`https://sandustrymods.shadow.computer/api/mods?modid=${modId}&option=info&version=${selectedVersion}`);
 
-                    if (!response.ok) {
-                        throw new Error("Failed to fetch version-specific info.");
-                    }
+					if (!response.ok) {
+						throw new Error("Failed to fetch version-specific info.");
+					}
 
-                    var modInfo = await response.json();
-                    renderVersionInfo(modInfo);
-                } catch (error) {
-                    modDisplayContainer.innerHTML =
-                        '<div class="alert alert-danger">Failed to load mod details for selected version.</div>';
-                }
-            }
+					var modInfo = await response.json();
+					renderVersionInfo(modInfo);
+				} catch (error) {
+					modDisplayContainer.innerHTML = '<div class="alert alert-danger">Failed to load mod details for selected version.</div>';
+				}
+			}
 
-            function renderVersionInfo(modInfo) {
-                var versionDetails = document.createElement("div");
-                versionDetails.className = "mt-3";
-                versionDetails.innerHTML = `
+			function renderVersionInfo(modInfo) {
+				var versionDetails = document.createElement("div");
+				versionDetails.className = "mt-3";
+				versionDetails.innerHTML = `
                 <div>
                     <strong>Version:</strong> ${modInfo.version}<br>
                     <strong>Changelog:</strong><br>${modInfo.description}
                 </div>
             `;
 
-                modDisplayContainer.appendChild(versionDetails);
-            }
+				modDisplayContainer.appendChild(versionDetails);
+			}
 
-            window.returnModId = function (modId) {
-                console.log("Mod ID:", modId);
-            };
-        });
-    </script>
+			window.returnModId = function (modId) {
+				console.log("Mod ID:", modId);
+			};
+		});
+	</script>
 </div>
