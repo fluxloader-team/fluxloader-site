@@ -66,8 +66,11 @@ module.exports = {
 
 				// Load the README.md file
 				var readmePath = fileNames.find((path) => path.endsWith("README.md"));
-				var readmeFile = await content.file(readmePath);
-				var description = await readmeFile.async("text");
+				var description = "";
+				if (readmePath) {
+					var readmeFile = await content.file(readmePath);
+					description = await readmeFile.async("text");
+				}
 
 				// Load the modinfo and sanitize it
 				var modInfoPath = fileNames.find((path) => path.endsWith("modinfo.json"));
