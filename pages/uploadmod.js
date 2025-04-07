@@ -73,29 +73,29 @@ module.exports = {
 				var modInfoPath = fileNames.find((path) => path.endsWith("modinfo.json"));
 				var modInfoFile = await content.file(modInfoPath);
 				var modInfoContent = await modInfoFile.async("text");
-				var modinfo = await JSON.parse(modInfoContent);
-				Object.keys(modinfo).forEach((key) => {
-					if (typeof modinfo[key] === "string") {
-						modinfo[key] = sanitizeHtml(modinfo[key]);
+				var modInfo = await JSON.parse(modInfoContent);
+				Object.keys(modInfo).forEach((key) => {
+					if (typeof modInfo[key] === "string") {
+						modInfo[key] = sanitizeHtml(modInfo[key]);
 					}
 				});
 
 				// Add extra information to modinfo to create moddata
-				var moddata = {
-					...modinfo,
+				var modData = {
+					...modInfo,
 					description: description,
 				};
 
 				var modEntry = {};
 				modEntry = await modsCollection.findOne({ modID: modID, "Author.discordID": discordInfo.id });
 				if (!modEntry) {
-					modEntry = await modsCollection.findOne({ "moddata.name": moddata.name, "Author.discordID": discordInfo.id });
+					modEntry = await modsCollection.findOne({ "modData.name": modData.name, "Author.discordID": discordInfo.id });
 				}
 				modID = modEntry ? modEntry.modID : modID;
 				if (!modEntry) {
 					modEntry = {
 						modID: modID,
-						moddata: moddata,
+						modData: modData,
 						Author: {
 							discordID: discordInfo.id,
 							discordUsername: discordInfo.username,
@@ -106,7 +106,7 @@ module.exports = {
 				var modVersionEntry = {
 					modID: modEntry.modID,
 					modfile: compressedZipBuffer.toString("base64"),
-					moddata: moddata,
+					modData: modData,
 					uploadTime: new Date(),
 					downloadCount: 0,
 				};

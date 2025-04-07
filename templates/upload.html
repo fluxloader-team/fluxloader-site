@@ -14,7 +14,7 @@
 		</div>
 		<div class="mb-3" id="ModInfo">
 			<h3>Mod Information</h3>
-			<pre id="modInfoContent" style="white-space: pre-wrap"></pre>
+			<pre id="modDataContent" style="white-space: pre-wrap"></pre>
 		</div>
 		<button type="submit" class="btn btn-primary" onclick="handleUpload()">Upload Mod</button>
 	</div>
@@ -98,20 +98,20 @@
 			}
 		}
 
-		function displayModInfo(modInfo) {
+		function displayModData(modData) {
 			var container = document.getElementById("ModInfo");
 			container.innerHTML = `
     <div class="card">
       <div class="card-header">
-        <h4>${modInfo.name} <small class="text-muted">v${modInfo.version}</small></h4>
-        <span class="badge bg-primary" style="margin-right: 10px;">Author: ${modInfo.author}</span>
-        ${modInfo.tags.map((tag) => `<span class="badge bg-secondary">${tag}</span>`).join(" ")}
+        <h4>${modData.name} <small class="text-muted">v${modData.version}</small></h4>
+        <span class="badge bg-primary" style="margin-right: 10px;">Author: ${modData.author}</span>
+        ${modData.tags.map((tag) => `<span class="badge bg-secondary">${tag}</span>`).join(" ")}
       </div>
       <div class="card-body">
         <h5>Short Description</h5>
-        <p class="text-muted">${modInfo.shortDescription}</p>
+        <p class="text-muted">${modData.shortDescription}</p>
         <h5>Description</h5>
-        <div>${modInfo.description ? marked.parse(modInfo.description) : "<em>No description provided.</em>"}</div>
+        <div>${modData.description ? marked.parse(modData.description) : "<em>No description provided.</em>"}</div>
 
         <hr>
 
@@ -120,26 +120,26 @@
           <tbody>
             <tr>
               <th scope="row">Modloader Version</th>
-              <td>${modInfo.modloaderVersion || "N/A"}</td>
+              <td>${modData.modloaderVersion || "N/A"}</td>
             </tr>
             <tr>
               <th scope="row">Electron Entrypoint</th>
-              <td>${modInfo.electronEntrypoint || "N/A"}</td>
+              <td>${modData.electronEntrypoint || "N/A"}</td>
             </tr>
             <tr>
               <th scope="row">Browser Entrypoint</th>
-              <td>${modInfo.browserEntrypoint || "N/A"}</td>
+              <td>${modData.browserEntrypoint || "N/A"}</td>
             </tr>
             <tr>
               <th scope="row">Worker Entrypoint</th>
-              <td>${modInfo.workerEntrypoint || "N/A"}</td>
+              <td>${modData.workerEntrypoint || "N/A"}</td>
             </tr>
             <tr>
               <th scope="row">Dependencies</th>
               <td>
                 ${
-					modInfo.dependencies && Object.keys(modInfo.dependencies).length
-						? Object.entries(modInfo.dependencies)
+					modData.dependencies && Object.keys(modData.dependencies).length
+						? Object.entries(modData.dependencies)
 								.map(([key, value]) => `<span class="badge bg-info">${key}: ${value}</span>`)
 								.join(" ")
 						: "<em>No dependencies.</em>"
@@ -152,7 +152,7 @@
         <hr>
 
         <h5>Default Configuration</h5>
-        <pre class="p-3 rounded">${modInfo.defaultConfig ? JSON.stringify(modInfo.defaultConfig, null, 2) : "No default config available."}</pre>
+        <pre class="p-3 rounded">${modData.defaultConfig ? JSON.stringify(modData.defaultConfig, null, 2) : "No default config available."}</pre>
       </div>
     </div>
   `;
@@ -177,17 +177,38 @@
 				var content = await zip.loadAsync(zipFileContent);
 
 				var fileNames = Object.keys(content.files);
-				var modInfoPath = fileNames.find((path) => path.endsWith("modinfo.json"));
 
-				if (!modInfoPath) {
+				// Load the README.md file
+				var readmePath = fileNames.find((path) => path.endsWith("README.md"));
+				if (!readmeFile) {
+					alert("No README.md found in the ZIP file!");
+					return;
+				}
+				var readmeFile = await content.file(readmePath);
+				var description = await readmeFile.async("text");
+
+				// Load the modinfo and sanitize it
+				var modInfoPath = fileNames.find((path) => path.endsWith("modinfo.json"));
+				if (!modInfo) {
 					alert("No modinfo.json found in the ZIP file!");
 					return;
 				}
-
-				var modInfoFile = content.file(modInfoPath);
+				var modInfoFile = await content.file(modInfoPath);
 				var modInfoContent = await modInfoFile.async("text");
-				var modInfo = JSON.parse(modInfoContent);
-				displayModInfo(modInfo);
+				var modInfo = await JSON.parse(modInfoContent);
+				Object.keys(modInfo).forEach((key) => {
+					if (typeof modInfo[key] === "string") {
+						modInfo[key] = sanitizeHtml(modInfo[key]);
+					}
+				});
+
+				// Add extra information to modinfo to create moddata
+				var modData = {
+					...modInfo,
+					description: description,
+				};
+
+				displayModData(modData);
 			} catch (error) {
 				console.error("Error processing the ZIP file:", error);
 				alert("Could not process the ZIP file.");
