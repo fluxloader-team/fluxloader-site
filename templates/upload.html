@@ -180,7 +180,7 @@
 
 				// Load the README.md file
 				var readmePath = fileNames.find((path) => path.endsWith("README.md"));
-				if (!readmeFile) {
+				if (!readmePath) {
 					alert("No README.md found in the ZIP file!");
 					return;
 				}
@@ -189,7 +189,7 @@
 
 				// Load the modinfo and sanitize it
 				var modInfoPath = fileNames.find((path) => path.endsWith("modinfo.json"));
-				if (!modInfo) {
+				if (!modInfoPath) {
 					alert("No modinfo.json found in the ZIP file!");
 					return;
 				}
