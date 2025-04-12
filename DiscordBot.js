@@ -21,7 +21,26 @@ globalThis.BotEvents = {
         run: function (event){}
     }
 }
+function computeRepoHash(directory = './') {
+    var folderHash = crypto.createHash('sha256');
 
+    function hashDirectory(dir) {
+        var files = fs.readdirSync(dir);
+        files.forEach(file => {
+            var fullPath = path.join(dir, file);
+            var fileStat = fs.statSync(fullPath);
+
+            if (fileStat.isDirectory()) {
+                hashDirectory(fullPath);
+            } else if (fileStat.isFile()) {
+                folderHash.update(fs.readFileSync(fullPath));
+            }
+        });
+    }
+
+    hashDirectory(directory);
+    return folderHash.digest('hex');
+}
 function reloadEvents(){
     log.log("Reloading events...")
     globalThis.BotEvents = {}
@@ -85,11 +104,22 @@ module.exports = {
         log.log("Starting bot...")
         reloadEvents();
         reloadCommands();
+        var lastRepoHash = computeRepoHash();
         globalThis.Discord.client.login(globalThis.Config.discord.token)
         log.log("Bot started")
         setInterval(()=>{
-            reloadEvents()
-            reloadCommands()
+            const newRepoHash = computeRepoHash();
+            log.log(newRepoHash)
+            if (newRepoHash !== lastRepoHash) {
+                log.log('Changes detected in the repository. Reloading templates and pages...');
+                lastRepoHash = newRepoHash;
+
+                reloadEvents()
+                reloadCommands()
+            } else {
+                log.log('No changes detected.');
+            }
+
         }, 10000)
     }
 }
