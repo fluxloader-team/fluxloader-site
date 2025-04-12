@@ -15,9 +15,13 @@ var defaultConfig = {
         clientId: 'CLIENT_ID',
         clientSecret: 'CLIENT_SECRET',
         redirectUri: 'https://example.com/auth/discord/callback',
+        token: 'TOKEN'
     },
     mongodb:{
         uri: 'mongodb://localhost:27017/somejoinstring',
+    },
+    git:{
+        pull: true,
     }
 };
 
@@ -85,14 +89,28 @@ function computeRepoHash(directory = './') {
     return folderHash.digest('hex');
 }
 
-function performGitPull() {
-    exec('git pull', (error, stdout, stderr) => {
-        if (error) {
-            log.log(`Error running git pull: ${error}`);
-            return;
-        }
-        log.log(stdout);
+function performUpdate() {
+    if(globalThis.Config.git.pull){
+        exec('git pull', (error, stdout, stderr) => {
+            if (error) {
+                log.log(`Error running git pull: ${error}`);
+                return;
+            }
+            log.log(stdout);
 
+            const newRepoHash = computeRepoHash();
+            log.log(newRepoHash)
+            if (newRepoHash !== lastRepoHash) {
+                log.log('Changes detected in the repository. Reloading templates and pages...');
+                lastRepoHash = newRepoHash;
+
+                LoadTemplates();
+                LoadPages();
+            } else {
+                log.log('No changes detected.');
+            }
+        });
+    }else{
         const newRepoHash = computeRepoHash();
         log.log(newRepoHash)
         if (newRepoHash !== lastRepoHash) {
@@ -104,7 +122,7 @@ function performGitPull() {
         } else {
             log.log('No changes detected.');
         }
-    });
+    }
 }
 
 
@@ -124,5 +142,5 @@ var WebRequestHandler = function (req, res){
         res.end("404")
     }
 }
-setInterval(performGitPull, 10000);
+setInterval(performUpdate, 10000);
 var WebServer = http.createServer(WebRequestHandler).listen(20221)
