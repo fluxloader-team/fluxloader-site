@@ -1,4 +1,4 @@
-const { Client, Events, GatewayIntentBits } = require('discord.js');
+const { Client, Events, GatewayIntentBits,REST, Routes} = require('discord.js');
 var colors = require('colors');
 var http = require("http")
 var os = require("os")
@@ -37,6 +37,39 @@ function reloadEvents(){
     })
     log.log("Events registered")
 }
+function reloadCommands() {
+    log.log("Reloading commands...");
+
+    globalThis.BotCommands = new Map();
+    const commandsPath = "./Discord/Commands";
+
+    fs.readdirSync(commandsPath).forEach(file => {
+        if (require.resolve(`${commandsPath}/${file}`)) {
+            delete require.cache[require.resolve(`${commandsPath}/${file}`)];
+        }
+        const command = require(`${commandsPath}/${file}`);
+        if (command.data && command.execute) {
+            BotCommands.set(command.data.name, command);
+        }
+    });
+    log.log("Commands reloaded successfully.");
+}
+
+globalThis.registerCommands = async function() {
+    log.log("Registering application commands...");
+    const commands = [...BotCommands.values()].map(cmd => cmd.data.toJSON());
+
+    const rest = new REST({ version: '10' }).setToken(globalThis.Config.discord.token);
+    try {
+        await rest.put(
+            Routes.applicationCommands(globalThis.Discord.client.user.id),
+            { body: commands }
+        );
+        log.log("Commands registered to Discord.");
+    } catch (error) {
+        log.log(`Error registering commands: ${error}`);
+    }
+}
 
 module.exports = {
     init: function () {
@@ -44,13 +77,19 @@ module.exports = {
         globalThis.Discord = {
             client: new Client({ intents: [GatewayIntentBits.Guilds] })
         }
+        globalThis.BotCommands = new Map();
+
 
     },
     start:function (){
         log.log("Starting bot...")
         reloadEvents();
+        reloadCommands();
         globalThis.Discord.client.login(globalThis.Config.discord.token)
         log.log("Bot started")
-        setInterval(reloadEvents, 10000)
+        setInterval(()=>{
+            reloadEvents()
+            reloadCommands()
+        }, 10000)
     }
 }

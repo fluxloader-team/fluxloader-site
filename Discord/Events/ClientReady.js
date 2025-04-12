@@ -16,7 +16,8 @@ process.on('uncaughtException', function (err) {
 });
 
 module.exports = {
-    run: function (readyClient) {
+    run: async function (readyClient) {
+        await registerCommands();
         log.log("Client ready!");
     }
 }
