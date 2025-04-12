@@ -29,10 +29,7 @@ function reloadEvents(){
         if(require.resolve("./Discord/Events/"+file)){
             delete require.cache[require.resolve("./Discord/Events/"+file)]
         }
-        var temprequire = require("./Discord/Events/"+file)
-        temprequire.paths.forEach(path => {
-            BotEvents[path] = temprequire;
-        })
+        BotEvents[file.split(".")[0]]= require("./Discord/Events/"+file)
     })
     log.log("Events loaded")
     Object.keys(BotEvents).forEach(key => {
