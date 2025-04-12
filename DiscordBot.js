@@ -111,7 +111,7 @@ module.exports = {
             const newRepoHash = computeRepoHash();
             log.log(newRepoHash)
             if (newRepoHash !== lastRepoHash) {
-                log.log('Changes detected in the repository. Reloading templates and pages...');
+                log.log('Changes detected in the repository. Reloading Events and Commands...');
                 lastRepoHash = newRepoHash;
 
                 reloadEvents()
