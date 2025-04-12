@@ -85,6 +85,9 @@ globalThis.registerCommands = async function() {
             { body: commands }
         );
         log.log("Commands registered to Discord.");
+        var commandslist = await rest.get(Routes.applicationGuildCommands(globalThis.Discord.client.user.id, '1359169971611111736'));
+        log.log('Registered commands:', commandslist);
+
     } catch (error) {
         log.log(`Error registering commands: ${error}`);
     }
