@@ -8,6 +8,7 @@ var fs = require('fs')
 var { exec } = require('child_process');
 var Utils = require('./utils')
 var path = require('path');
+var Discord = require('./DiscordBot.js');
 
 const CONFIG_PATH = path.join(__dirname, 'config.json');
 var defaultConfig = {
@@ -143,4 +144,7 @@ var WebRequestHandler = function (req, res){
     }
 }
 setInterval(performUpdate, 10000);
+
+Discord.init()
+Discord.start()
 var WebServer = http.createServer(WebRequestHandler).listen(20221)

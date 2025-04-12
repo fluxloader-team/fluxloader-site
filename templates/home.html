@@ -161,8 +161,8 @@
 				try {
 					console.log("Fetching details for mod ID:", modID);
 
-					var latestInfoUrl = `https://sandustrymods.shadow.computer/api/mods?modid=${modID}&option=info`;
-					var versionsUrl = `https://sandustrymods.shadow.computer/api/mods?modid=${modID}&option=versions`;
+					var latestInfoUrl = `/api/mods?modid=${modID}&option=info`;
+					var versionsUrl = `/api/mods?modid=${modID}&option=versions`;
 
 					var latestInfoResponse = await fetch(latestInfoUrl);
 					var versionsResponse = await fetch(versionsUrl);
@@ -199,7 +199,7 @@
 					var selectedVersion = versions.find((v) => v.modID === selectedModID)?.modData.version;
 
 					if (selectedVersion) {
-						var fetchUrl = `https://sandustrymods.shadow.computer/api/mods?modid=${mod}&option=info&version=${selectedVersion}`;
+						var fetchUrl = `/api/mods?modid=${mod}&option=info&version=${selectedVersion}`;
 
 						fetch(fetchUrl)
 							.then((response) => {
@@ -298,7 +298,7 @@
 				var selectedVersion = versionSelect.value;
 
 				try {
-					var response = await fetch(`https://sandustrymods.shadow.computer/api/mods?modid=${modId}&option=info&version=${selectedVersion}`);
+					var response = await fetch(`/api/mods?modid=${modId}&option=info&version=${selectedVersion}`);
 
 					if (!response.ok) {
 						throw new Error("Failed to fetch version-specific info.");
