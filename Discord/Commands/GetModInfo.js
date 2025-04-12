@@ -18,7 +18,7 @@ var mongoUri = globalThis.Config.mongodb.uri;
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('GetModInfo')
+        .setName('getmodinfo')
         .setDescription('Gets the specified mod info')
         .addStringOption(option =>
             option
