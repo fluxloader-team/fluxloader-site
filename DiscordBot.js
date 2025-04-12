@@ -81,7 +81,7 @@ globalThis.registerCommands = async function() {
     const rest = new REST({ version: '10' }).setToken(globalThis.Config.discord.token);
     try {
         await rest.put(
-            Routes.applicationCommands(globalThis.Discord.client.user.id),
+            Routes.applicationGuildCommands(globalThis.Discord.client.user.id,"1359169971611111736"),
             { body: commands }
         );
         log.log("Commands registered to Discord.");
