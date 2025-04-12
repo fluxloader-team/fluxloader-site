@@ -7,7 +7,7 @@ var crypto = require("crypto")
 var util = require('util')
 var fs = require('fs')
 var { exec } = require('child_process');
-var Utils = require('./../utils')
+var Utils = require('./../../utils')
 var path = require('path');
 
 const log = new Utils.log.log(colors.green("Sandustry.bot.event.ClientReady"), "./sandustry.bot.main.txt", true);
