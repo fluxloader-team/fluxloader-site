@@ -71,6 +71,7 @@ function reloadCommands() {
             BotCommands.set(command.data.name, command);
         }
     });
+    log.log(`Available Commands: ${[...BotCommands.keys()].join(', ')}`);
     log.log("Commands reloaded successfully.");
 }
 
