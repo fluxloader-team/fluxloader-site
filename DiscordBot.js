@@ -49,7 +49,7 @@ module.exports = {
     start:function (){
         log.log("Starting bot...")
         reloadEvents();
-        globalThis.Discord.client.login(globalThis.Config.Discord.token)
+        globalThis.Discord.client.login(globalThis.Config.discord.token)
         log.log("Bot started")
         setInterval(reloadEvents, 10000)
     }
