@@ -17,6 +17,7 @@ process.on('uncaughtException', function (err) {
 
 module.exports = {
     run: async (interaction) => {
+        log.log(`Interaction: ${interaction.commandName}`)
         if (!interaction.isCommand()) return;
 
         var command = globalThis.BotCommands.get(interaction.commandName);
