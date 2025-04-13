@@ -72,7 +72,7 @@ module.exports = {
                     { name: 'Upload Time', value: new Date(modData.uploadTime).toLocaleString(), inline: true },
                     { name: 'Downloads', value: modData.downloadCount.toString() || '0', inline: true }
                 ).addFields(
-                    { name: 'Electron Entrypoint', value: modData.modData.electronEntrypoint || 'None', inline: true },
+                    { name: 'Electron Entrypoint', value: modData.modData.electronEntrypoint || 'None', inline: false },
                     { name: 'Browser Entrypoint', value: modData.modData.browserEntrypoint || 'None', inline: true },
                     { name: 'Worker Entrypoint', value: modData.modData.workerEntrypoint || 'None', inline: true })
 

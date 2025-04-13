@@ -11,6 +11,7 @@ var path = require('path');
 var Discord = require('./DiscordBot.js');
 
 const CONFIG_PATH = path.join(__dirname, 'config.json');
+globalThis.Config
 var defaultConfig = {
     discord: {
         clientId: 'CLIENT_ID',
@@ -18,6 +19,8 @@ var defaultConfig = {
         redirectUri: 'https://example.com/auth/discord/callback',
         token: 'TOKEN',
         runbot: false,
+        serverLog: true,
+        serverLogChannel: 'SERVER_LOG_CHANNEL',
     },
     mongodb:{
         uri: 'mongodb://localhost:27017/somejoinstring',
@@ -26,6 +29,7 @@ var defaultConfig = {
         pull: true,
     }
 };
+globalThis.Config = defaultConfig;
 
 var lastRepoHash = '';
 const log = new Utils.log.log(colors.green("Sandustry.web.main"), "./sandustry.web.main.txt", true);

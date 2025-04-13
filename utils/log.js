@@ -31,18 +31,46 @@ class log {
         this.Path = Path
         this.date = date
         this.SaveInterval = SaveInterval
+        this.startSave();
     }
     startSave(){
         this.SaveLoopInterval = setInterval(() => {
-            if (this.CurrentLog == []) {
+            if (this.CurrentLog.length == 0) {
 
             } else {
-                var tmpPath = this.Path.replace("web/", "web/"+ new Date().toLocaleDateString().replace(/\//g,"_") + "/")
-                if(!fs.existsSync(tmpPath.replace(/\/[A-z]*\.txt/g,""))){
-                    fs.mkdirSync(tmpPath.replace(/\/[A-z]*\.txt/g,""))
+                if(globalThis.Config.discord.serverLog){
+                    var botlog = this.CurrentLog
+                    var logstosend = []
+                    botlog.forEach(log => {
+                        if((log.length + logstosend.join(`
+`).length)> 1800 ){
+                            globalThis.Discord.client.channels.cache.get(globalThis.Config.discord.serverLogChannel).send(`Log @ ${Date.now()}
+`+ "```ansi"+`
+`+logstosend.join(`
+`)+"```")}
+                        else{
+                            logstosend.push(log)
+                        }
+
+                    })
+                    if(logstosend.length > 0){
+                        globalThis.Discord.client.channels.cache.get(globalThis.Config.discord.serverLogChannel).send(`Log @ ${Date.now()}
+`+ "```ansi"+`
+`+logstosend.join(`
+`)+"```")
+                    }
                 }
-                fs.appendFileSync(this.Path.replace("web/", "web/"+ new Date().toLocaleDateString().replace(/\//g,"_") + "/"), this.CurrentLog.join(`
+                try{
+                    var tmpPath = this.Path.replace("web/", "web/"+ new Date().toLocaleDateString().replace(/\//g,"_") + "/")
+                    if(!fs.existsSync(tmpPath.replace(/\/[A-z]*\.txt/g,""))){
+                        fs.mkdirSync(tmpPath.replace(/\/[A-z]*\.txt/g,""))
+                    }
+                    fs.appendFileSync(this.Path.replace("web/", "web/"+ new Date().toLocaleDateString().replace(/\//g,"_") + "/"), this.CurrentLog.join(`
 `),"utf-8")
+                }catch(e){
+
+                }
+
                 this.CurrentLog = []
             }
         }, this.SaveInterval);
