@@ -1,4 +1,4 @@
-const { Client, Events, GatewayIntentBits,REST, Routes} = require('discord.js');
+var { Client, Events, GatewayIntentBits,REST, Routes, Collection} = require('discord.js');
 var colors = require('colors');
 var http = require("http")
 var os = require("os")
@@ -10,7 +10,7 @@ var { exec } = require('child_process');
 var Utils = require('./utils')
 var path = require('path');
 
-const log = new Utils.log.log(colors.green("Sandustry.bot.main"), "./sandustry.bot.main.txt", true);
+var log = new Utils.log.log(colors.green("Sandustry.bot.main"), "./sandustry.bot.main.txt", true);
 
 process.on('uncaughtException', function (err) {
     log.log(`Caught exception: ${err.stack}`);
@@ -52,47 +52,76 @@ function reloadEvents(){
     })
     log.log("Events loaded")
     Object.keys(BotEvents).forEach(key => {
-        Discord.client.on(Events[key], BotEvents[key].run)
+        Discord.client.on(Events[key], (event)=>{BotEvents[key].run(event)})
+        log.log(`Event listener registered for: ${key}`);
     })
     log.log("Events registered")
 }
 function reloadCommands() {
     log.log("Reloading commands...");
 
-    globalThis.BotCommands = new Map();
-    const commandsPath = "./Discord/Commands";
+    globalThis.BotCommands = new Collection();
+    var commandsPath = path.resolve(__dirname, "./Discord/Commands");
 
     fs.readdirSync(commandsPath).forEach(file => {
-        if (require.resolve(`${commandsPath}/${file}`)) {
-            delete require.cache[require.resolve(`${commandsPath}/${file}`)];
+        var filePath = path.join(commandsPath, file);
+        if (require.resolve(filePath)) {
+            delete require.cache[require.resolve(filePath)]; 
         }
-        const command = require(`${commandsPath}/${file}`);
+        var command = require(filePath);
+
         if (command.data && command.execute) {
             BotCommands.set(command.data.name, command);
+            log.log(`Command "${command.data.name}" successfully loaded.`);
+        } else {
+            log.log(`Skipping file "${file}" as it's not a valid command.`);
         }
     });
+
     log.log(`Available Commands: ${[...BotCommands.keys()].join(', ')}`);
     log.log("Commands reloaded successfully.");
 }
 
-globalThis.registerCommands = async function() {
-    log.log("Registering application commands...");
-    const commands = [...BotCommands.values()].map(cmd => cmd.data.toJSON());
 
-    const rest = new REST({ version: '10' }).setToken(globalThis.Config.discord.token);
+globalThis.registerCommands = async function () {
+    log.log("Registering application commands...");
+    log.log("Commands stored in BotCommands Collection:");
+    BotCommands.forEach((cmd, key) => {
+        log.log(`Command Key: ${key}, Command Details: ${JSON.stringify(cmd)}`);
+    });
+
+    var commands = [];
+    BotCommands.forEach((cmd, key) => {
+        log.log(`Processing command: ${key}`);
+        if (!cmd.data || !(cmd.data.toJSON instanceof Function)) {
+            log.log(`Error: Command "${key}" does not provide a valid 'data.toJSON()'. Skipping it.`);
+            return;
+        }
+
+        try {
+            var jsonData = cmd.data.toJSON();
+            log.log(`Generated JSON for command "${key}": ${JSON.stringify(jsonData)}`);
+            commands.push(jsonData);
+            log.log(`Command "${key}" added to commands array.`);
+        } catch (err) {
+            log.log(`Error while generating JSON for command "${key}": ${err.message}`);
+        }
+    });
+
+    log.log(`Final Commands to be registered: ${JSON.stringify(commands)}`);
+
+    var rest = new REST({ version: '10' }).setToken(globalThis.Config.discord.token);
     try {
         await rest.put(
-            Routes.applicationGuildCommands(globalThis.Discord.client.user.id,"1359169971611111736"),
+            Routes.applicationGuildCommands(globalThis.Discord.client.user.id, "1359169971611111736"),
             { body: commands }
         );
-        log.log("Commands registered to Discord.");
-        var commandslist = await rest.get(Routes.applicationGuildCommands(globalThis.Discord.client.user.id, '1359169971611111736'));
-        log.log('Registered commands:', commandslist);
-
+        log.log("Commands registered to Discord successfully.");
     } catch (error) {
-        log.log(`Error registering commands: ${error}`);
+        log.log(`Error registering commands to Discord: ${error.message}`);
     }
-}
+};
+
 
 module.exports = {
     init: function () {
@@ -100,7 +129,7 @@ module.exports = {
         globalThis.Discord = {
             client: new Client({ intents: Object.values(GatewayIntentBits)})
         }
-        globalThis.BotCommands = new Map();
+        globalThis.BotCommands = new Collection();
 
 
     },
@@ -112,7 +141,7 @@ module.exports = {
         globalThis.Discord.client.login(globalThis.Config.discord.token)
         log.log("Bot started")
         setInterval(()=>{
-            const newRepoHash = computeRepoHash();
+            var newRepoHash = computeRepoHash();
             log.log(newRepoHash)
             if (newRepoHash !== lastRepoHash) {
                 log.log('Changes detected in the repository. Reloading Events and Commands...');

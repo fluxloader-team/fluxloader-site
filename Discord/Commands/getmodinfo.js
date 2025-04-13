@@ -1,4 +1,4 @@
-var { SlashCommandBuilder } = require('discord.js');
+var { SlashCommandBuilder,EmbedBuilder } = require('discord.js');
 var colors = require("colors");
 var http = require("http");
 var os = require("os");
@@ -33,11 +33,14 @@ module.exports = {
 
     async execute(interaction) {
         await interaction.deferReply();
+        log.log(`getting mod info for ${interaction.options.getString('modid')}`)
 
         var modID = interaction.options.getString('modid');
         var version = interaction.options.getString('version');
 
+        log.log(`modID: ${modID}, version: ${version}`)
         var client = new MongoClient(mongoUri);
+        log.log("connecting to database")
         try {
             await client.connect();
             var db = client.db('SandustryMods');
@@ -80,9 +83,10 @@ module.exports = {
             await interaction.editReply({ embeds: [embed] });
 
         } catch (error) {
-            log.error(`Error fetching mod info: ${error}`);
+            log.log(`Error fetching mod info: ${error}`);
             await interaction.editReply({ content: 'An error occurred while fetching the mod info. Please try again later.' });
         } finally {
+            log.log("closing connection to database")
             await client.close();
         }
     }
