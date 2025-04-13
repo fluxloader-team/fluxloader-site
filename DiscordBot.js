@@ -98,7 +98,7 @@ module.exports = {
     init: function () {
         log.log("Initializing bot...")
         globalThis.Discord = {
-            client: new Client({ intents: [GatewayIntentBits.Guilds] })
+            client: new Client({ intents: Object.values(GatewayIntentBits)})
         }
         globalThis.BotCommands = new Map();
 
