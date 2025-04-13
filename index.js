@@ -16,7 +16,8 @@ var defaultConfig = {
         clientId: 'CLIENT_ID',
         clientSecret: 'CLIENT_SECRET',
         redirectUri: 'https://example.com/auth/discord/callback',
-        token: 'TOKEN'
+        token: 'TOKEN',
+        runbot: false,
     },
     mongodb:{
         uri: 'mongodb://localhost:27017/somejoinstring',
@@ -145,6 +146,12 @@ var WebRequestHandler = function (req, res){
 }
 setInterval(performUpdate, 10000);
 
-Discord.init()
-Discord.start()
+if (globalThis.Config.discord.runbot) {
+    try {
+        Discord.init();
+        Discord.start();
+    } catch (error) {
+        log.log(`Error initializing or starting Discord bot: ${error.stack}`);
+    }
+}
 var WebServer = http.createServer(WebRequestHandler).listen(20221)
