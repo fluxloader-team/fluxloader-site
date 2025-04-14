@@ -14,6 +14,7 @@ npm-audit:
   stage: dependency_scan
   image: node:18-alpine # Use an official Node.js image (choose LTS version matching your project, e.g., 20, 22)
   script:
+    - npm i
     - echo "Installing dependencies securely using package-lock.json..."
     - npm ci # 'ci' uses package-lock.json for deterministic installs
     - echo "Running npm audit and generating JSON report..."
