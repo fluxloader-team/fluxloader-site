@@ -1,0 +1,67 @@
+# .gitlab-ci.yml
+
+stages:
+  - dependency_scan
+  - sast_scan
+  - secret_scan
+
+default:
+  tags:
+    - linux # Ensure jobs run on runners tagged 'linux'
+
+# Job 1: Check for vulnerable dependencies using npm audit
+npm-audit:
+  stage: dependency_scan
+  image: node:18-alpine # Use an official Node.js image (choose LTS version matching your project, e.g., 20, 22)
+  script:
+    - echo "Installing dependencies securely using package-lock.json..."
+    - npm ci # 'ci' uses package-lock.json for deterministic installs
+    - echo "Running npm audit and generating JSON report..."
+    # Run audit, output JSON to stdout and also save to a file using tee.
+    # We use 'sh -c' and check PIPESTATUS[0] to ensure the exit code of 'npm audit' (the first command in the pipe)
+    # is used to determine job success/failure, not the exit code of 'tee'.
+    # The job will fail if vulnerabilities >= moderate are found.
+    - sh -c 'npm audit --audit-level=moderate --json | tee npm-audit-report.json; exit ${PIPESTATUS[0]}'
+    - echo "npm audit check complete." # This line only runs if the audit passed (exit code 0)
+  artifacts:
+    # Save the report file as a job artifact
+    paths:
+      - npm-audit-report.json
+    # Keep artifacts even if the job fails, so the report is always available
+    when: always
+    # Optional: Set an expiry date for the artifacts to save storage
+    # expire_in: 1 week
+
+# Job 2: Static Application Security Testing (SAST) using Semgrep
+sast-semgrep:
+  stage: sast_scan
+  image: returntocorp/semgrep # Use the official Semgrep Docker image
+  script:
+    - echo "Running Semgrep SAST scan and generating SARIF report..."
+    # Run Semgrep CI, specifying SARIF format for the output report.
+    # Use a relevant config like p/nodejs, p/javascript, or p/typescript. Auto might also work.
+    # Semgrep CI will exit with a non-zero code if findings are detected, failing the job.
+    - semgrep ci --sarif -o semgrep-report.sarif --config="p/nodejs"
+    - echo "Semgrep scan complete." # This line only runs if semgrep exits with 0 (no findings)
+  artifacts:
+    paths:
+      - semgrep-report.sarif
+    when: always
+    # expire_in: 1 week
+
+# Job 3: Detect hardcoded secrets using Gitleaks
+secret-detection-gitleaks:
+  stage: secret_scan
+  image: zricethezav/gitleaks:latest # Use the official Gitleaks Docker image
+  script:
+    - echo "Running Gitleaks secret detection and generating SARIF report..."
+    # Run Gitleaks, specifying SARIF format and path for the report.
+    # Use --no-git to scan only checked-out files (faster) or remove it to scan history.
+    # Gitleaks exits with a non-zero code if secrets are found, failing the job.
+    - gitleaks detect --source . --verbose --report-format sarif --report-path gitleaks-report.sarif --no-git
+    - echo "Gitleaks scan complete." # This line only runs if gitleaks exits with 0 (no findings)
+  artifacts:
+    paths:
+      - gitleaks-report.sarif
+    when: always
+    # expire_in: 1 week
