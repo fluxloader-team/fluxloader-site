@@ -17,7 +17,7 @@ npm-audit:
     - npm i
     - echo "Running npm audit and generating JSON report..."
     - npm audit --audit-level=moderate --json > npm-audit-report.json
-    audit_exit_code=$?
+    - audit_exit_code=$?
     - echo "npm audit finished with exit code: $audit_exit_code"
     - echo "--- Audit Report Start ---"
     - cat npm-audit-report.json
