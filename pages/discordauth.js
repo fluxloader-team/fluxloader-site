@@ -1,3 +1,9 @@
+/**
+ * @file discordauth.js
+ * @description Handles Discord OAuth2 authentication and callback processing for the application.
+ * Supports user redirection to the Discord authorization URL and processes the callback to retrieve user information.
+ */
+
 var colors = require('colors');
 var querystring = require('querystring');
 var https = require('https');
@@ -5,8 +11,38 @@ var Utils = require('./../utils');
 
 var log = new Utils.log.log(colors.green("Sandustry.web.pages.discord"), "./sandustry.web.main.txt", true);
 
+
+/**
+ * Namespace for Discord authentication functionality in the API.
+ * @namespace discordAuth
+ * @memberof module:web
+ */
 module.exports = {
+    /**
+     * The paths that use this module.
+     * @type {Array<string>}
+     * @memberof module:web.discordAuth
+     */
     paths: ['/auth/discord', '/auth/discord/callback'],
+    /**
+     * Handles Discord OAuth2 authentication and callback.
+     *
+     * - `/auth/discord`: Redirects the client to Discord's OAuth2 authorization URL.
+     * - `/auth/discord/callback`: Processes the OAuth2 callback, retrieves user information, and stores it in the browser's local storage.
+     *
+     * ### Query Parameters:
+     * - **code**: *(required for `/auth/discord/callback`)*
+     *   The OAuth2 authorization code returned by Discord after user authentication.
+     *   - *Example*: `code=abcdef123456`
+     *
+     * @async
+     * @function run
+     * @memberof api.discordAuth
+     * @param {IncomingMessage} req - The HTTP request object.
+     * @param {ServerResponse} res - The HTTP response object.
+     *
+     * @throws {Error} If query parameters are missing, invalid, or an error occurs during API requests.
+     */
     run: async function (req, res) {
         var urlSplit = req.url.split('?');
         var pathname = urlSplit[0];

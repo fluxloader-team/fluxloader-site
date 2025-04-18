@@ -1,13 +1,45 @@
+/**
+ * @file mod_version_generator.js
+ * @description Generates mod version `.zip` files with various metadata for the modding platform.
+ * This module handles the creation of multiple versions, including tags, semantic versioning, and metadata generation.
+ * This module is for validating and testing
+ */
+
+
 const colors = require("colors");
-const http = require("http");
 const JSZip = require("jszip");
 const Utils = require("./../utils");
-
+const crypto = require("crypto");
 const log = new Utils.log.log(colors.green("Sandustry.web.pages.generateMod"), "./sandustry.web.main.txt", true);
+var Mongo = require("./../Shared/DB");
 
+/**
+ * @namespace generateMod
+ * @memberof module:web
+ */
 module.exports = {
+	/**
+	 * The paths that use this module.
+	 * @type {Array<string>}
+	 * @memberof module:web.generateMod
+	 */
 	paths: ["/generateMod"],
+	/**
+	 * Handles the mod version generation process.
+	 *
+	 * This function generates random semantic versions of a mod, assigns metadata (such as tags and mod information),
+	 * and packages each version into a `.zip` file. and then is uploaded to the mod and version DB as if it was uploaded
+	 *
+	 * @async
+	 * @function run
+	 * @memberof module:web.generateMod
+	 * @param {IncomingMessage} req - The HTTP request object.
+	 * @param {ServerResponse} res - The HTTP response object.
+	 *
+	 * @returns {Promise<void>} Sends the error response.
+	 */
 	run: async function (req, res) {
+		var client = new MongoClient(mongoUri);
 		try {
 			// Function to generate random strings
 			const randomString = (length) =>
@@ -85,8 +117,9 @@ module.exports = {
 			};
 
 			// Function to generate a random modinfo.json file
-			const generateModInfo = (modName, version, tags) => {
+			const generateModInfo = (modName, version, tags,modID) => {
 				return {
+					modID:modID,
 					name: modName,
 					version: version,
 					author: `author-${randomString(8)}`,
@@ -108,7 +141,7 @@ module.exports = {
 			};
 
 			// Generate a random number of versions between 1 and 5
-			const numVersions = Math.floor(Math.random() * 5) + 1;
+			const numVersions = 10
 
 			// Create a main zip archive to hold all version zips
 			const mainZip = new JSZip();
@@ -121,9 +154,13 @@ module.exports = {
 
 			// Tags for the first version
 			let currentTags = generateTagsForVersion();
-
+			var discordInfo = {
+				id:"FakeMod",
+				username: "FakeMod",
+			}
 			// Generate `.zip` files for each version
 			for (let i = 0; i < numVersions; i++) {
+				var modID = crypto.randomUUID();
 				const versionString = `${currentVersion.major}.${currentVersion.minor}.${currentVersion.patch}`;
 
 				// Create a zip archive for this version
@@ -144,41 +181,30 @@ module.exports = {
 				// Add README
 				versionZip.file("README.md", `# Test Mod\nA test mod for the Electron Modloader`);
 
-				// Generate the content of this version's zip
-				const versionZipContent = await versionZip.generateAsync({
-					type: "nodebuffer",
-				});
-
-				// Add this version zip to the main zip archive
-				mainZip.file(`${modName}-v${versionString}.zip`, versionZipContent);
-
-				// Increment to the next version
 				currentVersion = incrementSemVer(currentVersion);
-
-				// Generate tags for the next version (with some changes)
 				currentTags = generateTagsForVersion(currentTags);
+				var payload = {filename: `${modName}_${versionString}`,filedata: arrayBufferToBase64(await versionZip.generateAsync({type:"arraybuffer"})),discordInfo: discordInfo }
+				var uploadResult = await Mongo.GetMod.Data.Upload(payload,true);
 			}
 
-			// Generate the main zip file
-			const mainZipContent = await mainZip.generateAsync({
-				type: "nodebuffer",
-			});
 
 			// Set correct headers and send the main zip file
 			res.writeHead(200, {
-				"Content-Type": "application/zip",
-				"Content-Disposition": `attachment; filename=${modName}-versions.zip`,
+				"Content-Type": "application/json",
 			});
-
-			res.end(mainZipContent);
+			res.end(JSON.stringify("{}"));
 
 			// Log success
-			log.success(`Generated mod with ${numVersions} version zips: ${modName}`);
+			log.log(`Generated mod with ${numVersions} version zips: ${modName}`);
 		} catch (error) {
 			// Handle errors here
-			log.error("Error generating mod versions:", error);
+			log.log("Error generating mod versions:" + error);
 			res.writeHead(500, { "Content-Type": "application/json" });
 			res.end(JSON.stringify({ error: "Failed to generate mod versions" }));
 		}
 	},
 };
+function arrayBufferToBase64(buffer) {
+	const byteArray = new Uint8Array(buffer);
+	return btoa(byteArray.reduce((data, byte) => data + String.fromCharCode(byte), ""));
+}
