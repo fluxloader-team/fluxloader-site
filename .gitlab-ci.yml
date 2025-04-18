@@ -1,0 +1,52 @@
+# .gitlab-ci.yml
+
+stages:
+  - dependency_scan
+  - sast_scan
+  - secret_scan
+
+default:
+  tags:
+    - linux
+
+npm-audit:
+  stage: dependency_scan
+  image: node:20-alpine 
+  script:
+    - echo "Installing dependencies using package-lock.json..."
+    - npm i
+    - echo "Running npm audit and generating JSON report..."
+    - npm audit --audit-level=moderate --json > npm-audit-report.json
+    - audit_exit_code=$?
+    - echo "npm audit finished with exit code: $audit_exit_code"
+    - echo "--- Audit Report Start ---"
+    - cat npm-audit-report.json
+    - exit $audit_exit_code
+  artifacts:
+    paths:
+      - npm-audit-report.json
+    when: always
+
+sast-semgrep:
+  stage: sast_scan
+  image: returntocorp/semgrep
+  script:
+    - echo "Running Semgrep SAST scan and generating SARIF report..."
+    - semgrep ci --sarif -o semgrep-report.sarif --config="p/nodejs"
+    - echo "Semgrep scan complete."
+  artifacts:
+    paths:
+      - semgrep-report.sarif
+    when: always
+
+secret-detection-gitleaks:
+  stage: secret_scan
+  image: zricethezav/gitleaks:latest
+  script:
+    - echo "Running Gitleaks secret detection and generating SARIF report..."
+    - gitleaks detect --source . --verbose --report-format sarif --report-path gitleaks-report.sarif --no-git
+    - echo "Gitleaks scan complete."
+  artifacts:
+    paths:
+      - gitleaks-report.sarif
+    when: always
