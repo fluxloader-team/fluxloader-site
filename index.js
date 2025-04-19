@@ -24,7 +24,7 @@ var Discord = require('./DiscordBot.js');
 
 /**
  * Timed tasks and scheduled functionality.
- * @module timers
+ * @module Timers
  */
 
 /**
@@ -158,23 +158,23 @@ var LoadPages = function (){
 /**
  * Global array to store all loaded timer tasks.
  * @type {Array}
- * @memberof module:timers
+ * @memberof module:Timers
  */
 globalThis.Timers = []
 /**
- * Function to dynamically load all timer tasks from the `timers` directory and store them globally.
+ * Function to dynamically load all timer tasks from the `Timers` directory and store them globally.
  *
  * @memberof module:timers
  * @function LoadTimers
  */
 var LoadTimers = function (){
-    log.log("Loading timers")
+    log.log("Loading Timers")
     Timers = []
-    fs.readdirSync( "./timers").forEach(file => {
-        if(require.resolve("./timers/"+file)){
-            delete require.cache[require.resolve("./timers/"+file)]
+    fs.readdirSync( "./Timers").forEach(file => {
+        if(require.resolve("./Timers/"+file)){
+            delete require.cache[require.resolve("./Timers/"+file)]
         }
-        Timers.push(require("./timers/"+file))
+        Timers.push(require("./Timers/"+file))
     })
 }
 /**
@@ -206,7 +206,7 @@ function computeRepoHash(directory = './') {
     return folderHash.digest('hex');
 }
 /**
- * Performs a `git pull` to update the repository, then reloads templates, pages, and timers if changes are detected.
+ * Performs a `git pull` to update the repository, then reloads templates, pages, and Timers if changes are detected.
  *
  * @function performUpdate
  * @memberof module:main
