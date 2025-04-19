@@ -48,9 +48,8 @@ class log {
 `+ "```ansi"+`
 `+logstosend.join(`
 `)+"```")
-                            var logstosend = []}
-
-                        else{
+                            logstosend = []
+                        } else{
                             logstosend.push(log)
                         }
 
