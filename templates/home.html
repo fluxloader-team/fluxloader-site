@@ -183,7 +183,7 @@
 			var modList = document.getElementById("modList");
 			var modItems = "";
 			Object.values(globalThis.Mods).forEach((mod) => {
-				modItems += `<tr onclick='globalThis.DisplayMod("${mod.modID}")'><td>${mod.modData.name}</td><td>${mod.modData.author}</td><td>${mod.modData.version}</td><td><span class="badge text-bg-secondary">${mod.modData.tags.slice(0,Math.min(mod.modData.tags.length - 1,4)).join("</span><a> </a><span class=\"badge text-bg-secondary\">")}</span></td></tr>`
+				modItems += `<tr class="modListItem" onclick='globalThis.DisplayMod("${mod.modID}")'><td>${mod.modData.name}</td><td>${mod.modData.author}</td><td>${mod.modData.version}</td><td><span class="badge text-bg-secondary">${mod.modData.tags.slice(0,Math.min(mod.modData.tags.length - 1,4)).join("</span><a> </a><span class=\"badge text-bg-secondary\">")}</span></td></tr>`
 
 			})
 			modList.innerHTML = `<table class="displayInner"><tr><th>Name</th><th>Author</th><th>Version</th><th>Tags</th></tr> ${modItems}`;

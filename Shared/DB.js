@@ -235,25 +235,6 @@ module.exports = {
                 })
                 return endresult;
             },
-            Test: async function () {
-
-                /*
-                 * Requires the MongoDB Node.js Driver
-                 * https://mongodb.github.io/node-mongodb-native
-                 */
-
-                const filter = {
-                    'modID': '2bf71415-40e8-4d5a-bb07-3f01bc4cfdd0'
-                };
-
-                const client = await MongoClient.connect(
-                    'mongodb://shadowdev:%2F2U6y31Y%3F%21yu@10.1.1.4:27017/admin'
-                );
-                const coll = client.db('SandustryMods').collection('ModVersions');
-                const cursor = coll.find(filter);
-                const result = await cursor.toArray();
-                await client.close();
-            },
             /**
              * Retrieves a list of version numbers for a specific `modID`.
              * @async
@@ -274,6 +255,44 @@ module.exports = {
                     return restult.toArray();
                 })
                 return endresult.map(entry => entry.modData.version || "Unknown");
+            },
+            /**
+             * Deletes a specific version of a mod from the database.
+             * If the mod has only one remaining version and that version is deleted, the mod itself is also removed from the `Mods` collection.
+             *
+             * @async
+             * @function Delete
+             * @memberof module:DB
+             *
+             * @param {string} [modID] - The unique identifier for the mod.
+             * @param {string} [version] - The specific version of the mod to delete.
+             *
+             * @returns {Promise<Object>} A promise that resolves to the result of the deletion operation for the specified mod version.
+             * - If the mod version was deleted, the result contains confirmation of the deletion.
+             * - If the mod had only one version and it is deleted, the mod itself is also removed from the `Mods` collection.
+             *
+             * @throws {Error} Throws an error if there is an issue connecting to the database or performing the deletion operations.
+             *
+             * @example
+             * // Deleting a specific mod version
+             * const result = await Delete("someModID", "1.0.0");
+             * console.log("Deletion Status:", result);
+             *
+             * // If only one version remained and was deleted, the mod will also be removed from the database.
+             */
+            Delete: async function (modID = "", version = "") {
+                var endresult = await HandleClient(async (client) => {
+                    var db = client.db('SandustryMods');
+                    var modVersionsCollection = await db.collection('ModVersions');
+                    var Versions = await modVersionsCollection.find({ modID: modID})
+                    var restult = await modVersionsCollection.deleteOne({ modID: modID, "modData.version": version });
+                    if((await Versions.toArray()).length === 1){
+                        var modsCollection = db.collection("Mods");
+                        await modsCollection.deleteOne({ modID: modID });
+                    }
+                    return restult;
+                })
+                return endresult;
             }
         },
         /**
@@ -462,6 +481,40 @@ module.exports = {
                 })
                 return endresult;
             }
+        },
+        /**
+         * Deletes a mod and all its associated versions from the database based on the provided mod ID.
+         *
+         * This function removes the mod record from the `Mods` collection and all corresponding entries from the `ModVersions` collection.
+         *
+         * @async
+         * @function Delete
+         * @memberof module:DB
+         *
+         * @param {string} [modID] - The unique identifier for the mod to be deleted.
+         *
+         * @returns {Promise<Object>} A promise that resolves to an object containing the results of the deletion:
+         * - `modDB` (Object): The result of the deletion operation for the mod in the `Mods` collection.
+         * - `VersionsDB` (Object): The result of the deletion operation for the mod versions in the `ModVersions` collection.
+         *
+         * @throws {Error} Throws an error if there is an issue connecting to the database or performing the deletion operations.
+         *
+         * @example
+         * // Deleting a mod and its versions
+         * const result = await Delete("someModID");
+         * console.log("Mod Deletion Status:", result.modDB);
+         * console.log("Version Deletion Status:", result.VersionsDB);
+         */
+        Delete: async function (modID = "") {
+            var endresult = await HandleClient(async (client) => {
+                var db = client.db('SandustryMods');
+                var modsCollection = db.collection("Mods");
+                var restult = await modsCollection.deleteOne({ modID: modID });
+                var modVersionsCollection = await db.collection('ModVersions');
+                var restult2 = await modVersionsCollection.deleteMany({ modID: modID });
+                return {modDB: restult, VersionsDB: restult2};
+            })
+            return endresult;
         }
     },
     /**
