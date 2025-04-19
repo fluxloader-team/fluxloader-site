@@ -648,6 +648,41 @@ var GetUser = {
             }
         })
         return endresult;
+    },
+    /**
+     * Bans a user by updating their record in the database.
+     *
+     * This function marks a user as banned in the `Users` collection by setting the `banned` field to `true`.
+     *
+     * @async
+     * @function Ban
+     * @memberof module:DB
+     *
+     * @param {string} [discordID] - The Discord ID of the user to be banned.
+     *
+     * @returns {Promise<Object>} A promise that resolves to the result of the update operation.
+     * - The result contains information about the success of the update.
+     *
+     * @throws {Error} Throws an error if there is an issue connecting to the database or updating the user record.
+     *
+     * @example
+     * // Banning a user with a given Discord ID
+     * const result = await Ban("123456789012345678");
+     * if (result.modifiedCount > 0) {
+     *     console.log("User banned successfully.");
+     * } else {
+     *     console.log("User not found or ban status not updated.");
+     * }
+     */
+
+    Ban:async function (discordID = "") {
+        var endresult = await HandleClient(async (client) => {
+            var db = client.db('SandustryMods');
+            var userCollection = db.collection("Users");
+            var restult = await userCollection.updateOne({ "discordID": discordID }, { $set: { banned: true } });
+            return restult;
+        })
+        return endresult;
     }
 }
 module.exports = {
