@@ -59,6 +59,7 @@ module.exports = {
 			try {
 				var payload = await JSON.parse(body);
 				var { filename } = payload;
+
 				var uploadResult = await Mongo.GetMod.Data.Upload(payload);
 				switch(uploadResult){
 					case "Invalid payload":

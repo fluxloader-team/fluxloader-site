@@ -51,7 +51,7 @@ module.exports = {
                             discordID: DiscordUserData.id,
                             discordUsername :DiscordUserData.username,
                             permissions: ["user"],
-                            description : "new user",
+                            description : "new User",
                             joinedAt : new Date()
                         })
                     }
