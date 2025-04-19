@@ -4,16 +4,8 @@
  * This module renders the home page.
  */
 
-
 var colors = require('colors');
-var http = require("http")
-var os = require("os")
-var Websocket = require("ws")
-var crypto = require("crypto")
-var util = require('util')
-var fs = require('fs')
 var ejs = require('ejs')
-var { exec } = require('child_process');
 var Utils = require('./../utils')
 
 const log = new Utils.log.log(colors.green("Sandustry.web.pages.home"), "./sandustry.web.main.txt", true);

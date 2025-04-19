@@ -1,16 +1,33 @@
 <div class="pagecontainer">
 	<div class="headerContainer" id="headerContainer">
-		<div class="btn btn-secondary headerButton" style="margin-left: 15px">Mod List</div>
+		<a class="btn btn-secondary headerButton" style="margin-left: 15px" href="/">Mod List</a>
 		<div class="input-group mb-3" style="width: 50%; padding-top: 15px">
-			<input type="text" class="form-control" />
+			<input type="text" class="form-control" id="searchInput" onchange="globalThis.PerformSearch()"/>
 		</div>
 		<a href="/auth/discord" class="btn btn-primary" style="margin-right: 15px" id="discordLogin">
 			<img src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg" alt="Discord Logo" style="width: 100px; height: 20px; margin-right: 5px" />
 		</a>
 	</div>
 	<div class="modDisplayHolder">
-		<div class="modList"></div>
-		<div class="modDisplay"></div>
+		<div class="modList" id="modList">
+			<div class="d-flex justify-content-center">
+				<div class="spinner-border" role="status">
+					<span class="visually-hidden">Loading...</span>
+				</div>
+			</div>
+		</div>
+		<div class="modDisplay">
+			<div class="modDisplayData" id="modDisplay">
+				<div class="d-flex justify-content-center">
+					<div class="spinner-border" role="status">
+						<span class="visually-hidden">Loading...</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modDisplayActions" id="modDisplayActions">
+
 	</div>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
@@ -44,15 +61,139 @@
 				window.location.reload();
 			});
 		}
-		//var latestInfoUrl = `/api/mods?modid=${modID}&option=info`;
-		//var versionsUrl = `/api/mods?modid=${modID}&option=versions`;
 
 		//var latestInfoResponse = await fetch(latestInfoUrl);
 		//var versionsResponse = await fetch(versionsUrl);
-
+		globalThis.Mods = {}
+		globalThis.SearchQuery = ""
+		globalThis.PerformSearch = async function() {
+			var searchInput = document.getElementById("searchInput");
+			globalThis.SearchQuery = searchInput.value;
+			var response = await fetch(`/api/mods?search=${globalThis.SearchQuery}`);
+			var result = await response.json();
+			globalThis.Mods = {}
+			result.mods.forEach((mod) => {
+				globalThis.Mods[mod.modID] = mod
+			})
+			console.log("Response:", result.mods);
+			UpdateModList(result.mods);
+		}
 		document.addEventListener("DOMContentLoaded", async () => {
-			var response = await fetch("/api/mods");
-			console.log("Response:", await response.json());
+			var response = await fetch(`/api/mods?search=${globalThis.SearchQuery}`);
+			var result = await response.json();
+			globalThis.Mods = {}
+			result.mods.forEach((mod) => {
+				globalThis.Mods[mod.modID] = mod
+			})
+			console.log("Response:", result.mods);
+			UpdateModList(result.mods)
 		});
+		globalThis.DownloadMod = async function (modID) {
+			var mod = globalThis.Mods[modID]
+			var response = await fetch(`/api/mods?modid=${mod.modID}&option=download`);
+			var result = await response.blob();
+			var url = window.URL.createObjectURL(new Blob([result]));
+			var link = document.createElement('a');
+			link.href = url;
+			link.style.display = 'none';
+			link.setAttribute('download', `${mod.modData.name}.zip`);
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+		}
+		globalThis.UpdateModDisplayActions = async function (modID) {
+			var mod = globalThis.Mods[modID]
+			var modDisplayActions = document.getElementById("modDisplayActions");
+			modDisplayActions.innerHTML =`<div class="btn-group" role="group" style="padding-left: 15px;margin-top:5px; height: 40px;">
+<button class="btn btn-primary" onclick='globalThis.DownloadMod("${modID}")'>Download</button>
+<button class="btn btn-success" onclick="navigator.clipboard.writeText('${modID}')">Copy ID</button>
+</div>
+<select class="form-select" id="versionSelection" style="padding-left: 15px;margin-top:5px; height: 40px;width: 150px" onchange='globalThis.GetModVersion("${modID}",this.value)'>
+<option selected>Change Version</option>
+</select>`
+		}
+		globalThis.DisplayMod = async function (modID) {
+			var mod = globalThis.Mods[modID]
+			var modDisplay = document.getElementById("modDisplay");
+			modDisplay.innerHTML = `<div class="displayInner">
+<h3 id="modDisplayModName">${mod.modData.name}<a> </a><span class="badge text-bg-info">${mod.modData.version}</span><a> </a><span class="badge text-bg-warning">${mod.modData.author}</span></h3>
+<h6 id="modDisplayshortDescription">${mod.modData.shortDescription}</h6>
+<h6 id="modDisplayTags"><span class="badge text-bg-primary">${mod.modData.tags.join("</span><a> </a><span class=\"badge text-bg-primary\">")}</span></h6>
+<br>
+<h5>Dependencies</h5>
+<div id="dependencies">
+
+</div>
+<br>
+<h5>Mod Readme file</h5>
+<hr>
+<p id="modDisplayDescription">
+<div class="d-flex justify-content-center">
+  <div class="spinner-border" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>
+</p>
+<h6></h6>
+</div>`
+			var dependenciesList = document.getElementById("dependencies");
+			var dependencies = "";
+			Object.keys(mod.modData.dependencies).forEach((dependency) => {
+				dependencies += `<tr><td>${dependency}</td><td>${mod.modData.dependencies[dependency]}</td></tr>`
+
+			})
+			dependenciesList.innerHTML = `<table><tr><th style="width: 250px">Name</th><th style="width: 250px">Version</th></tr> ${dependencies}`;
+			dependenciesList.innerHTML += "</table>";
+			if (globalThis.ModCache[mod.modID]){
+				await globalThis.DisplayModApi(globalThis.ModCache[mod.modID]);
+			}else{
+				var response = await fetch(`/api/mods?modid=${mod.modID}&option=info`);
+				var result = await response.json();
+				console.log("Response:", result.mod);
+				globalThis.ModCache[result.mod.modID] = result.mod
+				await globalThis.DisplayModApi(globalThis.ModCache[result.mod.modID]);
+			}
+		}
+		globalThis.ModCache = {}
+		globalThis.DisplayModApi = async function (mod) {
+			document.getElementById("modDisplayModName").innerHTML = `${mod.modData.name}<a> </a><span class="badge text-bg-info">${mod.modData.version}</span><a> </a><span class="badge text-bg-warning">${mod.modData.author}</span>`;
+			document.getElementById("modDisplayshortDescription").innerHTML = `${mod.modData.shortDescription}`;
+			document.getElementById("modDisplayTags").innerHTML = `<span class="badge text-bg-primary">${mod.modData.tags.join("</span><a> </a><span class=\"badge text-bg-primary\">")}</span>`;
+			document.getElementById("modDisplayDescription").innerHTML = `${marked.parse(mod.modData.description)}`
+
+			await globalThis.UpdateModDisplayActions(mod.modID)
+			var response = await fetch(`/api/mods?modid=${mod.modID}&option=versions`);
+			var result = await response.json();
+			console.log("Response:", result);
+			await globalThis.UpdateVersionsList(mod.modID,result.versions);
+		}
+		globalThis.GetModVersion = async function (modID, version) {
+			var response = await fetch(`/api/mods?modid=${modID}&option=info&version=${version}`);
+			var result = await response.json();
+			console.log("Response:", result.mod);
+			globalThis.ModCache[result.mod.modID] = result.mod
+			await globalThis.DisplayModApi(globalThis.ModCache[result.mod.modID]);
+		}
+		globalThis.UpdateVersionsList = async function (modID,versions){
+			var versionSelection = document.getElementById("versionSelection");
+			console.log("Versions: " + JSON.stringify(versions));
+			versions.forEach((version) => {
+				var versionOption = document.createElement("option");
+				versionOption.value = version;
+				versionOption.innerHTML = version;
+				versionSelection.appendChild(versionOption);
+			});
+		}
+		function UpdateModList(){
+			var modList = document.getElementById("modList");
+			var modItems = "";
+			Object.values(globalThis.Mods).forEach((mod) => {
+				modItems += `<tr onclick='globalThis.DisplayMod("${mod.modID}")'><td>${mod.modData.name}</td><td>${mod.modData.author}</td><td>${mod.modData.version}</td><td><span class="badge text-bg-secondary">${mod.modData.tags.slice(0,Math.min(mod.modData.tags.length - 1,4)).join("</span><a> </a><span class=\"badge text-bg-secondary\">")}</span></td></tr>`
+
+			})
+			modList.innerHTML = `<table class="displayInner"><tr><th>Name</th><th>Author</th><th>Version</th><th>Tags</th></tr> ${modItems}`;
+			modList.innerHTML += "</table>";
+			globalThis.DisplayMod(Object.values(globalThis.Mods)[0].modID)
+		}
 	</script>
 </div>

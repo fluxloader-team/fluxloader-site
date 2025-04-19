@@ -169,6 +169,7 @@ globalThis.Timers = []
  */
 var LoadTimers = function (){
     log.log("Loading timers")
+    Timers = []
     fs.readdirSync( "./timers").forEach(file => {
         if(require.resolve("./timers/"+file)){
             delete require.cache[require.resolve("./timers/"+file)]

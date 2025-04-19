@@ -1,0 +1,69 @@
+<div class="pagecontainer">
+  <div class="headerContainer" id="headerContainer">
+    <a class="btn btn-secondary headerButton" style="margin-left: 15px" href="/">Mod List</a>
+    <div class="input-group mb-3" style="width: 50%; padding-top: 15px">
+      <input type="text" class="form-control" />
+    </div>
+    <a href="/auth/discord" class="btn btn-primary" style="margin-right: 15px" id="discordLogin">
+      <img src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg" alt="Discord Logo" style="width: 100px; height: 20px; margin-right: 5px" />
+    </a>
+  </div>
+  <div id="adminPage">
+
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+  <script>
+    var discordUser = JSON.parse(localStorage.getItem("discordUser"));
+    if (discordUser) {
+      console.log("Discord User:", discordUser);
+      var headerContainer = document.getElementById("headerContainer");
+      headerContainer.removeChild(document.getElementById("discordLogin"));
+
+      var discordDropdown = document.createElement("div");
+      discordDropdown.className = "dropdown";
+
+      discordDropdown.innerHTML = `
+                <button class="btn dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png" alt="${discordUser.global_name}" class="rounded-circle" style="width: 30px; height: 30px; margin-right: 5px;">
+                    ${discordUser.global_name}
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                    <li><a class="dropdown-item" href="/upload">Upload Mod</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#" id="logoutButton">Logout</a></li>
+                </ul>
+            `;
+
+      headerContainer.appendChild(discordDropdown);
+
+      var logoutButton = document.getElementById("logoutButton");
+      logoutButton.addEventListener("click", function () {
+        localStorage.removeItem("discordUser");
+        window.location.reload();
+      });
+    }
+    else {
+      window.location.href = "/";
+    }
+    document.addEventListener("DOMContentLoaded", async () => {
+      var response = await fetch("/api/admin/page", {
+        method: 'POST', // HTTP method
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          discordUser:discordUser,
+        }),
+      })
+      var result = await response.json();
+      if(result.error){
+
+      }else{
+        var adminPage = document.getElementById("adminPage");
+        adminPage.innerHTML = result.data;
+        Function(result.run)()
+      }
+    });
+  </script>
+</div>

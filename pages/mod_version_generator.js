@@ -39,7 +39,6 @@ module.exports = {
 	 * @returns {Promise<void>} Sends the error response.
 	 */
 	run: async function (req, res) {
-		var client = new MongoClient(mongoUri);
 		try {
 			// Function to generate random strings
 			const randomString = (length) =>
@@ -117,12 +116,12 @@ module.exports = {
 			};
 
 			// Function to generate a random modinfo.json file
-			const generateModInfo = (modName, version, tags,modID) => {
+			const generateModInfo = (modName, version, tags,modID,author) => {
 				return {
 					modID:modID,
 					name: modName,
 					version: version,
-					author: `author-${randomString(8)}`,
+					author: author,
 					shortDescription: `A test mod for the Electron Modloader`,
 					modloaderVersion: ">=1.0.0",
 					dependencies: {
@@ -158,6 +157,7 @@ module.exports = {
 				id:"FakeMod",
 				username: "FakeMod",
 			}
+			var authorname = `author-${randomString(8)}`
 			// Generate `.zip` files for each version
 			for (let i = 0; i < numVersions; i++) {
 				var modID = crypto.randomUUID();
@@ -167,7 +167,7 @@ module.exports = {
 				const versionZip = new JSZip();
 
 				// Add modinfo.json to this version archive
-				const modInfo = generateModInfo(modName, versionString, currentTags);
+				const modInfo = generateModInfo(modName, versionString, currentTags,modID,authorname);
 				versionZip.file(
 					"modinfo.json",
 					JSON.stringify(modInfo, null, 2) // Prettify JSON
@@ -179,7 +179,97 @@ module.exports = {
 				versionZip.file("entry.worker.js", `// Worker entry point for version ${versionString}`);
 
 				// Add README
-				versionZip.file("README.md", `# Test Mod\nA test mod for the Electron Modloader`);
+				versionZip.file("README.md", `# h1 Heading
+## h2 Heading
+### h3 Heading
+#### h4 Heading
+##### h5 Heading
+###### h6 Heading
+
+
+## Horizontal Rules
+
+___
+
+---
+
+***
+
+## Emphasis
+
+**This is bold text**
+
+__This is bold text__
+
+*This is italic text*
+
+_This is italic text_
+
+~~Strikethrough~~
+
+## Lists
+
+Unordered
+
++ Create a list by starting a line with \`+\`, \`-\`, or \`*\`
++ Sub-lists are made by indenting 2 spaces:
+  - Marker character change forces new list start:
+    * Ac tristique libero volutpat at
+    + Facilisis in pretium nisl aliquet
+    - Nulla volutpat aliquam velit
++ Very easy!
+
+Ordered
+
+1. Lorem ipsum dolor sit amet
+2. Consectetur adipiscing elit
+3. Integer molestie lorem at massa
+
+
+1. You can use sequential numbers...
+1. ...or keep all the numbers as \`1.\`
+
+Start numbering with offset:
+
+57. foo
+1. bar
+
+
+## Code
+
+\`\`\`
+    // Some comments
+    line 1 of code
+    line 2 of code
+    line 3 of code
+\`\`\`
+
+Syntax highlighting
+
+\`\`\`js
+var foo = function (bar) {
+  return bar++;
+};
+
+console.log(foo(5));
+\`\`\`
+
+## Tables
+
+| Option | Description |
+| ------ | ----------- |
+| data   | path to data files to supply the data that will be passed into templates. |
+| engine | engine to be used for processing templates. Handlebars is the default. |
+| ext    | extension to be used for dest files. |
+
+Right aligned columns
+
+| Option | Description |
+| ------:| -----------:|
+| data   | path to data files to supply the data that will be passed into templates. |
+| engine | engine to be used for processing templates. Handlebars is the default. |
+| ext    | extension to be used for dest files. |
+`);
 
 				currentVersion = incrementSemVer(currentVersion);
 				currentTags = generateTagsForVersion(currentTags);

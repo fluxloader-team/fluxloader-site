@@ -211,9 +211,9 @@ module.exports = {
 							}
 							var modVersion = {}
 							if(querys["version"]){
-								modVersion = Mongo.GetMod.Versions.One(modID,querys["version"],{ modfile: 0 });
+								modVersion = await Mongo.GetMod.Versions.One(modID,querys["version"],{ modfile: 0 });
 							}else{
-								modVersion = Mongo.GetMod.Versions.One(modID,"",{ modfile: 0 });
+								modVersion = await Mongo.GetMod.Versions.One(modID,"",{ modfile: 0 });
 							}
 
 							if (!modVersion) {
