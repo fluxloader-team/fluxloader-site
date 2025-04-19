@@ -757,6 +757,7 @@ var GetAction = {
 module.exports = {
     GetMod,
     GetUser,
+    GetAction
 }
 
 function verifyDiscordUser(userId, accessToken) {
