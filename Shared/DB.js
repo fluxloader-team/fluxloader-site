@@ -171,6 +171,11 @@ class userEntry {
      * @type {Date}
      */
     joinedAt = new Date();
+    /**
+     * if the user is banned
+     * @type {boolean}
+     */
+    banned = false
 }
 
 /**
@@ -447,7 +452,13 @@ var GetMod = {
                             User.permissions = ["user"]
                             User.description = "new user"
                             User.joinedAt = new Date()
+                            User.banned = false
                             await GetUser.Add(User)
+                        }
+                        else{
+                            if(UserRecord.banned){
+                                return "User is banned"
+                            }
                         }
                     }
                 }

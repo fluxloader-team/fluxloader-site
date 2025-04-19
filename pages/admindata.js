@@ -52,7 +52,8 @@ module.exports = {
                             discordUsername :DiscordUserData.username,
                             permissions: ["user"],
                             description : "new User",
-                            joinedAt : new Date()
+                            joinedAt : new Date(),
+                            banned: false
                         })
                     }
                     var isValidUser = await verifyDiscordUser(DiscordUserData.id, DiscordUserData.tokenResponse.access_token);
