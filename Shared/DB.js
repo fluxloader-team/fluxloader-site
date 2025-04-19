@@ -178,6 +178,12 @@ class userEntry {
     banned = false
 }
 
+class ActionEntry {
+    discordID = "";
+    action = "";
+    time = new Date();
+}
+
 /**
  * Handles operations using a MongoDB client.
  * @async
@@ -226,7 +232,7 @@ var GetMod = {
          * @param {object} [sort] - how to sort the data
          * @returns {Promise<modVersionEntry[]>} An array of all versions of the mod.
          */
-        All:async function (modID = "",project= {},sort = {uploadTime: 1}) {
+        All:async function (modID = "",project= {},sort = {uploadTime: -1}) {
             var endresult = await HandleClient(async (client) => {
                 var db = await client.db('SandustryMods');
                 var modVersionsCollection = await db.collection('ModVersions');
@@ -462,7 +468,6 @@ var GetMod = {
                         }
                     }
                 }
-
                 var zipBuffer = Buffer.from(filedata, "base64");
                 var compressedZipBuffer = await compress(zipBuffer, 10);
 
@@ -520,6 +525,10 @@ var GetMod = {
                     downloadCount: 0,
                 };
                 await versionsCollection.insertOne(modVersionEntry);
+                var action = new ActionEntry()
+                action.action = `Uploaded mod ${modData.name} ID ${modID}`
+                action.discordID = discordInfo.id
+                await GetAction.Add(action)
                 return modID;
             })
             return endresult;
@@ -667,7 +676,7 @@ var GetUser = {
      *
      * @example
      * // Banning a user with a given Discord ID
-     * const result = await Ban("123456789012345678");
+     * const result = await GetUser.Ban("123456789012345678");
      * if (result.modifiedCount > 0) {
      *     console.log("User banned successfully.");
      * } else {
@@ -681,6 +690,66 @@ var GetUser = {
             var userCollection = db.collection("Users");
             var restult = await userCollection.updateOne({ "discordID": discordID }, { $set: { banned: true } });
             return restult;
+        })
+        return endresult;
+    }
+}
+/**
+ * Functions related to action logging
+ * @namespace GetAction
+ * @memberof module:DB
+ */
+var GetAction = {
+    /**
+     * Adds a new action entry to the database.
+     *
+     * @async
+     * @function Add
+     * @memberof module:DB.GetAction
+     *
+     * @param {Object} [action=new ActionEntry()] - The action entry to insert into the database.
+     * Must follow the structure of an `ActionEntry` object.
+     *
+     * @returns {Promise<Object>} A promise that resolves to the result of the insert operation.
+     * - Contains details about the success of the insertion.
+     *
+     * @throws {Error} Throws an error if there is an issue connecting to the database or inserting the action.
+     */
+    Add:async function (action = new ActionEntry()) {
+        var endresult = await HandleClient(async (client) => {
+            var db = client.db('SandustryMods');
+            var actionCollection = db.collection("Actions");
+            var restult = await actionCollection.insertOne(action)
+            try{
+                await globalThis.Discord.client.channels.cache.get(globalThis.Config.discord.serverActionsChannel).send(`Site Action: ${action.action} by ${action.discordID}`)
+            }catch (e) {
+                
+            }
+            return restult;
+        })
+        return endresult;
+    },
+    /**
+     * Retrieves action entries from the database based on the provided query.
+     *
+     * @async
+     * @function Get
+     * @memberof module:DB.GetAction
+     *
+     * @param {Object} [query={}] - The query object to filter actions from the database.
+     * If no query is provided, all actions are retrieved.
+     *
+     * @param page
+     * @returns {Promise<Object[]>} A promise that resolves to an array of actions matching the query.
+     *
+     * @throws {Error} Throws an error if there is an issue connecting to the database or retrieving the actions.
+     */
+    Get:async function (query = {},page = {number:1,size:200}) {
+        var endresult = await HandleClient(async (client) => {
+            var db = client.db('SandustryMods');
+            var actionCollection = db.collection("Actions");
+            var restult = await actionCollection.find(query).skip((page.number - 1) * page.size)
+                .limit(page.size).sort({time:-1}).toArray();
         })
         return endresult;
     }

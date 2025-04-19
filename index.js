@@ -81,6 +81,7 @@ var defaultConfig = {
         runbot: false,
         serverLog: true,
         serverLogChannel: 'SERVER_LOG_CHANNEL',
+        serverActionsChannel: 'SERVER_ACTIONS_CHANNEL',
     },
     mongodb:{
         uri: 'mongodb://localhost:27017/somejoinstring',
