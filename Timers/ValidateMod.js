@@ -78,7 +78,7 @@ module.exports = {
                         action: `Auto-Verified mod ${mod.modID}`,
                         time: new Date(),
                     }
-                    await Mongo.GetAction.Add()
+                    await Mongo.GetAction.Add(action)
                     log.log(`ModID: ${mod.modID} verified successfully.`);
                 } else {
                     log.log(`ModID: ${mod.modID} not yet eligible for verification. Validating at ${uploadTime + elapsedTime}`);

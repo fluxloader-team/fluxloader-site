@@ -48,7 +48,7 @@ module.exports = {
                             action: `Updated mod ${mod.modID} to version ${modData.modData.version}`,
                             time: new Date(),
                         }
-                        await Mongo.GetAction.Add()
+                        await Mongo.GetAction.Add(action)
                     }
                 }
                 page++;
