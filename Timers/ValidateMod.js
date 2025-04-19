@@ -6,6 +6,7 @@
 var { MongoClient } = require('mongodb');
 var colors = require("colors");
 var Utils = require('./../utils');
+const Mongo = require("../Shared/DB");
 var log = new Utils.log.log(colors.green("Sandustry.Timer.Validate"), "./sandustry.Timer.main.txt", true);
 
 var mongoUri = globalThis.Config.mongodb.uri;
@@ -72,7 +73,12 @@ module.exports = {
                         { modID: mod.modID },
                         { $set: { verified: true } }
                     );
-
+                    var action = {
+                        discordID: "Timer",
+                        action: `Auto-Verified mod ${mod.modID}`,
+                        time: new Date(),
+                    }
+                    await Mongo.GetAction.Add()
                     log.log(`ModID: ${mod.modID} verified successfully.`);
                 } else {
                     log.log(`ModID: ${mod.modID} not yet eligible for verification. Validating at ${uploadTime + elapsedTime}`);

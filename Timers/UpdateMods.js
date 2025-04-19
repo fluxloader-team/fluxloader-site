@@ -43,6 +43,12 @@ module.exports = {
                         log.log(`Updating mod ${mod.modID} to version ${modData.modData.version}`);
                         mod.modData.version = modData.modData.version;
                         await Mongo.GetMod.Data.Update(mod.modID,mod)
+                        var action = {
+                            discordID: "Timer",
+                            action: `Updated mod ${mod.modID} to version ${modData.modData.version}`,
+                            time: new Date(),
+                        }
+                        await Mongo.GetAction.Add()
                     }
                 }
                 page++;
