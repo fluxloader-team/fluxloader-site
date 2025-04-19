@@ -56,10 +56,6 @@ module.exports = {
             ]}
         //type of ActionEntry[]
         var Actions = await Mongo.GetAction.Get(query,{number:interaction.options.getInteger('page') || 1,size:10});
-        if(Actions.length == 0){
-            await interaction.editReply({ content: `No actions found matching the query: \`${interaction.options.getString('query')}\`.` });
-            return;
-        }
         var embed = new EmbedBuilder()
             .setTitle('Site Actions')
             .setDescription(`Results for your query: \`${interaction.options.getString('query')}\``)
