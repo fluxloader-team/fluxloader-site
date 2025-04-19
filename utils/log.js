@@ -47,7 +47,9 @@ class log {
                             globalThis.Discord.client.channels.cache.get(globalThis.Config.discord.serverLogChannel).send(`Log @ ${Date.now()}
 `+ "```ansi"+`
 `+logstosend.join(`
-`)+"```")}
+`)+"```")
+                            var logstosend = []}
+
                         else{
                             logstosend.push(log)
                         }
