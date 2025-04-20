@@ -525,12 +525,10 @@ var GetMod = {
                     downloadCount: 0,
                 };
                 await versionsCollection.insertOne(modVersionEntry);
-                (async ()=>{
-                    var action = new ActionEntry()
-                    action.action = `Uploaded mod ${modData.name} ID ${modID} version ${modData.version}`
-                    action.discordID = discordInfo.id
-                    await GetAction.Add(action)
-                })
+                var action = new ActionEntry()
+                action.action = `Uploaded mod ${modData.name} ID ${modID} version ${modData.version}`
+                action.discordID = discordInfo.id
+                GetAction.Add(action)
                 return modID;
             })
             return endresult;
