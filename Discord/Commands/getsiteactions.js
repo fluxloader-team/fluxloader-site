@@ -56,20 +56,24 @@ module.exports = {
             ]}
         //type of ActionEntry[]
         var Actions = await Mongo.GetAction.Get(query,{number:interaction.options.getInteger('page') || 1,size:10});
-        var embed = new EmbedBuilder()
-            .setTitle('Site Actions')
-            .setDescription(`Results for your query: \`${interaction.options.getString('query')}\``)
-            .setColor(0x00AEFF)
-        var page = interaction.options.getInteger('page') || 1;
-        Actions.forEach((actionEntry, index) => {
-            embed.addFields({
-                name: `Action #${(page - 1) * 10 + (index + 1)}`,
-                value: `**User ID**: ${actionEntry.discordID}\n**Action**: ${actionEntry.action}\n**Timestamp**: ${actionEntry.time.toISOString()}`,
-                inline: false
+        try{
+            var embed = new EmbedBuilder()
+                .setTitle('Site Actions')
+                .setDescription(`Results for your query: \`${interaction.options.getString('query')}\``)
+                .setColor(0x00AEFF)
+            var page = interaction.options.getInteger('page') || 1;
+            Actions.forEach((actionEntry, index) => {
+                embed.addFields({
+                    name: `Action #${(page - 1) * 10 + (index + 1)}`,
+                    value: `**User ID**: ${actionEntry.discordID}\n**Action**: ${actionEntry.action}\n**Timestamp**: ${actionEntry.time.toISOString()}`,
+                    inline: false
+                });
             });
-        });
-        await interaction.editReply({ embeds: [embed] });
-
+            await interaction.editReply({ embeds: [embed] });
+        }catch(e){
+            log.log(`Error fetching site actions: ${e}`)
+            await interaction.editReply({ content: 'An error occurred while fetching the site actions. Please try again later.' });
+        }
     }
 };
 

@@ -750,6 +750,7 @@ var GetAction = {
             var actionCollection = db.collection("Actions");
             var restult = await actionCollection.find(query).skip((page.number - 1) * page.size)
                 .limit(page.size).sort({time:-1}).toArray();
+            return restult;
         })
         return endresult;
     }
