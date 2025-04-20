@@ -383,7 +383,7 @@ var GetMod = {
                                 { "modData.workerEntrypoint": { $regex: query, $options: 'i' } },
                             ]
                         },
-                        ...(verifiedOnly === true ? [{ verified: true }] : [])
+                        ...(verifiedOnly === true ? [{ "verified": true }] : (verifiedOnly === false ? [{ "verified": false }] : []))
                     ]
                 })
                     .project(projection).sort(sort);
@@ -525,10 +525,12 @@ var GetMod = {
                     downloadCount: 0,
                 };
                 await versionsCollection.insertOne(modVersionEntry);
-                var action = new ActionEntry()
-                action.action = `Uploaded mod ${modData.name} ID ${modID}`
-                action.discordID = discordInfo.id
-                await GetAction.Add(action)
+                (async ()=>{
+                    var action = new ActionEntry()
+                    action.action = `Uploaded mod ${modData.name} ID ${modID} version ${modData.version}`
+                    action.discordID = discordInfo.id
+                    await GetAction.Add(action)
+                })
                 return modID;
             })
             return endresult;

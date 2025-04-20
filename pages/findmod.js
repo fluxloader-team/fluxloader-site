@@ -287,14 +287,24 @@ module.exports = {
 				try {
 					var searchQuery = decodeURIComponent(querys["search"]);
 					var mods = []
+					var VerifiedOnly = true;
+					if(querys["verified"]){
+						if(querys["verified"] == "true"){
+
+						}else if (querys["verified"] == "false"){
+							VerifiedOnly = false
+						}else{
+							VerifiedOnly = null;
+						}
+					}
 					if(querys["page"]){
 						var page = {number:parseInt(querys["page"]),size:200}
 						if(querys["size"]){
 							page.size = parseInt(querys["size"])
 						}
-						mods =  await Mongo.GetMod.Data.Search(searchQuery,true,false,page);
+						mods =  await Mongo.GetMod.Data.Search(searchQuery,VerifiedOnly,false,page);
 					}else{
-						mods = await Mongo.GetMod.Data.Search(searchQuery,true,false);
+						mods = await Mongo.GetMod.Data.Search(searchQuery,VerifiedOnly,false);
 					}
 
 					if (mods.length === 0) {

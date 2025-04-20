@@ -1,14 +1,12 @@
 <div class="pagecontainer">
   <div class="headerContainer" id="headerContainer">
     <a class="btn btn-secondary headerButton" style="margin-left: 15px" href="/">Mod List</a>
-    <div class="input-group mb-3" style="width: 50%; padding-top: 15px">
-      <input type="text" class="form-control" />
-    </div>
+    <a class="btn btn-secondary headerButton" style="margin-left: 15px" onclick="globalThis.Pages.Selection.action();">Selection menu</a>
     <a href="/auth/discord" class="btn btn-primary" style="margin-right: 15px" id="discordLogin">
       <img src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg" alt="Discord Logo" style="width: 100px; height: 20px; margin-right: 5px" />
     </a>
   </div>
-  <div id="adminPage">
+  <div id="adminPage" class="fullpage">
 
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
