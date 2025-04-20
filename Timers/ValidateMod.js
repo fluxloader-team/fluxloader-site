@@ -62,7 +62,7 @@ module.exports = {
                 );
 
                 if (!modVersion) {
-                    log.log(`No version found for modID: ${mod.modID}. Skipping...`);
+                    //log.log(`No version found for modID: ${mod.modID}. Skipping...`);
                     continue;
                 }
                 var uploadTime = new Date(modVersion.uploadTime);
@@ -79,9 +79,9 @@ module.exports = {
                         time: new Date(),
                     }
                     await Mongo.GetAction.Add(action)
-                    log.log(`ModID: ${mod.modID} verified successfully.`);
+                    //log.log(`ModID: ${mod.modID} verified successfully.`);
                 } else {
-                    log.log(`ModID: ${mod.modID} not yet eligible for verification. Validating at ${uploadTime + elapsedTime}`);
+                   // log.log(`ModID: ${mod.modID} not yet eligible for verification. Validating at ${uploadTime + elapsedTime}`);
                 }
             }
         } catch (error) {

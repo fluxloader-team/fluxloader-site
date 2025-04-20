@@ -40,7 +40,7 @@ module.exports = {
                     if(mod.modData.version == modData.modData.version){
 
                     }else{
-                        log.log(`Updating mod ${mod.modID} to version ${modData.modData.version}`);
+                        //log.log(`Updating mod ${mod.modID} to version ${modData.modData.version}`);
                         mod.modData.version = modData.modData.version;
                         await Mongo.GetMod.Data.Update(mod.modID,mod)
                         var action = {
