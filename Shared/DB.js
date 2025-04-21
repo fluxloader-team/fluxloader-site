@@ -182,6 +182,7 @@ class ActionEntry {
     discordID = "";
     action = "";
     time = new Date();
+    logged = false;
 }
 
 /**
@@ -754,11 +755,6 @@ var GetAction = {
             var db = client.db('SandustryMods');
             var actionCollection = db.collection("Actions");
             var restult = await actionCollection.insertOne(action)
-            try{
-                await globalThis.Discord.client.channels.cache.get(globalThis.Config.discord.serverActionsChannel).send(`Site Action: ${action.action} by ${action.discordID}`)
-            }catch (e) {
-                
-            }
             return restult;
         })
         return endresult;
@@ -787,6 +783,14 @@ var GetAction = {
             return restult;
         })
         return endresult;
+    },
+    Update: async function (action = new ActionEntry()) {
+        var endresult = await HandleClient(async (client) => {
+            var db = client.db('SandustryMods');
+            var actionCollection = db.collection("Actions");
+            var restult = await actionCollection.updateOne({ _id: action._id }, { $set: action });
+            return restult;
+        })
     }
 }
 module.exports = {
