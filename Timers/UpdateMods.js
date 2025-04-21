@@ -29,31 +29,52 @@ module.exports = {
         log.log("Updating mod data...");
         var page = 1;
         var MorePages = true;
-        while (MorePages) {
-            var Mods = await Mongo.GetMod.Data.Search("",false,false,{number:page,size:300})
-            if(Mods.length == 0){
-                MorePages = false;
-            }else{
-                log.log(`Found ${Mods.length} mods`);
-                for (var mod of Mods) {
-                    var modData = await Mongo.GetMod.Versions.One(mod.modID,"",{ modfile: 0 });
-                    if(mod.modData.version == modData.modData.version){
 
-                    }else{
-                        //log.log(`Updating mod ${mod.modID} to version ${modData.modData.version}`);
-                        mod.modData.version = modData.modData.version;
-                        await Mongo.GetMod.Data.Update(mod.modID,mod)
+        while (MorePages) {
+            var Mods = await Mongo.GetMod.Data.Search(
+                "",
+                null,
+                false,
+                { number: page, size: 50 },
+                { _id: 1, modID: 1, modData: 1 }
+            );
+
+            if (Mods.length === 0) {
+                MorePages = false;
+            } else {
+                log.log(`Found ${Mods.length} mods`);
+                var modIDs = Mods.map(mod => mod.modID);
+                var modDataList = await Mongo.GetMod.Versions.Multiple(
+                    modIDs,
+                    { modfile: 0, uploadTime: 1, modData: 1 }
+                );
+                var modDataMap = Object.fromEntries(modDataList.map(mod => [mod.modID, mod.modData]));
+                for (var mod of Mods) {
+                    var modData = modDataMap[mod.modID];
+
+                    if (mod.modData.version !== modData.version) {
+                        mod.modData.version = modData.version;
+                        await Mongo.GetMod.Data.Update(mod.modID, mod);
+
                         var action = {
                             discordID: "Timer",
-                            action: `Updated mod ${mod.modID} to version ${modData.modData.version}`,
+                            action: `Updated mod ${mod.modID} to version ${modData.version}`,
                             time: new Date(),
-                        }
-                        await Mongo.GetAction.Add(action)
+                        };
+                        await Mongo.GetAction.Add(action);
                     }
+                    modData = null;
+                    mod = null;
                 }
+                modDataMap = null;
+                modDataList = null;
+                Mods = null;
+                modIDs = null;
+
                 page++;
             }
         }
+
         log.log("Mod data updated.");
     }
 };

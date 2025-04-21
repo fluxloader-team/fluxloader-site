@@ -276,6 +276,44 @@ var GetMod = {
             })
             return endresult;
         },
+        Multiple: async function (modIDs = [], project = {}, sort = { uploadTime: -1 }) {
+            if (!modIDs.length) return []; // If no modIDs provided, return empty array
+
+            var endresult = await HandleClient(async (client) => {
+                var db = client.db('SandustryMods');
+                var modVersionsCollection = db.collection('ModVersions');
+                var pipeline = [
+                    {
+                        $match: {
+                            modID: { $in: modIDs }
+                        }
+                    },
+                    {
+                        $sort: sort
+                    },
+                    {
+                        $group: {
+                            _id: "$modID",
+                            doc: { $first: "$$ROOT" }
+                        }
+                    },
+                    {
+                        $replaceRoot: { newRoot: "$doc" }
+                    },
+                    {
+                        $project: project
+                    }
+                ];
+
+                var result = modVersionsCollection.aggregate(pipeline);
+                var returnresult = await result.toArray();
+                return returnresult;
+            });
+
+            return endresult;
+        },
+
+
         /**
          * Retrieves a list of version numbers for a specific `modID`.
          * @async

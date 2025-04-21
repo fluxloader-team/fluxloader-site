@@ -51,37 +51,36 @@ module.exports = {
             var unverifiedMods = await modsCollection.find({ verified: false }).toArray();
             if(unverifiedMods.length > 0){
                 log.log(`Found ${unverifiedMods.length} unverified mod(s) to check.`);
-            }
+                var now = new Date();
 
-            var now = new Date();
-
-            for (var mod of unverifiedMods) {
-                var modVersion = await modVersionsCollection.findOne(
-                    { modID: mod.modID },
-                    { sort: { uploadTime: 1 } }
-                );
-
-                if (!modVersion) {
-                    //log.log(`No version found for modID: ${mod.modID}. Skipping...`);
-                    continue;
-                }
-                var uploadTime = new Date(modVersion.uploadTime);
-                var elapsedTime = (now - uploadTime);
-
-                if (elapsedTime > validationTime) {
-                    await modsCollection.updateOne(
+                for (var mod of unverifiedMods) {
+                    var modVersion = await modVersionsCollection.findOne(
                         { modID: mod.modID },
-                        { $set: { verified: true } }
+                        { sort: { uploadTime: 1 } }
                     );
-                    var action = {
-                        discordID: "Timer",
-                        action: `Auto-Verified mod ${mod.modID}`,
-                        time: new Date(),
+
+                    if (!modVersion) {
+                        //log.log(`No version found for modID: ${mod.modID}. Skipping...`);
+                        continue;
                     }
-                    await Mongo.GetAction.Add(action)
-                    //log.log(`ModID: ${mod.modID} verified successfully.`);
-                } else {
-                   // log.log(`ModID: ${mod.modID} not yet eligible for verification. Validating at ${uploadTime + elapsedTime}`);
+                    var uploadTime = new Date(modVersion.uploadTime);
+                    var elapsedTime = (now - uploadTime);
+
+                    if (elapsedTime > validationTime) {
+                        await modsCollection.updateOne(
+                            { modID: mod.modID },
+                            { $set: { verified: true } }
+                        );
+                        var action = {
+                            discordID: "Timer",
+                            action: `Auto-Verified mod ${mod.modID}`,
+                            time: new Date(),
+                        }
+                        await Mongo.GetAction.Add(action)
+                        //log.log(`ModID: ${mod.modID} verified successfully.`);
+                    } else {
+                        // log.log(`ModID: ${mod.modID} not yet eligible for verification. Validating at ${uploadTime + elapsedTime}`);
+                    }
                 }
             }
         } catch (error) {
