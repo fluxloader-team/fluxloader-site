@@ -29,7 +29,6 @@ module.exports = {
         log.log("Updating mod data...");
         var page = 1;
         var MorePages = true;
-
         while (MorePages) {
             var Mods = await Mongo.GetMod.Data.Search(
                 "",
@@ -38,17 +37,16 @@ module.exports = {
                 { number: page, size: 50 },
                 { _id: 1, modID: 1, modData: 1 }
             );
-
             if (Mods.length === 0) {
                 MorePages = false;
             } else {
                 log.log(`Found ${Mods.length} mods`);
                 var modIDs = Mods.map(mod => mod.modID);
                 var modDataList = await Mongo.GetMod.Versions.Multiple(
-                    modIDs,
-                    { modfile: 0, uploadTime: 1, modData: 1 }
+                    modIDs
                 );
                 var modDataMap = Object.fromEntries(modDataList.map(mod => [mod.modID, mod.modData]));
+                //log.log(`${JSON.stringify(modDataMap)}`)
                 for (var mod of Mods) {
                     var modData = modDataMap[mod.modID];
 
