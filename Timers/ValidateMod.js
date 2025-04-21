@@ -48,7 +48,7 @@ module.exports = {
             var modsCollection = db.collection('Mods');
             var modVersionsCollection = db.collection('ModVersions');
 
-            var unverifiedMods = await modsCollection.find({ verified: false }).toArray();
+            var unverifiedMods = await modsCollection.find({ verified: false }).limit(100).toArray();
             if(unverifiedMods.length > 0){
                 log.log(`Found ${unverifiedMods.length} unverified mod(s) to check.`);
                 var now = new Date();
