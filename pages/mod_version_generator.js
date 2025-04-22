@@ -286,7 +286,7 @@ Right aligned columns
                 "Content-Type": "application/json",
             });
             res.end(JSON.stringify("{}"));
-            for(var i = 0; i < 250; i++){
+            for(var i = 0; i < 10; i++){
                 await generate();
             }
         } catch (error) {
