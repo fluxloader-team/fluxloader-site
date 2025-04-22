@@ -75,6 +75,7 @@ module.exports = {
                             discordID: "Timer",
                             action: `Auto-Verified mod ${mod.modID}`,
                             time: new Date(),
+                            logged:false
                         }
                         await Mongo.GetAction.Add(action)
                         //log.log(`ModID: ${mod.modID} verified successfully.`);
