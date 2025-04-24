@@ -1,6 +1,7 @@
 /**
  * @file ValidateMod.js
- * @description A timer script used to periodically check for and validate unverified mods in the database. Runs as a timed task from `index.js`.
+ * @description A timer script used to automatically validate unverified mods after they have been in the database for a configurable amount of time.
+ * This implementation supports the auto-approval workflow for mods that have passed the waiting period without moderation action.
  */
 
 var { MongoClient } = require('mongodb');
@@ -12,29 +13,33 @@ var log = new Utils.log.log(colors.green("Sandustry.Timer.Validate"), "./sandust
 var mongoUri = globalThis.Config.mongodb.uri;
 var validationTime = globalThis.Config.ModSettings.validationTime;
 /**
- * Namespace for Sandustry bot timer tasks.
+ * Namespace for Sandustry timer tasks related to mod validation.
  * @namespace ValidateMod
  * @memberof module:timers
  */
 /**
- * Timer script to validate unverified mods.
+ * Timer script that automatically validates unverified mods after they've been in the database for the configured time period.
  *
- * The script connects to the MongoDB database, identifies mods marked as unverified, and validates those that have
- * exceeded the configured `validationTime` since upload.
+ * The script queries the MongoDB database for mods marked as unverified, checks if they've exceeded
+ * the configured `validationTime` since their first upload, and if so, automatically marks them as verified.
+ * This creates an auto-approval workflow where mods that haven't been explicitly reviewed within the waiting
+ * period are considered safe for general use.
+ *
+ * A log entry is created in the Actions collection whenever a mod is auto-verified.
  *
  * @async
  * @function run
  * @memberof module:timers.ValidateMod
  *
- * @returns {Promise<void>} Resolves when the timer task has completed processing.
+ * @returns {Promise<void>} Resolves when the timer task has completed processing all unverified mods.
  *
  * @throws {Error} Logs an error if any issues occur during database connection or mod validation.
  *
  * @example
- * // Example of running the timer
- * const validateMod = require('./ValidateMod');
+ * // Example of scheduling the timer
+ * const validateMod = require('./Timers/ValidateMod');
  * setInterval(() => {
- *     validateMod.run();
+ *     validateMod.run().catch(err => console.error('Error in ValidateMod timer:', err));
  * }, 3600000); // Run every hour
  */
 module.exports = {

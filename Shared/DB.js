@@ -178,10 +178,37 @@ class userEntry {
     banned = false
 }
 
+/**
+ * Represents an action entry in the database for logging user actions.
+ *
+ * This class defines the structure of action log entries stored in the `Actions` collection.
+ *
+ * @class
+ * @memberof module:DB
+ */
 class ActionEntry {
+    /**
+     * The Discord ID of the user who performed the action.
+     * @type {string}
+     */
     discordID = "";
+
+    /**
+     * Description of the action performed.
+     * @type {string}
+     */
     action = "";
+
+    /**
+     * The date and time when the action occurred. Defaults to the current date and time.
+     * @type {Date}
+     */
     time = new Date();
+
+    /**
+     * Indicates whether the action has been logged or processed.
+     * @type {boolean}
+     */
     logged = false;
 }
 
@@ -277,6 +304,23 @@ var GetMod = {
             })
             return endresult;
         },
+        /**
+         * Retrieves the latest version of multiple mods by their IDs.
+         *
+         * This function uses an aggregation pipeline to efficiently fetch the most recent version
+         * of each mod in the provided list of mod IDs.
+         *
+         * @async
+         * @function
+         * @memberof module:DB.GetMod.Versions
+         *
+         * @param {string[]} [modIDs] - Array of mod IDs to retrieve.
+         * @param {object} [project] - Fields to include in the results.
+         * @param {object} [sort] - How to sort the data (default is newest first).
+         *
+         * @returns {Promise<modVersionEntry[]>} A promise that resolves to an array of the latest version of each requested mod.
+         * Returns an empty array if no mod IDs are provided or none are found.
+         */
         Multiple: async function (modIDs = [], project = { uploadTime: 1, modData: 1,modID: 1 }, sort = { uploadTime: -1 }) {
             if (!modIDs.length) return [];
 
@@ -338,10 +382,10 @@ var GetMod = {
          *
          * @async
          * @function Delete
-         * @memberof module:DB
+         * @memberof module:DB.GetMod.Versions
          *
-         * @param {string} [modID] - The unique identifier for the mod.
-         * @param {string} [version] - The specific version of the mod to delete.
+         * @param {string} [modID=""] - The unique identifier for the mod.
+         * @param {string} [version=""] - The specific version of the mod to delete.
          *
          * @returns {Promise<Object>} A promise that resolves to the result of the deletion operation for the specified mod version.
          * - If the mod version was deleted, the result contains confirmation of the deletion.
@@ -351,7 +395,7 @@ var GetMod = {
          *
          * @example
          * // Deleting a specific mod version
-         * const result = await Delete("someModID", "1.0.0");
+         * const result = await GetMod.Versions.Delete("someModID", "1.0.0");
          * console.log("Deletion Status:", result);
          *
          * // If only one version remained and was deleted, the mod will also be removed from the database.
@@ -385,7 +429,7 @@ var GetMod = {
          * @param {string} [query] - The search query
          * @param {boolean} [verifiedOnly] - if it should only find verified mods
          * @param {boolean} [IdsOnly] - if it should return modids only
-         * @param {object} [page ={number:1,size:200}] - what page of search is this and what size
+         * @param {object} [page] - what page of search is this and what size
          * @param {object} [project] - filter out data
          * @param {object} [sort] - how to sort the data
          * @returns {(Promise<modEntry[]>|string[])} An array of found mods or modid if IdsOnly
@@ -568,6 +612,32 @@ var GetMod = {
             })
             return endresult;
         },
+        /**
+         * Updates a mod entry in the database.
+         *
+         * This function updates an existing mod entry in the `Mods` collection, identified by its unique `modID`.
+         *
+         * @async
+         * @function Update
+         * @memberof module:DB.GetMod.Data
+         *
+         * @param {string} [modID=""] - The unique identifier of the mod to update.
+         * @param {modEntry} [entry=new modEntry()] - The mod entry data containing the updated values.
+         *
+         * @returns {Promise<Object>} A promise that resolves to the result of the update operation.
+         * - Contains details about the success of the update.
+         *
+         * @throws {Error} Throws an error if there is an issue connecting to the database or updating the mod entry.
+         *
+         * @example
+         * // Update a mod's verification status
+         * const modToUpdate = await GetMod.Data.One("someModID");
+         * if (modToUpdate) {
+         *     modToUpdate.verified = true;
+         *     const result = await GetMod.Data.Update("someModID", modToUpdate);
+         *     console.log("Update Status:", result);
+         * }
+         */
         Update: async function (modID = "", entry = new modEntry()) {
             var endresult = await HandleClient(async (client) => {
                 var db = client.db('SandustryMods');
@@ -585,9 +655,9 @@ var GetMod = {
      *
      * @async
      * @function Delete
-     * @memberof module:DB
+     * @memberof module:DB.GetMod
      *
-     * @param {string} [modID] - The unique identifier for the mod to be deleted.
+     * @param {string} [modID=""] - The unique identifier for the mod to be deleted.
      *
      * @returns {Promise<Object>} A promise that resolves to an object containing the results of the deletion:
      * - `modDB` (Object): The result of the deletion operation for the mod in the `Mods` collection.
@@ -597,7 +667,7 @@ var GetMod = {
      *
      * @example
      * // Deleting a mod and its versions
-     * const result = await Delete("someModID");
+     * const result = await GetMod.Delete("someModID");
      * console.log("Mod Deletion Status:", result.modDB);
      * console.log("Version Deletion Status:", result.VersionsDB);
      */
@@ -700,9 +770,9 @@ var GetUser = {
      *
      * @async
      * @function Ban
-     * @memberof module:DB
+     * @memberof module:DB.GetUser
      *
-     * @param {string} [discordID] - The Discord ID of the user to be banned.
+     * @param {string} [discordID=""] - The Discord ID of the user to be banned.
      *
      * @returns {Promise<Object>} A promise that resolves to the result of the update operation.
      * - The result contains information about the success of the update.
@@ -718,7 +788,6 @@ var GetUser = {
      *     console.log("User not found or ban status not updated.");
      * }
      */
-
     Ban:async function (discordID = "") {
         var endresult = await HandleClient(async (client) => {
             var db = client.db('SandustryMods');
@@ -769,10 +838,21 @@ var GetAction = {
      * @param {Object} [query={}] - The query object to filter actions from the database.
      * If no query is provided, all actions are retrieved.
      *
-     * @param page
+     * @param {Object} [page={number:1,size:200}] - Pagination parameters
+     * @param {number} [page.number=1] - The page number to retrieve (starting from 1)
+     * @param {number} [page.size=200] - The number of results per page
+     *
      * @returns {Promise<Object[]>} A promise that resolves to an array of actions matching the query.
      *
      * @throws {Error} Throws an error if there is an issue connecting to the database or retrieving the actions.
+     *
+     * @example
+     * // Get the first 50 actions for a specific user
+     * const actions = await GetAction.Get(
+     *   { discordID: "123456789012345678" },
+     *   { number: 1, size: 50 }
+     * );
+     * console.log(`Found ${actions.length} actions`);
      */
     Get:async function (query = {},page = {number:1,size:200}) {
         var endresult = await HandleClient(async (client) => {
@@ -784,6 +864,25 @@ var GetAction = {
         })
         return endresult;
     },
+    /**
+     * Updates an existing action entry in the database.
+     *
+     * This function modifies an action entry in the `Actions` collection, identified by its unique `_id`.
+     *
+     * @async
+     * @function Update
+     * @memberof module:DB.GetAction
+     *
+     * @param {Object} [action] - The action entry to update, which must include:
+     * - `_id`: The unique identifier of the action to update.
+     * - Other fields to be updated with their new values.
+     *
+     * @returns {Promise<Object>} A promise that resolves to the result of the update operation.
+     * - Contains details about the success of the update.
+     *
+     * @throws {Error} Throws an error if there is an issue connecting to the database or updating the action entry.
+     *
+     */
     Update: async function (action = new ActionEntry()) {
         var endresult = await HandleClient(async (client) => {
             var db = client.db('SandustryMods');
@@ -791,6 +890,7 @@ var GetAction = {
             var restult = await actionCollection.updateOne({ _id: action._id }, { $set: action });
             return restult;
         })
+        return endresult;
     }
 }
 module.exports = {

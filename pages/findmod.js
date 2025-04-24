@@ -1,7 +1,8 @@
 /**
  * @file findmod.js
  * @description Handles APIs for searching and retrieving mod information, versions, and files.
- * This module provides endpoints to search for mods, download specific versions, and get mod-related metadata.
+ * This module provides RESTful endpoints to search the mod database, download specific versions, and retrieve mod metadata.
+ * It serves as the primary interface between the frontend and the mod database.
  */
 
 var colors = require("colors");
@@ -11,7 +12,8 @@ var log = new Utils.log.log(colors.green("Sandustry.web.pages.search"), "./sandu
 var Mongo = require("./../Shared/DB");
 
 /**
- * for mod search and retrieval functionality within the web module.
+ * Namespace for mod search and retrieval functionality within the web module.
+ * This provides the API endpoints that power the mod browser interface.
  * @namespace search
  * @memberof module:api
  */
@@ -79,6 +81,14 @@ module.exports = {
 	 * @returns {Promise<void>} - The response is sent directly to the client.
 	 *
 	 * @throws {Error} If query parameters are missing or other errors occur during processing.
+	 *
+	          * Additional query parameters for search:
+	          * - **verified**: *(optional, only for `search`)*
+	          *   Filters mods by verification status:
+	          *   - `"true"`: Return only verified mods
+	          *   - `"false"`: Return only unverified mods
+	          *   - `"null"` or omitted: Return all mods regardless of verification status
+	          *   - *Example*: `verified=true`
 	 *
 	 * @example <caption>Example 1: Search for mods (first page, default size)</caption>
 	 * // URL: /api/mods?search=testmod

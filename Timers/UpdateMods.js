@@ -1,6 +1,7 @@
 /**
  * @file UpdateMods.js
- * @description A timer to make sure ModDB data is using the latest mod version data.
+ * @description A timer to make sure ModDB data is using the latest mod version data from the ModVersions collection.
+ * This timer ensures that mod metadata in the Mods collection stays synchronized with the latest version information.
  */
 var colors = require("colors");
 var Utils = require('./../utils');
@@ -13,16 +14,26 @@ var Mongo = require("./../Shared/DB");
  * @memberof module:timers
  */
 /**
- * Timer script to update modData.
+ * Timer script to update mod metadata in the Mods collection based on the latest version data.
+ *
+ * This function retrieves mods in batches of 50, fetches their latest version data from the ModVersions collection,
+ * and updates the main mod entries if their version information has changed. This ensures that search results
+ * and mod listings always display the most current version information.
  *
  * @async
  * @function run
  * @memberof module:timers.UpdateMods
  *
- * @returns {Promise<void>} Resolves when the timer task has completed processing.
+ * @returns {Promise<void>} Resolves when the timer task has completed updating all mods.
  *
- * @throws {Error} Logs an error if any issues occur.
+ * @throws {Error} Logs an error if any issues occur during database operations.
  *
+ * @example
+ * // Example of how this timer might be scheduled
+ * const UpdateMods = require('./Timers/UpdateMods');
+ * setInterval(() => {
+ *   UpdateMods.run().catch(err => console.error('Error in UpdateMods timer:', err));
+ * }, 86400000); // Run once per day
  */
 module.exports = {
     async run() {
