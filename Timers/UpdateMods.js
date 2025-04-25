@@ -51,7 +51,7 @@ module.exports = {
             if (Mods.length === 0) {
                 MorePages = false;
             } else {
-                log.log(`Found ${Mods.length} mods`);
+                //log.log(`Found ${Mods.length} mods`);
                 var modIDs = Mods.map(mod => mod.modID);
                 var modDataList = await Mongo.GetMod.Versions.Multiple(
                     modIDs
