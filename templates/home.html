@@ -68,7 +68,7 @@
 
 		globalThis.buildSearchQuery = function(searchText) {
 			if (!searchText || searchText.trim() === "") {
-				return JSON.stringify({});
+				return JSON.stringify({"modData.name":{$regex: "", $options: "i"}});
 			}
 			
 			const query = { $and: [] };
@@ -164,7 +164,7 @@
 		}
 		document.addEventListener("DOMContentLoaded", async () => {
 			try {
-				const encodedQuery = encodeURIComponent(JSON.stringify({}));
+				const encodedQuery = encodeURIComponent(JSON.stringify({"modData.name":{$regex: "", $options: "i"}}));
 				const response = await fetch(`/api/mods?search=${encodedQuery}&verified=null&size=200`);
 				const result = await response.json();
 				
