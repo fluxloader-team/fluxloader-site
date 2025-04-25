@@ -87,7 +87,7 @@
 			if (tags.length > 0) {
 				query.$and.push({
 					"modData.tags": { 
-						$all: tags.map(tag => new RegExp(tag, "i")) 
+						$all: tags
 					}
 				});
 			}
