@@ -477,7 +477,6 @@ module.exports = {
 					var parsedQuery;
 					try {
 						parsedQuery = JSON.parse(searchQuery);
-						// Validate it's an array or object
 						if (!parsedQuery || (typeof parsedQuery !== 'object')) {
 							throw new Error("Invalid search query format");
 						}
@@ -497,14 +496,12 @@ module.exports = {
 					var VerifiedOnly = true;
 					if(querys["verified"]){
 						if(querys["verified"] == "true"){
-							// Keep default true value
 						}else if (querys["verified"] == "false"){
 							VerifiedOnly = false
 						}else{
 							VerifiedOnly = null;
 						}
 					}
-					// Default to an empty array for search if nothing is provided
 					if (!searchQuery || searchQuery.trim() === "") {
 						searchQuery = "[]";
 					}
