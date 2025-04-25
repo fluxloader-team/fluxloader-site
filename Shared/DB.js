@@ -459,7 +459,7 @@ var GetMod = {
                 if (project) {
                     projection = { ...projection, ...project };
                 }
-
+                console.log(JSON.parse(query))
                 var searchResults = await modsCollection.find({
                     $and: [
                         ...JSON.parse(query),
