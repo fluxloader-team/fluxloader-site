@@ -3,7 +3,7 @@
  * @description The main entry point of the Sandustry mod site application.
  */
 
-var colors = require('colors');
+ var colors = require('colors');
 var http = require("http")
 var crypto = require("crypto")
 var fs = require('fs')
@@ -212,7 +212,7 @@ function computeRepoHash(directory = './') {
  * @function performUpdate
  * @memberof module:main
  */
-function performUpdate() {
+async function performUpdate() {
     if(globalThis.Config.git.pull){
         exec('git pull', (error, stdout, stderr) => {
             if (error) {
@@ -248,10 +248,10 @@ function performUpdate() {
             log.log('No changes detected.');
         }
     }
-    Timers.forEach(timer => {
-        timer.run();
-    })
-
+    for (const timer of Timers) {
+        await timer.run();
+    }
+    setTimeout(performUpdate, 10000);
 }
 
 
@@ -272,7 +272,7 @@ var WebRequestHandler = function (req, res){
         res.end("404")
     }
 }
-setInterval(performUpdate, 10000);
+setTimeout(performUpdate, 10000);
 
 if (globalThis.Config.discord.runbot) {
     try {
