@@ -435,6 +435,20 @@ var GetMod = {
          * @returns {(Promise<modEntry[]>|string[])} An array of found mods or modid if IdsOnly
          */
         Search: async function (query = "",verifiedOnly = true, IdsOnly = true,page = {number:1,size:200},project = {},sort = {}) {
+            //{
+            //    $or: [
+            //        { "modData.modID": { $regex: query, $options: 'i' } },
+            //        { "modData.name": { $regex: query, $options: 'i' } },
+            //        { "modData.version": { $regex: query, $options: 'i' } },
+            //        { "modData.author": { $regex: query, $options: 'i' } },
+            //        { "modData.shortDescription": { $regex: query, $options: 'i' } },
+            //        { "modData.modloaderVersion": { $regex: query, $options: 'i' } },
+            //        { "modData.tags": { $regex: query, $options: 'i' } },
+            //        { "modData.electronEntrypoint": { $regex: query, $options: 'i' } },
+            //        { "modData.browserEntrypoint": { $regex: query, $options: 'i' } },
+            //        { "modData.workerEntrypoint": { $regex: query, $options: 'i' } },
+            //    ]
+            //}
             var endresult = await HandleClient(async (client) => {
                 var db = client.db('SandustryMods');
                 var modsCollection = db.collection('Mods');
@@ -448,20 +462,7 @@ var GetMod = {
 
                 var searchResults = await modsCollection.find({
                     $and: [
-                        {
-                            $or: [
-                                { "modData.modID": { $regex: query, $options: 'i' } },
-                                { "modData.name": { $regex: query, $options: 'i' } },
-                                { "modData.version": { $regex: query, $options: 'i' } },
-                                { "modData.author": { $regex: query, $options: 'i' } },
-                                { "modData.shortDescription": { $regex: query, $options: 'i' } },
-                                { "modData.modloaderVersion": { $regex: query, $options: 'i' } },
-                                { "modData.tags": { $regex: query, $options: 'i' } },
-                                { "modData.electronEntrypoint": { $regex: query, $options: 'i' } },
-                                { "modData.browserEntrypoint": { $regex: query, $options: 'i' } },
-                                { "modData.workerEntrypoint": { $regex: query, $options: 'i' } },
-                            ]
-                        },
+                        ...JSON.parse(query),
                         ...(verifiedOnly === true ? [{ "verified": true }] : (verifiedOnly === false ? [{ "verified": false }] : []))
                     ]
                 })
@@ -645,6 +646,54 @@ var GetMod = {
                 var restult = await modsCollection.updateOne({ modID: modID }, { $set: entry });
                 return restult;
             })
+            return endresult;
+        },
+        /**
+         * Fetches a random mod from the database.
+         * 
+         * @async
+         * @function
+         * @memberof module:DB.GetMod.Data
+         * @param {boolean} [verifiedOnly=true] - Whether to only return verified mods
+         * @param {object} [project={}] - Fields to include in the results
+         * @returns {Promise<modEntry|null>} A promise that resolves to a random mod or null if none found
+         * 
+         * @example
+         * // Get a random verified mod
+         * const randomMod = await GetMod.Data.random();
+         * 
+         * // Get a random mod regardless of verification status
+         * const anyRandomMod = await GetMod.Data.random(null);
+         */
+        Random: async function (verifiedOnly = true, project = {}) {
+            var endresult = await HandleClient(async (client) => {
+                var db = client.db('SandustryMods');
+                var modsCollection = db.collection('Mods');
+                
+                var query = {};
+                if (verifiedOnly === true) {
+                    query.verified = true;
+                } else if (verifiedOnly === false) {
+                    query.verified = false;
+                }
+                
+                var count = await modsCollection.countDocuments(query);
+                
+                if (count === 0) {
+                    return null;
+                }
+                
+                var random = Math.floor(Math.random() * count);
+                
+                var result = await modsCollection.find(query)
+                    .project(project)
+                    .skip(random)
+                    .limit(1)
+                    .toArray();
+                
+                return result.length > 0 ? result[0] : null;
+            });
+            
             return endresult;
         }
     },
