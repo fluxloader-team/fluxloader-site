@@ -105,7 +105,7 @@
 			}
 			
 			if (query.$and.length === 0) {
-				return JSON.stringify({});
+				return JSON.stringify({"modData.name":{$regex: "", $options: "i"}});
 			}
 			
 			return JSON.stringify(query);
@@ -116,7 +116,7 @@
 				const searchInput = document.getElementById("searchInput");
 				const searchText = searchInput.value;
 				globalThis.SearchQuery = searchText;
-				
+
 				const queryJson = globalThis.buildSearchQuery(searchText);
 				const encodedQuery = encodeURIComponent(queryJson);
 
@@ -149,7 +149,12 @@
 					globalThis.Mods[mod.modID] = mod;
 				});
 				
-				console.log(`Found ${result.mods.length} mods in search`);
+				if (searchText.trim() === "") {
+					console.log(`Loaded all ${result.mods.length} mods`);
+				} else {
+					console.log(`Found ${result.mods.length} mods in search`);
+				}
+
 				UpdateModList();
 			} catch (error) {
 				console.error("Search failed:", error);
