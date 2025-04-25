@@ -45,7 +45,7 @@ module.exports = {
                 JSON.stringify({"modData.name":{$regex: "", $options: "i"}}),
                 null,
                 false,
-                { number: page, size: 50 },
+                { number: page, size: 100 },
                 { _id: 1, modID: 1, modData: 1 }
             );
             if (Mods.length === 0) {
