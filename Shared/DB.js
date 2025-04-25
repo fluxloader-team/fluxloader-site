@@ -462,7 +462,7 @@ var GetMod = {
                 console.log(query)
                 var searchResults = await modsCollection.find({
                     $and: [
-                        ...JSON.parse(query),
+                        JSON.parse(query),
                         ...(verifiedOnly === true ? [{ "verified": true }] : (verifiedOnly === false ? [{ "verified": false }] : []))
                     ]
                 })
