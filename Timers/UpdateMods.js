@@ -42,7 +42,7 @@ module.exports = {
         var MorePages = true;
         while (MorePages) {
             var Mods = await Mongo.GetMod.Data.Search(
-                "",
+                JSON.stringify({"modData.name":{$regex: "", $options: "i"}}),
                 null,
                 false,
                 { number: page, size: 50 },
