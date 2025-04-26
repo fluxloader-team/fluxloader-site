@@ -65,6 +65,7 @@
 
 		globalThis.Mods = {}
 		globalThis.SearchQuery = ""
+		globalThis.Searching = false
 
 		globalThis.buildSearchQuery = function(searchText) {
 			if (!searchText || searchText.trim() === "") {
@@ -110,8 +111,21 @@
 			
 			return JSON.stringify(query);
 		};
-		
-		globalThis.PerformSearch = async function() {
+		var modList = document.getElementById('modList');
+		globalThis.pageGet = 1;
+		modList.addEventListener('scroll', () => {
+			var isAtBottom = modList.scrollHeight - modList.scrollTop === modList.clientHeight;
+			if (isAtBottom) {
+				globalThis.PerformSearch(globalThis.pageGet++);
+			}
+		});
+
+		globalThis.PerformSearch = async function(pageToget = 1, perPage = 5000) {
+			if(globalThis.Searching === true){
+				return;
+			}
+			globalThis.searching = true;
+			console.log("Performing search for:", globalThis.SearchQuery)
 			try {
 				var searchInput = document.getElementById("searchInput");
 				var searchText = searchInput.value;
@@ -121,27 +135,48 @@
 				var encodedQuery = encodeURIComponent(queryJson);
 
 				var modList = document.getElementById("modList");
-				modList.innerHTML = `
+				if(pageToget === 1){
+					modList.innerHTML = `
 					<div class="d-flex justify-content-center">
 						<div class="spinner-border" role="status">
 							<span class="visually-hidden">Searching...</span>
 						</div>
 					</div>
 				`;
+				}
+
 				
-				var response = await fetch(`/api/mods?search=${encodedQuery}&verified=null&size=5000&page=1`);
+				var response = await fetch(`/api/mods?search=${encodedQuery}&verified=null&size=${perPage}&page=${pageToget}`);
 				var result = await response.json();
 
 				globalThis.Mods = {}
 				
 				if (result.error) {
 					console.error("Search error:", result.error);
-					modList.innerHTML = `<div class="alert alert-danger">Search error: ${result.error}</div>`;
+					if(pageToget === 1){
+						modList.innerHTML = `<div class="alert alert-danger">Search error: ${result.error}</div>`;
+					}else{
+						document.getElementById("modListTable").innerHTML += `
+					<tr>
+						<td colspan="4">Search error: ${result.error}</td>
+					</tr>
+					`
+					}
+
 					return;
 				}
 				
 				if (!result.mods || result.mods.length === 0) {
-					modList.innerHTML = `<div class="alert alert-info">No mods found matching your search.</div>`;
+					if(pageToget === 1){
+						modList.innerHTML = `<div class="alert alert-info">No mods found matching your search.</div>`;
+					}else{
+						document.getElementById("modListTable").innerHTML += `
+					<tr>
+						<td colspan="4">All mods loaded</td>
+					</tr>
+					`
+					}
+
 					return;
 				}
 
@@ -155,7 +190,7 @@
 					console.log(`Found ${result.mods.length} mods in search`);
 				}
 
-				UpdateModList();
+				UpdateModList(pageToget);
 			} catch (error) {
 				console.error("Search failed:", error);
 				var modList = document.getElementById("modList");
@@ -163,6 +198,10 @@
 			}
 		}
 		document.addEventListener("DOMContentLoaded", async () => {
+			if(globalThis.Searching === true){
+				return;
+			}
+			globalThis.searching = true;
 			try {
 				var encodedQuery = encodeURIComponent(JSON.stringify({"modData.name":{$regex: "", $options: "i"}}));
 				var response = await fetch(`/api/mods?search=${encodedQuery}&verified=null&size=5000&page=1`);
@@ -293,14 +332,15 @@
 				versionSelection.appendChild(versionOption);
 			});
 		}
-		function UpdateModList(){
+		function UpdateModList(onPage = 1){
 			var modList = document.getElementById("modList");
 			var modItems = "";
 			var mods = Object.values(globalThis.Mods);
 			
 			if (mods.length === 0) {
-				modList.innerHTML = `<div class="alert alert-info">No mods found matching your search criteria.</div>`;
-				document.getElementById("modDisplay").innerHTML = `
+				if(onPage === 1){
+					modList.innerHTML = `<div class="alert alert-info">No mods found matching your search criteria.</div>`;
+					document.getElementById("modDisplay").innerHTML = `
 					<div class="alert alert-secondary">
 						<h4>No mod selected</h4>
 						<p>Search for mods using the search box above.</p>
@@ -312,7 +352,16 @@
 						</p>
 					</div>
 				`;
-				document.getElementById("modDisplayActions").innerHTML = "";
+					document.getElementById("modDisplayActions").innerHTML = "";
+				}else{
+					document.getElementById("modListTable").innerHTML += `
+					<tr>
+						<td colspan="4">No more mods to load.</td>
+					</tr>
+					`
+				}
+
+
 				return;
 			}
 			
@@ -328,9 +377,9 @@
 					<td><span class="badge text-bg-secondary">${tagList}</span></td>
 				</tr>`;
 			});
-			
-			modList.innerHTML = `
-				<table class="displayInner">
+			if(onPage === 1){
+				modList.innerHTML = `
+				<table class="displayInner" id="modListTable">
 					<tr>
 						<th>Name</th>
 						<th>Author</th>
@@ -340,8 +389,13 @@
 					${modItems}
 				</table>
 			`;
+				globalThis.DisplayMod(mods[0].modID);
+			}else{
+				document.getElementById("modListTable").innerHTML += modItems;
+			}
 
-			globalThis.DisplayMod(mods[0].modID);
+
+
 		}
 	</script>
 </div>
