@@ -6,11 +6,11 @@
  */
 
 
-const colors = require("colors");
-const JSZip = require("jszip");
-const Utils = require("./../utils");
-const crypto = require("crypto");
-const log = new Utils.log.log(colors.green("Sandustry.web.pages.generateMod"), "./sandustry.web.main.txt", true);
+var colors = require("colors");
+var JSZip = require("jszip");
+var Utils = require("./../utils");
+var crypto = require("crypto");
+var log = new Utils.log.log(colors.green("Sandustry.web.pages.generateMod"), "./sandustry.web.main.txt", true);
 var Mongo = require("./../Shared/DB");
 
 /**
@@ -40,15 +40,28 @@ module.exports = {
      */
     run: async function (req, res) {
         try {
+            var count = 100;
+            var maxCount = 1000000000;
+
+            if (req.url.includes('?')) {
+                var queryParams = new URLSearchParams(req.url.split('?')[1]);
+                if (queryParams.has('count')) {
+                    var requestedCount = parseInt(queryParams.get('count'));
+                    if (!isNaN(requestedCount) && requestedCount > 0) {
+                        count = Math.min(requestedCount, maxCount);
+                    }
+                }
+            }
+            
             // Function to generate random strings
-            const randomString = (length) =>
+            var randomString = (length) =>
                 Math.random()
                     .toString(36)
                     .substring(2, 2 + length);
-
+    
             // Function to increment semantic version
-            const incrementSemVer = ({major, minor, patch}) => {
-                const type = Math.floor(Math.random() * 3); // 0 = major, 1 = minor, 2 = patch
+            var incrementSemVer = ({major, minor, patch}) => {
+                var type = Math.floor(Math.random() * 3); // 0 = major, 1 = minor, 2 = patch
                 if (type === 0) {
                     return {major: major + 1, minor: 0, patch: 0};
                 } else if (type === 1) {
@@ -57,9 +70,9 @@ module.exports = {
                     return {major, minor, patch: patch + 1};
                 }
             };
-
+    
             // Predefined static list of 25 realistic tags
-            const predefinedTags = [
+            var predefinedTags = [
                 "multiplayer",
                 "sandbox",
                 "mod",
@@ -86,37 +99,47 @@ module.exports = {
                 "platformer",
                 "tactical",
             ];
-
+            
+            // Generate a pool of authors (65% of the total count)
+            var authorCount = Math.max(5, Math.floor(count * 0.65));
+            var authorPool = [];
+            
+            for (var i = 0; i < authorCount; i++) {
+                authorPool.push(`author-${randomString(8)}`);
+            }
+            
+            log.log(`Generated author pool with ${authorPool.length} authors`);
+    
             // Function to generate tags for a version
-            const generateTagsForVersion = (previousTags = null) => {
+            var generateTagsForVersion = (previousTags = null) => {
                 // Number of tags to use for this version
-                const numTags = Math.floor(Math.random() * 6) + 10; // 10 to 15 tags
-                const tags = previousTags ? [...previousTags] : [];
-
+                var numTags = Math.floor(Math.random() * 6) + 10; // 10 to 15 tags
+                var tags = previousTags ? [...previousTags] : [];
+    
                 // If this isn't the first version, randomly replace some tags
                 if (previousTags) {
-                    const numReplacements = Math.floor(Math.random() * 4) + 1; // Replace 1-3 tags
-                    for (let i = 0; i < numReplacements; i++) {
+                    var numReplacements = Math.floor(Math.random() * 4) + 1; // Replace 1-3 tags
+                    for (var i = 0; i < numReplacements; i++) {
                         // Remove a random tag and replace it
-                        const indexToReplace = Math.floor(Math.random() * tags.length);
-                        const newTag = predefinedTags[Math.floor(Math.random() * predefinedTags.length)];
+                        var indexToReplace = Math.floor(Math.random() * tags.length);
+                        var newTag = predefinedTags[Math.floor(Math.random() * predefinedTags.length)];
                         tags[indexToReplace] = newTag;
                     }
                 } else {
                     // For the first version, generate unique random tags
                     while (tags.length < numTags) {
-                        const newTag = predefinedTags[Math.floor(Math.random() * predefinedTags.length)];
+                        var newTag = predefinedTags[Math.floor(Math.random() * predefinedTags.length)];
                         if (!tags.includes(newTag)) {
                             tags.push(newTag);
                         }
                     }
                 }
-
+    
                 return tags;
             };
-
+    
             // Function to generate a random modinfo.json file
-            const generateModInfo = (modName, version, tags, modID, author) => {
+            var generateModInfo = (modName, version, tags, modID, author) => {
                 return {
                     modID: modID,
                     name: modName,
@@ -138,37 +161,40 @@ module.exports = {
                     },
                 };
             };
-
+    
             async function generate() {
                 // Generate a random number of versions between 1 and 5
-                const numVersions = 10
-
+                var numVersions = 10
+    
                 // Create a main zip archive to hold all version zips
-                const mainZip = new JSZip();
-
+                var mainZip = new JSZip();
+    
                 // Generate a random mod name
-                const modName = `testmod-${randomString(5)}`;
-
+                var modName = `testmod-${randomString(5)}`;
+    
                 // Start with the first version
-                let currentVersion = {major: 1, minor: 0, patch: 0};
-
+                var currentVersion = {major: 1, minor: 0, patch: 0};
+    
                 // Tags for the first version
-                let currentTags = generateTagsForVersion();
+                var currentTags = generateTagsForVersion();
                 var discordInfo = {
                     id: "FakeMod",
                     username: "FakeMod",
                 }
-                var authorname = `author-${randomString(8)}`
+                
+                // Select a random author from the author pool
+                var authorname = authorPool[Math.floor(Math.random() * authorPool.length)];
+                
                 // Generate `.zip` files for each version
-                for (let i = 0; i < numVersions; i++) {
+                for (var i = 0; i < numVersions; i++) {
                     var modID = crypto.randomUUID();
-                    const versionString = `${currentVersion.major}.${currentVersion.minor}.${currentVersion.patch}`;
+                    var versionString = `${currentVersion.major}.${currentVersion.minor}.${currentVersion.patch}`;
 
                     // Create a zip archive for this version
-                    const versionZip = new JSZip();
+                    var versionZip = new JSZip();
 
                     // Add modinfo.json to this version archive
-                    const modInfo = generateModInfo(modName, versionString, currentTags, modID, authorname);
+                    var modInfo = generateModInfo(modName, versionString, currentTags, modID, authorname);
                     versionZip.file(
                         "modinfo.json",
                         JSON.stringify(modInfo, null, 2) // Prettify JSON
@@ -282,13 +308,22 @@ Right aligned columns
                     var uploadResult = await Mongo.GetMod.Data.Upload(payload, true);
                 }
             }
+            // Send response with information about the operation
             res.writeHead(200, {
                 "Content-Type": "application/json",
             });
-            res.end(JSON.stringify("{}"));
-            for(var i = 0; i < 10000; i++){
+            res.end(JSON.stringify({
+                message: `Generating ${count} mods with ${authorPool.length} authors`,
+                count: count,
+                authorCount: authorPool.length
+            }));
+            
+            // Generate the specified number of mods
+            for(var i = 0; i < count; i++){
                 await generate();
             }
+            
+            log.log(`Successfully generated ${count} mods with ${authorPool.length} unique authors`);
         } catch (error) {
             // Handle errors here
             log.log("Error generating mod versions:" + error);
@@ -299,6 +334,6 @@ Right aligned columns
 };
 
 function arrayBufferToBase64(buffer) {
-    const byteArray = new Uint8Array(buffer);
+    var byteArray = new Uint8Array(buffer);
     return btoa(byteArray.reduce((data, byte) => data + String.fromCharCode(byte), ""));
 }
