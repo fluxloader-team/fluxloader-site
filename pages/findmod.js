@@ -548,10 +548,8 @@ module.exports = {
 				}
 			}
 		} catch (error) {
-			var allMods = await Mongo.GetMod.Data.Search("",true,false);
-
 			res.writeHead(200, { "Content-Type": "application/json" });
-			res.end(JSON.stringify(allMods));
+			res.end(JSON.stringify({"error":"Missing required query parameters"}));
 		}
 	},
 };
