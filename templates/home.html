@@ -71,10 +71,10 @@
 				return JSON.stringify({"modData.name":{$regex: "", $options: "i"}});
 			}
 			
-			const query = { $and: [] };
-			const terms = searchText.trim().split(" ");
-			const tags = [];
-			const nonTagTerms = [];
+			var query = { $and: [] };
+			var terms = searchText.trim().split(" ");
+			var tags = [];
+			var nonTagTerms = [];
 			
 			terms.forEach(term => {
 				if (term.startsWith("#")) {
@@ -93,8 +93,8 @@
 			}
 			
 			if (nonTagTerms.length > 0) {
-				const searchString = nonTagTerms.join(" ");
-				const nameAuthorSearch = {
+				var searchString = nonTagTerms.join(" ");
+				var nameAuthorSearch = {
 					$or: [
 						{ "modData.name": { $regex: searchString, $options: "i" } },
 						{ "modData.author": { $regex: searchString, $options: "i" } },
@@ -113,14 +113,14 @@
 		
 		globalThis.PerformSearch = async function() {
 			try {
-				const searchInput = document.getElementById("searchInput");
-				const searchText = searchInput.value;
+				var searchInput = document.getElementById("searchInput");
+				var searchText = searchInput.value;
 				globalThis.SearchQuery = searchText;
 
-				const queryJson = globalThis.buildSearchQuery(searchText);
-				const encodedQuery = encodeURIComponent(queryJson);
+				var queryJson = globalThis.buildSearchQuery(searchText);
+				var encodedQuery = encodeURIComponent(queryJson);
 
-				const modList = document.getElementById("modList");
+				var modList = document.getElementById("modList");
 				modList.innerHTML = `
 					<div class="d-flex justify-content-center">
 						<div class="spinner-border" role="status">
@@ -129,8 +129,8 @@
 					</div>
 				`;
 				
-				const response = await fetch(`/api/mods?search=${encodedQuery}&verified=null&size=200`);
-				const result = await response.json();
+				var response = await fetch(`/api/mods?search=${encodedQuery}&verified=null&size=200`);
+				var result = await response.json();
 
 				globalThis.Mods = {}
 				
@@ -158,27 +158,27 @@
 				UpdateModList();
 			} catch (error) {
 				console.error("Search failed:", error);
-				const modList = document.getElementById("modList");
+				var modList = document.getElementById("modList");
 				modList.innerHTML = `<div class="alert alert-danger">Error performing search. Please try again.</div>`;
 			}
 		}
 		document.addEventListener("DOMContentLoaded", async () => {
 			try {
-				const encodedQuery = encodeURIComponent(JSON.stringify({"modData.name":{$regex: "", $options: "i"}}));
-				const response = await fetch(`/api/mods?search=${encodedQuery}&verified=null&size=200`);
-				const result = await response.json();
+				var encodedQuery = encodeURIComponent(JSON.stringify({"modData.name":{$regex: "", $options: "i"}}));
+				var response = await fetch(`/api/mods?search=${encodedQuery}&verified=null&size=200`);
+				var result = await response.json();
 				
 				globalThis.Mods = {};
 				
 				if (result.error) {
 					console.error("Error loading initial mods:", result.error);
-					const modList = document.getElementById("modList");
+					var modList = document.getElementById("modList");
 					modList.innerHTML = `<div class="alert alert-danger">Error loading mods: ${result.error}</div>`;
 					return;
 				}
 				
 				if (!result.mods || result.mods.length === 0) {
-					const modList = document.getElementById("modList");
+					var modList = document.getElementById("modList");
 					modList.innerHTML = `<div class="alert alert-info">No mods found in the database.</div>`;
 					return;
 				}
@@ -198,7 +198,7 @@
 				});
 			} catch (error) {
 				console.error("Failed to load initial mods:", error);
-				const modList = document.getElementById("modList");
+				var modList = document.getElementById("modList");
 				modList.innerHTML = `<div class="alert alert-danger">Error loading mods. Please refresh the page to try again.</div>`;
 			}
 		});
@@ -317,7 +317,7 @@
 			}
 			
 			mods.forEach((mod) => {
-				const tagList = mod.modData.tags && mod.modData.tags.length > 0 
+				var tagList = mod.modData.tags && mod.modData.tags.length > 0 
 					? mod.modData.tags.slice(0, Math.min(mod.modData.tags.length, 4)).join("</span><a> </a><span class=\"badge text-bg-secondary\">")
 					: "";
 					
