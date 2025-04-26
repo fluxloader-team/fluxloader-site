@@ -129,7 +129,7 @@
 					</div>
 				`;
 				
-				var response = await fetch(`/api/mods?search=${encodedQuery}&verified=null&size=200`);
+				var response = await fetch(`/api/mods?search=${encodedQuery}&verified=null&size=5000&page=1`);
 				var result = await response.json();
 
 				globalThis.Mods = {}
@@ -165,7 +165,7 @@
 		document.addEventListener("DOMContentLoaded", async () => {
 			try {
 				var encodedQuery = encodeURIComponent(JSON.stringify({"modData.name":{$regex: "", $options: "i"}}));
-				var response = await fetch(`/api/mods?search=${encodedQuery}&verified=null&size=200`);
+				var response = await fetch(`/api/mods?search=${encodedQuery}&verified=null&size=5000&page=1`);
 				var result = await response.json();
 				
 				globalThis.Mods = {};
