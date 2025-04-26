@@ -124,7 +124,7 @@
 			if(globalThis.Searching === true){
 				return;
 			}
-			globalThis.searching = true;
+			globalThis.Searching = true;
 			console.log("Performing search for:", globalThis.SearchQuery)
 			try {
 				var searchInput = document.getElementById("searchInput");
@@ -148,9 +148,9 @@
 				
 				var response = await fetch(`/api/mods?search=${encodedQuery}&verified=null&size=${perPage}&page=${pageToget}`);
 				var result = await response.json();
-
-				globalThis.Mods = {}
-				
+				if(pageToget === 1) {
+					globalThis.Mods = {}
+				}
 				if (result.error) {
 					console.error("Search error:", result.error);
 					if(pageToget === 1){
@@ -162,7 +162,7 @@
 					</tr>
 					`
 					}
-
+					globalThis.Searching = false;
 					return;
 				}
 				
@@ -176,7 +176,7 @@
 					</tr>
 					`
 					}
-
+					globalThis.Searching = false;
 					return;
 				}
 
@@ -360,8 +360,7 @@
 					</tr>
 					`
 				}
-
-
+				globalThis.Searching = false;
 				return;
 			}
 			
@@ -377,8 +376,7 @@
 					<td><span class="badge text-bg-secondary">${tagList}</span></td>
 				</tr>`;
 			});
-			if(onPage === 1){
-				modList.innerHTML = `
+			modList.innerHTML = `
 				<table class="displayInner" id="modListTable">
 					<tr>
 						<th>Name</th>
@@ -389,11 +387,11 @@
 					${modItems}
 				</table>
 			`;
-				globalThis.DisplayMod(mods[0].modID);
-			}else{
-				document.getElementById("modListTable").innerHTML += modItems;
-			}
+			if(onPage === 1){
 
+				globalThis.DisplayMod(mods[0].modID);
+			}
+			globalThis.Searching = false;
 
 
 		}
