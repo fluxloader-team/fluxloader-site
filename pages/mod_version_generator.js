@@ -2,7 +2,7 @@
  * @file mod_version_generator.js
  * @description Generates mod version `.zip` files with various metadata for the modding platform.
  * This module handles the creation of multiple versions, including tags, semantic versioning, and metadata generation.
- * This module is for validating and testing
+ * This module is for validating and testing the modding platform with realistic sample data.
  */
 
 
@@ -27,16 +27,65 @@ module.exports = {
     /**
      * Handles the mod version generation process.
      *
-     * This function generates random semantic versions of a mod, assigns metadata (such as tags and mod information),
-     * and packages each version into a `.zip` file. and then is uploaded to the mod and version DB as if it was uploaded
+     * This function generates random semantic versions of mods, assigns metadata (such as tags and mod information),
+     * and packages each version into a `.zip` file. All generated mods are uploaded to the mod and version database
+     * as if they were uploaded by real users. The function creates a pool of authors (65% of the total mods count)
+     * and randomly assigns authors to each mod.
+     *
+     * ### Query Parameters:
+     * - **count**: *(optional)* Number of mods to generate. Defaults to 100 if not specified.
+     *   - *Example*: `count=50`
+     *   - *Valid Range*: 1 to 1,000,000,000
+     *
+     * ### Response:
+     * Returns a JSON response with information about the generation process, including:
+     * - **message**: A message indicating the number of mods and authors being generated
+     * - **count**: The number of mods that will be generated
+     * - **authorCount**: The number of unique authors created for the mods
+     *
+     * ### Process Details:
+     * 1. Creates a pool of author names (65% of the total mod count)
+     * 2. For each mod:
+     *    - Generates a random mod name with a random author from the pool
+     *    - Creates 10 versions with incrementing semantic versioning
+     *    - Assigns random tags from a predefined list
+     *    - Creates modinfo.json with metadata
+     *    - Adds README.md and entry point files
+     *    - Uploads each version to the database
      *
      * @async
      * @function run
      * @memberof module:web.generateMod
-     * @param {IncomingMessage} req - The HTTP request object.
+     * @param {IncomingMessage} req - The HTTP request object. Can include a 'count' query parameter to specify the number of mods to generate.
      * @param {ServerResponse} res - The HTTP response object.
      *
-     * @returns {Promise<void>} Sends the error response.
+     * @returns {Promise<void>} Sends a JSON response with information about the generation process.
+     *
+     * @example <caption>Example 1: Generate default number of mods (100)</caption>
+     * // Browser fetch API
+     * async function generateDefaultMods() {
+     *   try {
+     *     const response = await fetch('/generateMod');
+     *     const data = await response.json();
+     *     console.log(`Generating ${data.count} mods with ${data.authorCount} authors`);
+     *     return data;
+     *   } catch (error) {
+     *     console.error("Error generating mods:", error);
+     *   }
+     * }
+     *
+     * @example <caption>Example 2: Generate specific number of mods</caption>
+     * // Browser fetch API with query parameter
+     * async function generateSpecificMods(count) {
+     *   try {
+     *     const response = await fetch(`/generateMod?count=${count}`);
+     *     const data = await response.json();
+     *     console.log(`Generating ${data.count} mods with ${data.authorCount} authors`);
+     *     return data;
+     *   } catch (error) {
+     *     console.error("Error generating mods:", error);
+     *   }
+     * }
      */
     run: async function (req, res) {
         try {
