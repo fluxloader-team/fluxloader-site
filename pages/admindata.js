@@ -8,7 +8,7 @@ var Utils = require('./../utils')
 const https = require("https");
 var Mongo = require("./../Shared/DB");
 
-var log = new Utils.log.log(colors.green("Sandustry.web.pages.admin"), "./sandustry.web.main.txt", true);
+var log = new Utils.log.log("Sandustry.web.pages.admin", "./sandustry.web.main.txt", true);
 
 /**
  * @namespace admin

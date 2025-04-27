@@ -9,7 +9,7 @@
 var colors = require('colors');
 var Utils = require('./../../utils')
 
-var log = new Utils.log.log(colors.green("Sandustry.bot.event.interactionCreate"), "./sandustry.bot.main.txt", true);
+var log = new Utils.log.log("Sandustry.bot.event.interactionCreate", "./sandustry.bot.main.txt", true);
 process.on('uncaughtException', function (err) {
     log.log(`Caught exception: ${err.stack}`);
 });

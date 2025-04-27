@@ -10,7 +10,7 @@ var colors = require("colors");
 var JSZip = require("jszip");
 var Utils = require("./../utils");
 var crypto = require("crypto");
-var log = new Utils.log.log(colors.green("Sandustry.web.pages.generateMod"), "./sandustry.web.main.txt", true);
+var log = new Utils.log.log("Sandustry.web.pages.generateMod", "./sandustry.web.main.txt", true);
 var Mongo = require("./../Shared/DB");
 
 /**

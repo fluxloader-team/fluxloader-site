@@ -7,7 +7,7 @@
 
 var colors = require("colors");
 var Utils = require("./../utils");
-var log = new Utils.log.log(colors.green("Sandustry.web.pages.upload"), "./sandustry.web.main.txt", true);
+var log = new Utils.log.log("Sandustry.web.pages.upload", "./sandustry.web.main.txt", true);
 var Mongo = require("./../Shared/DB");
 
 /**

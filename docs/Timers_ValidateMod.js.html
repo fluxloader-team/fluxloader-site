@@ -10,7 +10,7 @@ var { MongoClient } = require('mongodb');
 var colors = require("colors");
 var Utils = require('./../utils');
 const Mongo = require("../Shared/DB");
-var log = new Utils.log.log(colors.green("Sandustry.Timer.Validate"), "./sandustry.Timer.main.txt", true);
+var log = new Utils.log.log("Sandustry.Timer.Validate", "./sandustry.Timer.main.txt", true);
 
 var mongoUri = globalThis.Config.mongodb.uri;
 var validationTime = globalThis.Config.ModSettings.validationTime;

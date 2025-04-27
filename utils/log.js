@@ -3,11 +3,11 @@
 // ---------------------------------
 // Custom Log system
 /**
- * @author Bitstudios <support@bitstudios.org>
+ * @author FluxLoaderApp <support@fluxloader.app>
  */
 
 //requires
-
+var colors = require('colors');
 const { Console } = require("console");
 var fs = require("fs")
 
@@ -26,12 +26,16 @@ class log {
     date = false
     SaveInterval = 0
     SaveLoopInterval = {}
+    loglevel = "debug" //debug info
     constructor(Name = "", Path = "./log.txt", date = false, SaveInterval = 10000) {
         this.Name = Name
         this.Path = Path
         this.date = date
         this.SaveInterval = SaveInterval
         this.startSave();
+    }
+    logLevel(level){
+        this.loglevel = level
     }
     startSave(){
         this.SaveLoopInterval = setInterval(() => {
@@ -82,13 +86,37 @@ class log {
     /**
     * @param {string} [Input] - What to log
     */
-    log(Input = "") {
+    info(Input = "") {
         var ThisLog = ""
 
         if(this.date == true){
-            ThisLog =`${this.Name} | ${Date.now()} : ${Input}`
+            ThisLog =`${colors.green(this.Name + " | " + Date.now())} : ${Input}`
         }else{
-            ThisLog =`${this.Name} : ${Input}`
+            ThisLog =`${colors.green(this.Name)} : ${Input}`
+        }
+        this.CurrentLog.push(ThisLog)
+        console.log(ThisLog)
+    }
+    debug(Input = "") {
+        if(this.loglevel == "debug"){
+            var ThisLog = ""
+
+            if(this.date == true){
+                ThisLog =`${colors.yellow(this.Name + " | " + Date.now())} : ${Input}`
+            }else{
+                ThisLog =`${colors.yellow(this.Name)} : ${Input}`
+            }
+            this.CurrentLog.push(ThisLog)
+            console.log(ThisLog)
+        }
+    }
+    error(Input = "") {
+        var ThisLog = ""
+
+        if(this.date == true){
+            ThisLog =`${colors.red(this.Name + " | " + Date.now())} : ${Input}`
+        }else{
+            ThisLog =`${colors.red(this.Name)} : ${Input}`
         }
         this.CurrentLog.push(ThisLog)
         console.log(ThisLog)

@@ -8,7 +8,7 @@
 var colors = require("colors");
 var Utils = require("./../utils");
 var { compress, decompress } = require("@mongodb-js/zstd");
-var log = new Utils.log.log(colors.green("Sandustry.web.pages.search"), "./sandustry.web.main.txt", true);
+var log = new Utils.log.log("Sandustry.web.pages.search", "./sandustry.web.main.txt", true);
 var Mongo = require("./../Shared/DB");
 
 /**

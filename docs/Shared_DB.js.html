@@ -8,7 +8,7 @@ const https = require("https");
 const {compress} = require("@mongodb-js/zstd");
 var JSZip = require("jszip");
 const sanitizeHtml = require("sanitize-html");
-var log = new Utils.log.log(colors.green("Sandustry.Shared.DB"), "./sandustry.Shared.txt", true);
+var log = new Utils.log.log("Sandustry.Shared.DB", "./sandustry.Shared.txt", true);
 var mongoUri = globalThis.Config.mongodb.uri;
 
 /**

@@ -98,7 +98,7 @@ var defaultConfig = {
 globalThis.Config = defaultConfig;
 
 var lastRepoHash = '';
-const log = new Utils.log.log(colors.green("Sandustry.web.main"), "./sandustry.web.main.txt", true);
+const log = new Utils.log.log("Sandustry.web.main", "./sandustry.web.main.txt", true);
 
 process.on('uncaughtException', function (err) {
     log.log(`Caught exception: ${err.stack}`);

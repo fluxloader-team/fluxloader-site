@@ -28,7 +28,7 @@ var fs = require('fs')
 var Utils = require('./utils')
 var path = require('path');
 
-var log = new Utils.log.log(colors.green("Sandustry.bot.main"), "./sandustry.bot.main.txt", true);
+var log = new Utils.log.log("Sandustry.bot.main", "./sandustry.bot.main.txt", true);
 
 process.on('uncaughtException', function (err) {
     log.log(`Caught exception: ${err.stack}`);

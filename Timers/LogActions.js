@@ -7,7 +7,7 @@ var { MongoClient } = require('mongodb');
 var colors = require("colors");
 var Utils = require('./../utils');
 const Mongo = require("../Shared/DB");
-var log = new Utils.log.log(colors.green("Sandustry.Timer.ActionLog"), "./sandustry.Timer.main.txt", true);
+var log = new Utils.log.log("Sandustry.Timer.ActionLog", "./sandustry.Timer.main.txt", true);
 var validationTime = globalThis.Config.ModSettings.validationTime;
 /**
  * Namespace for Sandustry bot timer tasks.

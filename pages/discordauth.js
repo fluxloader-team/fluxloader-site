@@ -9,7 +9,7 @@ var querystring = require('querystring');
 var https = require('https');
 var Utils = require('./../utils');
 
-var log = new Utils.log.log(colors.green("Sandustry.web.pages.discord"), "./sandustry.web.main.txt", true);
+var log = new Utils.log.log("Sandustry.web.pages.discord", "./sandustry.web.main.txt", true);
 
 
 /**

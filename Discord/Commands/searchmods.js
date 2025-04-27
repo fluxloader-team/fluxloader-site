@@ -6,7 +6,7 @@
 var { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 var colors = require("colors");
 var Utils = require('./../../utils'); // Adjust this accordingly
-var log = new Utils.log.log(colors.green("Sandustry.bot.command.SearchMods"), "./sandustry.bot.main.txt", true);
+var log = new Utils.log.log("Sandustry.bot.command.SearchMods", "./sandustry.bot.main.txt", true);
 var Mongo = require("./../../Shared/DB");
 /**
  * Namespace for Discord bot commands.
