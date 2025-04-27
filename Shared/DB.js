@@ -64,6 +64,11 @@ class modEntry {
         discordUsername: "",
     }
     /**
+     * The upload time of the mod.
+     * @type {Date}
+     */
+    uploadTime = new Date()
+    /**
      * The number of votes for the mod.
      * @type {number}
      */
@@ -434,7 +439,7 @@ var GetMod = {
          * @param {object} [sort] - how to sort the data
          * @returns {(Promise<modEntry[]>|string[])} An array of found mods or modid if IdsOnly
          */
-        Search: async function (query = "",verifiedOnly = true, IdsOnly = true,page = {number:1,size:200},project = {},sort = {}) {
+        Search: async function (query = "",verifiedOnly = true, IdsOnly = true,page = {number:1,size:200},project = {},sort = { uploadTime: -1 }) {
             //{
             //    $or: [
             //        { "modData.modID": { $regex: query, $options: 'i' } },
@@ -569,7 +574,7 @@ var GetMod = {
                         modInfo[key] = sanitizeHtml(modInfo[key]);
                     }
                 });
-
+                //if(modInfo[""][""] == undefined || )
                 var modData = {
                     ...modInfo,
                     description: description,
@@ -580,6 +585,7 @@ var GetMod = {
                     modEntry = await modsCollection.findOne({ "modData.name": modData.name, "Author.discordID": discordInfo.id });
                 }
                 modID = modEntry ? modEntry.modID : modID;
+                var uploadTime =  new Date()
                 if (modEntry == null) {
                     modEntry = {
                         modID: modID,
@@ -589,18 +595,20 @@ var GetMod = {
                             discordUsername: discordInfo.username,
                         },
                         votes: 0,
+                        uploadTime:uploadTime,
                         verified:false,
                     };
                     await modsCollection.insertOne(modEntry);
                 }else{
                     modEntry.modData = modData;
+                    modEntry.uploadTime = uploadTime;
                     await modsCollection.replaceOne({ modID: modID }, modEntry);
                 }
                 var modVersionEntry = {
                     modID: modEntry.modID,
                     modfile: compressedZipBuffer.toString("base64"),
                     modData: modData,
-                    uploadTime: new Date(),
+                    uploadTime: uploadTime,
                     downloadCount: 0,
                 };
                 await versionsCollection.insertOne(modVersionEntry);
