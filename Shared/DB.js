@@ -228,7 +228,7 @@ async function HandleClient(runClient = async function (client = new MongoClient
         await client.close();
         return result
     } catch (err) {
-        log.log(`${err}`);
+        log.info(`${err}`);
     } finally {
         //await client.close();
     }

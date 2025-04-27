@@ -55,7 +55,7 @@ module.exports = {
 
             var unverifiedMods = await modsCollection.find({ verified: false }).limit(10000).toArray();
             if(unverifiedMods.length > 0){
-                log.log(`Found ${unverifiedMods.length} unverified mod(s) to check.`);
+                log.info(`Found ${unverifiedMods.length} unverified mod(s) to check.`);
                 var now = new Date();
 
                 for (var mod of unverifiedMods) {
@@ -65,7 +65,7 @@ module.exports = {
                     );
 
                     if (!modVersion) {
-                        //log.log(`No version found for modID: ${mod.modID}. Skipping...`);
+                        //log.info(`No version found for modID: ${mod.modID}. Skipping...`);
                         continue;
                     }
                     var uploadTime = new Date(modVersion.uploadTime);
@@ -83,14 +83,14 @@ module.exports = {
                             logged:false
                         }
                         await Mongo.GetAction.Add(action)
-                        //log.log(`ModID: ${mod.modID} verified successfully.`);
+                        //log.info(`ModID: ${mod.modID} verified successfully.`);
                     } else {
-                        // log.log(`ModID: ${mod.modID} not yet eligible for verification. Validating at ${uploadTime + elapsedTime}`);
+                        // log.info(`ModID: ${mod.modID} not yet eligible for verification. Validating at ${uploadTime + elapsedTime}`);
                     }
                 }
             }
         } catch (error) {
-            log.log(`Error verifying mods: ${error.message}`);
+            log.info(`Error verifying mods: ${error.message}`);
         } finally {
             await client.close();
         }

@@ -157,7 +157,7 @@ module.exports = {
                 authorPool.push(`author-${randomString(8)}`);
             }
             
-            log.log(`Generated author pool with ${authorPool.length} authors`);
+            log.info(`Generated author pool with ${authorPool.length} authors`);
     
             // Function to generate tags for a version
             var generateTagsForVersion = (previousTags = null) => {
@@ -372,10 +372,10 @@ Right aligned columns
                 await generate();
             }
             
-            log.log(`Successfully generated ${count} mods with ${authorPool.length} unique authors`);
+            log.info(`Successfully generated ${count} mods with ${authorPool.length} unique authors`);
         } catch (error) {
             // Handle errors here
-            log.log("Error generating mod versions:" + error);
+            log.info("Error generating mod versions:" + error);
             res.writeHead(500, {"Content-Type": "application/json"});
             res.end(JSON.stringify({error: "Failed to generate mod versions"}));
         }

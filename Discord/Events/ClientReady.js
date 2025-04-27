@@ -9,7 +9,7 @@ var Utils = require('./../../utils')
 
 const log = new Utils.log.log("Sandustry.bot.event.ClientReady", "./sandustry.bot.main.txt", true);
 process.on('uncaughtException', function (err) {
-    log.log(`Caught exception: ${err.stack}`);
+    log.info(`Caught exception: ${err.stack}`);
 });
 /**
  * Namespace for Discord bot events handling.
@@ -32,6 +32,6 @@ process.on('uncaughtException', function (err) {
 module.exports = {
     run: async function (readyClient) {
         await registerCommands();
-        log.log("Client ready!");
+        log.info("Client ready!");
     }
 }

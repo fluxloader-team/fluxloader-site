@@ -99,13 +99,13 @@ var lastRepoHash = '';
 const log = new Utils.log.log("Sandustry.web.main", "./sandustry.web.main.txt", true);
 
 process.on('uncaughtException', function (err) {
-    log.log(`Caught exception: ${err.stack}`);
+    log.info(`Caught exception: ${err.stack}`);
 });
 
 if (!fs.existsSync(CONFIG_PATH)) {
-    log.log('Config file not found, generating default config.json...');
+    log.info('Config file not found, generating default config.json...');
     fs.writeFileSync(CONFIG_PATH, JSON.stringify(defaultConfig, null, 2), 'utf-8');
-    log.log('Default config.json generated.');
+    log.info('Default config.json generated.');
     process.exit(0);
 }
 globalThis.Config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
@@ -130,11 +130,11 @@ var pages = {"/": {
  * @function LoadTemplates
  */
 var LoadTemplates = function (){
-    log.log("Loading templates")
+    log.info("Loading templates")
     fs.readdirSync( "./templates").forEach(file => {
         Templates[file] = fs.readFileSync("./templates/"+file, "utf8")
     })
-    log.log("Templates loaded")
+    log.info("Templates loaded")
 }
 /**
  * Function to load dynamically defined pages from the `pages` directory.
@@ -143,7 +143,7 @@ var LoadTemplates = function (){
  * @function LoadPages
  */
 var LoadPages = function (){
-    log.log("Loading pages")
+    log.info("Loading pages")
     fs.readdirSync( "./pages").forEach(file => {
         if(require.resolve("./pages/"+file)){
             delete require.cache[require.resolve("./pages/"+file)]
@@ -154,7 +154,7 @@ var LoadPages = function (){
         })
 
     })
-    log.log("pages loaded")
+    log.info("pages loaded")
 }
 /**
  * Global array to store all loaded timer tasks.
@@ -169,7 +169,7 @@ globalThis.Timers = []
  * @function LoadTimers
  */
 var LoadTimers = function (){
-    log.log("Loading Timers")
+    log.info("Loading Timers")
     Timers = []
     fs.readdirSync( "./Timers").forEach(file => {
         if(require.resolve("./Timers/"+file)){
@@ -216,36 +216,36 @@ async function performUpdate() {
     if(globalThis.Config.git.pull){
         exec('git pull', (error, stdout, stderr) => {
             if (error) {
-                log.log(`Error running git pull: ${error}`);
+                log.info(`Error running git pull: ${error}`);
                 return;
             }
-            log.log(stdout);
+            log.info(stdout);
 
             const newRepoHash = computeRepoHash();
-            log.log(newRepoHash)
+            log.info(newRepoHash)
             if (newRepoHash !== lastRepoHash) {
-                log.log('Changes detected in the repository. Reloading templates and pages...');
+                log.info('Changes detected in the repository. Reloading templates and pages...');
                 lastRepoHash = newRepoHash;
 
                 LoadTemplates();
                 LoadPages();
                 LoadTimers();
             } else {
-                log.log('No changes detected.');
+                log.info('No changes detected.');
             }
         });
     }else{
         const newRepoHash = computeRepoHash();
-        log.log(newRepoHash)
+        log.info(newRepoHash)
         if (newRepoHash !== lastRepoHash) {
-            log.log('Changes detected in the repository. Reloading templates and pages...');
+            log.info('Changes detected in the repository. Reloading templates and pages...');
             lastRepoHash = newRepoHash;
 
             LoadTemplates();
             LoadPages();
             LoadTimers();
         } else {
-            log.log('No changes detected.');
+            log.info('No changes detected.');
         }
     }
     for (const timer of Timers) {
@@ -259,7 +259,7 @@ LoadTemplates();
 LoadPages();
 LoadTimers();
 lastRepoHash = computeRepoHash();
-log.log(lastRepoHash)
+log.info(lastRepoHash)
 var WebRequestHandler = function (req, res){
     var url = req.url
     var urlSplit = url.split("?")
@@ -279,7 +279,7 @@ if (globalThis.Config.discord.runbot) {
         Discord.init();
         Discord.start();
     } catch (error) {
-        log.log(`Error initializing or starting Discord bot: ${error.stack}`);
+        log.info(`Error initializing or starting Discord bot: ${error.stack}`);
     }
 }
 var WebServer = http.createServer(WebRequestHandler).listen(20221)

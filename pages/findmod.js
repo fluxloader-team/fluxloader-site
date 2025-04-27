@@ -374,7 +374,7 @@ module.exports = {
 							});
 							res.end(decompressedBuffer);
 						} catch (error) {
-							log.log("Error processing mod download: " + error.message);
+							log.info("Error processing mod download: " + error.message);
 							res.writeHead(201, { "Content-Type": "application/json" });
 							res.end(
 								JSON.stringify({
@@ -419,7 +419,7 @@ module.exports = {
 							res.writeHead(201, { "Content-Type": "application/json" });
 							res.end(JSON.stringify({ mod: modVersion }));
 						} catch (err) {
-							log.log("Error fetching mod info: " + err.message);
+							log.info("Error fetching mod info: " + err.message);
 							res.writeHead(201, { "Content-Type": "application/json" });
 							res.end(
 								JSON.stringify({
@@ -459,7 +459,7 @@ module.exports = {
 							res.writeHead(201, { "Content-Type": "application/json" });
 							res.end(JSON.stringify({ versions }));
 						} catch (err) {
-							log.log("Error fetching versions: " + err.message);
+							log.info("Error fetching versions: " + err.message);
 							res.writeHead(201, { "Content-Type": "application/json" });
 							res.end(
 								JSON.stringify({
@@ -481,7 +481,7 @@ module.exports = {
 							throw new Error("Invalid search query format");
 						}
 					} catch (jsonError) {
-						log.log("Invalid JSON search query: " + jsonError.message);
+						log.info("Invalid JSON search query: " + jsonError.message);
 						res.writeHead(201, { "Content-Type": "application/json" });
 						res.end(
 							JSON.stringify({
@@ -536,7 +536,7 @@ module.exports = {
 						})
 					);
 				} catch (error) {
-					log.log("Error occurred while searching mods:", error);
+					log.info("Error occurred while searching mods:", error);
 
 					res.writeHead(201, { "Content-Type": "application/json" });
 					res.end(

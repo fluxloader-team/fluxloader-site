@@ -50,7 +50,7 @@ module.exports = {
 
         if (pathname === '/auth/discord') {
             var authURL = `https://discord.com/oauth2/authorize?client_id=${globalThis.Config.discord.clientId}&redirect_uri=${encodeURIComponent(globalThis.Config.discord.redirectUri)}&response_type=code&scope=identify`;
-            log.log("Redirecting to Discord Authorization URL...");
+            log.info("Redirecting to Discord Authorization URL...");
             res.writeHead(302, { Location: authURL });
             return res.end();
         }
@@ -63,7 +63,7 @@ module.exports = {
             }
 
             try {
-                log.log(`Received code: ${code}`);
+                log.info(`Received code: ${code}`);
                 var tokenData = querystring.stringify({
                     client_id: globalThis.Config.discord.clientId,
                     client_secret: globalThis.Config.discord.clientSecret,
@@ -80,7 +80,7 @@ module.exports = {
                     tokenData
                 );
 
-                log.log(`Token Response: ${JSON.stringify(tokenResponse)}`);
+                log.info(`Token Response: ${JSON.stringify(tokenResponse)}`);
                 if (!tokenResponse.access_token) {
                     res.writeHead(500, { 'Content-Type': 'text/html' });
                     return res.end('<h1>Error: Failed to retrieve access token from Discord.</h1>');
@@ -93,7 +93,7 @@ module.exports = {
                     { Authorization: `Bearer ${tokenResponse.access_token}` }
                 );
 
-                log.log(`User Response: ${JSON.stringify(userResponse)}`);
+                log.info(`User Response: ${JSON.stringify(userResponse)}`);
                 userResponse.tokenResponse = tokenResponse
                 res.writeHead(200, { 'Content-Type': 'text/html' });
                 return res.end(`<script>
@@ -104,7 +104,7 @@ module.exports = {
                     </script>
 `);
             } catch (err) {
-                log.log(`Error during Discord OAuth2 process: ${err.message}`);
+                log.info(`Error during Discord OAuth2 process: ${err.message}`);
                 res.writeHead(500, { 'Content-Type': 'text/html' });
                 return res.end('<h1>Error: Something went wrong during the Discord authentication process.</h1>');
             }

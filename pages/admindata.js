@@ -68,7 +68,7 @@ module.exports = {
                         res.end(JSON.stringify({ error: 'User does not have admin permissions' }));
                     }
                 } catch (error) {
-                    log.log(`Error ${error}`);
+                    log.info(`Error ${error}`);
                     res.end(JSON.stringify({ error: 'Invalid JSON format' }));
                 }
             });

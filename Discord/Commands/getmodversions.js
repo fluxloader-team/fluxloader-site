@@ -50,11 +50,11 @@ module.exports = {
      */
     async execute(interaction) {
         await interaction.deferReply();
-        log.log(`getting mod versions for ${interaction.options.getString('modid')}`)
+        log.info(`getting mod versions for ${interaction.options.getString('modid')}`)
 
         var modID = interaction.options.getString('modid');
 
-        log.log(`modID: ${modID}`)
+        log.info(`modID: ${modID}`)
         try {
             var modsList = await Mongo.GetMod.Versions.Numbers(modID);
 
@@ -76,7 +76,7 @@ module.exports = {
 
             await interaction.editReply({ embeds: [embed] });
         } catch (error) {
-            log.log(`Error fetching mod info: ${error}`);
+            log.info(`Error fetching mod info: ${error}`);
             await interaction.editReply({ content: 'An error occurred while fetching the mod info. Please try again later.' });
         }
     }

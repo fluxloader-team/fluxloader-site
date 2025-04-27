@@ -55,13 +55,13 @@ module.exports = {
      */
     async execute(interaction) {
         await interaction.deferReply();
-        log.log(`getting mod info for ${interaction.options.getString('modid')}`)
+        log.info(`getting mod info for ${interaction.options.getString('modid')}`)
 
         var modID = interaction.options.getString('modid');
         var version = interaction.options.getString('version');
 
-        log.log(`modID: ${modID}, version: ${version}`)
-        log.log("connecting to database")
+        log.info(`modID: ${modID}, version: ${version}`)
+        log.info("connecting to database")
         try {
 
             var modData = {}
@@ -105,7 +105,7 @@ module.exports = {
             await interaction.editReply({ embeds: [embed] });
 
         } catch (error) {
-            log.log(`Error fetching mod info: ${error}`);
+            log.info(`Error fetching mod info: ${error}`);
             await interaction.editReply({ content: 'An error occurred while fetching the mod info. Please try again later.' });
         }
     }

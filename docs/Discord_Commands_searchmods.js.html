@@ -64,7 +64,7 @@ module.exports = {
         await interaction.deferReply();
 
         var query = interaction.options.getString('query');
-        log.log(`Searching mods for query: ${query}`);
+        log.info(`Searching mods for query: ${query}`);
         var searchResults = await Mongo.GetMod.Data.Search(query, interaction.options.getBoolean('verifiedOnly'),false,{number:interaction.options.getInteger('page') || 1,size:10});
         try {
             if (searchResults.length === 0) {
@@ -101,7 +101,7 @@ module.exports = {
             await interaction.editReply({ embeds: [embed] });
 
         } catch (error) {
-            log.log(`Error searching mods: ${error}`);
+            log.info(`Error searching mods: ${error}`);
             await interaction.editReply({ content: 'An error occurred while searching for mods. Please try again later.' });
         }
     }

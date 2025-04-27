@@ -11,7 +11,7 @@ var Utils = require('./../../utils')
 
 var log = new Utils.log.log("Sandustry.bot.event.interactionCreate", "./sandustry.bot.main.txt", true);
 process.on('uncaughtException', function (err) {
-    log.log(`Caught exception: ${err.stack}`);
+    log.info(`Caught exception: ${err.stack}`);
 });
 /**
  * Namespace for Discord bot interaction handling.
@@ -34,7 +34,7 @@ process.on('uncaughtException', function (err) {
  */
 module.exports = {
     run: async (interaction) => {
-        log.log(`Interaction: ${interaction.commandName}`)
+        log.info(`Interaction: ${interaction.commandName}`)
         if (!interaction.isCommand()) return;
 
         var command = globalThis.BotCommands.get(interaction.commandName);

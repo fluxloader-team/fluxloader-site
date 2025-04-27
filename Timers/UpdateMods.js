@@ -37,7 +37,7 @@ var Mongo = require("./../Shared/DB");
  */
 module.exports = {
     async run() {
-        log.log("Updating mod data...");
+        log.info("Updating mod data...");
         var page = 1;
         var MorePages = true;
         while (MorePages) {
@@ -51,13 +51,13 @@ module.exports = {
             if (Mods.length === 0) {
                 MorePages = false;
             } else {
-                //log.log(`Found ${Mods.length} mods`);
+                //log.info(`Found ${Mods.length} mods`);
                 var modIDs = Mods.map(mod => mod.modID);
                 var modDataList = await Mongo.GetMod.Versions.Multiple(
                     modIDs
                 );
                 var modDataMap = Object.fromEntries(modDataList.map(mod => [mod.modID, mod.modData]));
-                //log.log(`${JSON.stringify(modDataMap)}`)
+                //log.info(`${JSON.stringify(modDataMap)}`)
                 for (var mod of Mods) {
                     var modData = modDataMap[mod.modID];
 
@@ -84,6 +84,6 @@ module.exports = {
             }
         }
 
-        log.log("Mod data updated.");
+        log.info("Mod data updated.");
     }
 };

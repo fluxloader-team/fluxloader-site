@@ -101,13 +101,13 @@ var lastRepoHash = '';
 const log = new Utils.log.log("Sandustry.web.main", "./sandustry.web.main.txt", true);
 
 process.on('uncaughtException', function (err) {
-    log.log(`Caught exception: ${err.stack}`);
+    log.info(`Caught exception: ${err.stack}`);
 });
 
 if (!fs.existsSync(CONFIG_PATH)) {
-    log.log('Config file not found, generating default config.json...');
+    log.info('Config file not found, generating default config.json...');
     fs.writeFileSync(CONFIG_PATH, JSON.stringify(defaultConfig, null, 2), 'utf-8');
-    log.log('Default config.json generated.');
+    log.info('Default config.json generated.');
     process.exit(0);
 }
 globalThis.Config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
@@ -132,11 +132,11 @@ var pages = {"/": {
  * @function LoadTemplates
  */
 var LoadTemplates = function (){
-    log.log("Loading templates")
+    log.info("Loading templates")
     fs.readdirSync( "./templates").forEach(file => {
         Templates[file] = fs.readFileSync("./templates/"+file, "utf8")
     })
-    log.log("Templates loaded")
+    log.info("Templates loaded")
 }
 /**
  * Function to load dynamically defined pages from the `pages` directory.
@@ -145,7 +145,7 @@ var LoadTemplates = function (){
  * @function LoadPages
  */
 var LoadPages = function (){
-    log.log("Loading pages")
+    log.info("Loading pages")
     fs.readdirSync( "./pages").forEach(file => {
         if(require.resolve("./pages/"+file)){
             delete require.cache[require.resolve("./pages/"+file)]
@@ -156,7 +156,7 @@ var LoadPages = function (){
         })
 
     })
-    log.log("pages loaded")
+    log.info("pages loaded")
 }
 /**
  * Global array to store all loaded timer tasks.
@@ -171,7 +171,7 @@ globalThis.Timers = []
  * @function LoadTimers
  */
 var LoadTimers = function (){
-    log.log("Loading Timers")
+    log.info("Loading Timers")
     Timers = []
     fs.readdirSync( "./Timers").forEach(file => {
         if(require.resolve("./Timers/"+file)){
@@ -218,36 +218,36 @@ function performUpdate() {
     if(globalThis.Config.git.pull){
         exec('git pull', (error, stdout, stderr) => {
             if (error) {
-                log.log(`Error running git pull: ${error}`);
+                log.info(`Error running git pull: ${error}`);
                 return;
             }
-            log.log(stdout);
+            log.info(stdout);
 
             const newRepoHash = computeRepoHash();
-            log.log(newRepoHash)
+            log.info(newRepoHash)
             if (newRepoHash !== lastRepoHash) {
-                log.log('Changes detected in the repository. Reloading templates and pages...');
+                log.info('Changes detected in the repository. Reloading templates and pages...');
                 lastRepoHash = newRepoHash;
 
                 LoadTemplates();
                 LoadPages();
                 LoadTimers();
             } else {
-                log.log('No changes detected.');
+                log.info('No changes detected.');
             }
         });
     }else{
         const newRepoHash = computeRepoHash();
-        log.log(newRepoHash)
+        log.info(newRepoHash)
         if (newRepoHash !== lastRepoHash) {
-            log.log('Changes detected in the repository. Reloading templates and pages...');
+            log.info('Changes detected in the repository. Reloading templates and pages...');
             lastRepoHash = newRepoHash;
 
             LoadTemplates();
             LoadPages();
             LoadTimers();
         } else {
-            log.log('No changes detected.');
+            log.info('No changes detected.');
         }
     }
     Timers.forEach(timer => {
@@ -261,7 +261,7 @@ LoadTemplates();
 LoadPages();
 LoadTimers();
 lastRepoHash = computeRepoHash();
-log.log(lastRepoHash)
+log.info(lastRepoHash)
 var WebRequestHandler = function (req, res){
     var url = req.url
     var urlSplit = url.split("?")
@@ -281,7 +281,7 @@ if (globalThis.Config.discord.runbot) {
         Discord.init();
         Discord.start();
     } catch (error) {
-        log.log(`Error initializing or starting Discord bot: ${error.stack}`);
+        log.info(`Error initializing or starting Discord bot: ${error.stack}`);
     }
 }
 var WebServer = http.createServer(WebRequestHandler).listen(20221)</code></pre></article></section></div></div></div><div class="search-container" id="PkfLWpAbet" style="display:none"><div class="wrapper" id="iCxFxjkHbP"><button class="icon-button search-close-button" id="VjLlGakifb" aria-label="close search"><svg><use xlink:href="#close-icon"></use></svg></button><div class="search-box-c"><svg><use xlink:href="#search-icon"></use></svg> <input type="text" id="vpcKVYIppa" class="search-input" placeholder="Search..." autofocus></div><div class="search-result-c" id="fWwVHRuDuN"><span class="search-result-c-text">Type anything to view search result</span></div></div></div><div class="mobile-menu-icon-container"><button class="icon-button" id="mobile-menu" data-isopen="false" aria-label="menu"><svg><use xlink:href="#menu-icon"></use></svg></button></div><div id="mobile-sidebar" class="mobile-sidebar-container"><div class="mobile-sidebar-wrapper"><div class="mobile-nav-links"></div><div class="mobile-sidebar-items-c"><div class="sidebar-section-title with-arrow" data-isopen="false" id="sidebar-modules"><div>Modules</div><svg><use xlink:href="#down-icon"></use></svg></div><div class="sidebar-section-children-container"><div class="sidebar-section-children"><a href="module-DB.html">DB</a></div><div class="sidebar-section-children"><a href="module-Timers.html">Timers</a></div><div class="sidebar-section-children"><a href="module-api.html">api</a></div><div class="sidebar-section-children"><a href="module-discord.html">discord</a></div><div class="sidebar-section-children"><a href="module-main.html">main</a></div><div class="sidebar-section-children"><a href="module-web.html">web</a></div></div><div class="sidebar-section-title with-arrow" data-isopen="false" id="sidebar-classes"><div>Classes</div><svg><use xlink:href="#down-icon"></use></svg></div><div class="sidebar-section-children-container"><div class="sidebar-section-children"><a href="log.html">log</a></div><div class="sidebar-section-children"><a href="module-DB.ActionEntry.html">ActionEntry</a></div><div class="sidebar-section-children"><a href="module-DB.modEntry.html">modEntry</a></div><div class="sidebar-section-children"><a href="module-DB.modVersionEntry.html">modVersionEntry</a></div><div class="sidebar-section-children"><a href="userEntry.html">userEntry</a></div></div><div class="sidebar-section-title with-arrow" data-isopen="false" id="sidebar-namespaces"><div>Namespaces</div><svg><use xlink:href="#down-icon"></use></svg></div><div class="sidebar-section-children-container"><div class="sidebar-section-children"><a href="Config.html">Config</a></div><div class="sidebar-section-children"><a href="module-DB.GetAction.html">GetAction</a></div><div class="sidebar-section-children"><a href="module-DB.GetMod.html">GetMod</a></div><div class="sidebar-section-children"><a href="module-DB.GetMod.Data.html">Data</a></div><div class="sidebar-section-children"><a href="module-DB.GetMod.Versions.html">Versions</a></div><div class="sidebar-section-children"><a href="module-DB.GetUser.html">GetUser</a></div><div class="sidebar-section-children"><a href="module-api.admin.html">admin</a></div><div class="sidebar-section-children"><a href="module-api.search.html">search</a></div><div class="sidebar-section-children"><a href="module-api.uploadmod.html">uploadmod</a></div><div class="sidebar-section-children"><a href="module-discord.BotEvents.html">BotEvents</a></div><div class="sidebar-section-children"><a href="module-discord.Commands.html">Commands</a></div><div class="sidebar-section-children"><a href="module-discord.Commands.getModInfo.html">getModInfo</a></div><div class="sidebar-section-children"><a href="module-discord.Commands.getModVersions.html">getModVersions</a></div><div class="sidebar-section-children"><a href="module-discord.Commands.getSiteActions.html">getSiteActions</a></div><div class="sidebar-section-children"><a href="module-discord.Commands.searchMods.html">searchMods</a></div><div class="sidebar-section-children"><a href="module-discord.Events.html">Events</a></div><div class="sidebar-section-children"><a href="module-discord.Events.clientReady.html">clientReady</a></div><div class="sidebar-section-children"><a href="module-discord.Events.interactionCreate.html">interactionCreate</a></div><div class="sidebar-section-children"><a href="module-timers.LogActions.html">LogActions</a></div><div class="sidebar-section-children"><a href="module-timers.UpdateMods.html">UpdateMods</a></div><div class="sidebar-section-children"><a href="module-timers.ValidateMod.html">ValidateMod</a></div><div class="sidebar-section-children"><a href="module-web.admin.html">admin</a></div><div class="sidebar-section-children"><a href="module-web.discordAuth.html">discordAuth</a></div><div class="sidebar-section-children"><a href="module-web.generateMod.html">generateMod</a></div><div class="sidebar-section-children"><a href="module-web.home.html">home</a></div><div class="sidebar-section-children"><a href="module-web.upload.html">upload</a></div></div><div class="sidebar-section-title with-arrow" data-isopen="false" id="sidebar-global"><div>Global</div><svg><use xlink:href="#down-icon"></use></svg></div><div class="sidebar-section-children-container"><div class="sidebar-section-children"><a href="global.html#HandleClient">HandleClient</a></div></div></div><div class="mobile-navbar-actions"><div class="navbar-right-item"><button class="icon-button search-button" aria-label="open-search"><svg><use xlink:href="#search-icon"></use></svg></button></div><div class="navbar-right-item"><button class="icon-button theme-toggle" aria-label="toggle-theme"><svg><use class="theme-svg-use" xlink:href="#light-theme-icon"></use></svg></button></div><div class="navbar-right-item"><button class="icon-button font-size" aria-label="change-font-size"><svg><use xlink:href="#font-size-icon"></use></svg></button></div></div></div></div><script type="text/javascript" src="scripts/core.min.js"></script><script src="scripts/search.min.js" defer="defer"></script><script src="scripts/third-party/fuse.js" defer="defer"></script><script type="text/javascript">var tocbotInstance=tocbot.init({tocSelector:"#eed4d2a0bfd64539bb9df78095dec881",contentSelector:".main-content",headingSelector:"h1, h2, h3",hasInnerContainers:!0,scrollContainer:".main-content",headingsOffset:130,onClick:bringLinkToView})</script></body></html>

@@ -49,7 +49,7 @@ module.exports = {
      */
     async execute(interaction) {
         await interaction.deferReply();
-        log.log(`getting site actions for ${interaction.options.getString('query')}`)
+        log.info(`getting site actions for ${interaction.options.getString('query')}`)
         var query = {$or: [
                 { "discordID": { $regex:interaction.options.getString('query') , $options: 'i' } },
                 { "action": { $regex:interaction.options.getString('query') , $options: 'i' } }
@@ -71,7 +71,7 @@ module.exports = {
             });
             await interaction.editReply({ embeds: [embed] });
         }catch(e){
-            log.log(`Error fetching site actions: ${e}`)
+            log.info(`Error fetching site actions: ${e}`)
             await interaction.editReply({ content: 'An error occurred while fetching the site actions. Please try again later.' });
         }
     }
