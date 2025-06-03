@@ -402,6 +402,13 @@ globalThis.Pages = {
                     verifiedOnly = "null";
                     break;
             }
+
+            // Initialize with an empty search query (returns all mods)
+            let searchQuery = {};
+
+            // Convert the query object to a JSON string and encode it for URL
+            globalThis.SearchQuery = encodeURIComponent(JSON.stringify(searchQuery));
+
             var response = await fetch(`/api/mods?search=${globalThis.SearchQuery}&verified=${verifiedOnly}`);
             var result = await response.json();
             console.log(result.mods);
@@ -451,7 +458,7 @@ globalThis.UpdateModList = function() {
 }
 globalThis.PerformSearch = async function() {
     var searchInput = document.getElementById("searchInput");
-    globalThis.SearchQuery = searchInput.value;
+    var searchText = searchInput.value;
     var verifiedOnly = "";
     switch (document.getElementById("searchtype").value) {
         case "verified":
@@ -464,6 +471,25 @@ globalThis.PerformSearch = async function() {
             verifiedOnly = "null";
             break;
     }
+
+    // Create a MongoDB query object based on the search text
+    let searchQuery;
+    if (searchText && searchText.trim() !== "") {
+        // Create a regex search for the mod name
+        searchQuery = {
+            "modData.name": {
+                "$regex": searchText,
+                "$options": "i" // case-insensitive
+            }
+        };
+    } else {
+        // Empty search returns all mods
+        searchQuery = {};
+    }
+
+    // Convert the query object to a JSON string and encode it for URL
+    globalThis.SearchQuery = encodeURIComponent(JSON.stringify(searchQuery));
+
     var response = await fetch(`/api/mods?search=${globalThis.SearchQuery}&verified=${verifiedOnly}`);
     var result = await response.json();
     console.log(result.mods);
