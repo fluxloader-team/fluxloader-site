@@ -416,6 +416,41 @@ var GetMod = {
             })
             return endresult.map(entry => entry.modData.version || "Unknown");
         },
+
+        /**
+         * Retrieves lists of version numbers for multiple mod IDs.
+         * @async
+         * @function
+         * @memberof module:DB.GetMod.Versions
+         * @param {string[]} modIDs - Array of mod IDs to retrieve versions for.
+         * @returns {Promise<Object>} An object mapping each modID to its array of version numbers.
+         */
+        MultipleNumbers: async function (modIDs = []) {
+            if (!modIDs.length) return {};
+
+            var sort = {uploadTime: -1}
+            var endresult = await HandleClient(async (client) => {
+                var db = await client.db('SandustryMods');
+                var modVersionsCollection = await db.collection('ModVersions');
+                var result = await modVersionsCollection.find(
+                    {modID: { $in: modIDs }},
+                    { projection: { 'modData.version': 1, 'modID': 1, _id: 0 } }
+                ).sort(sort).toArray();
+
+                // Group versions by modID
+                const versionsByModId = {};
+                result.forEach(item => {
+                    if (!versionsByModId[item.modID]) {
+                        versionsByModId[item.modID] = [];
+                    }
+                    versionsByModId[item.modID].push(item.modData.version || "Unknown");
+                });
+
+                return versionsByModId;
+            });
+
+            return endresult;
+        },
         /**
          * Deletes a specific version of a mod from the database.
          * If the mod has only one remaining version and that version is deleted, the mod itself is also removed from the `Mods` collection.

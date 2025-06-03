@@ -40,17 +40,24 @@ module.exports = {
 	 *   - *Example*: `search=%7B%22modData.name%22%3A%7B%22%24regex%22%3A%22test%22%2C%22%24options%22%3A%22i%22%7D%7D`
 	 *   - This example decodes to: `{"modData.name":{"$regex":"test","$options":"i"}}`
 	 *
-	 * - **modid**: *(required for non-search options)*
+	 * - **modid**: *(required for non-search options unless modids is provided)*
 	 *   The unique ID of the mod to retrieve information or download.
 	 *   - *Example*: `modid=1234`
+	 * 
+	 * - **modids**: *(can be used instead of modid for the versions option)*
+	 *   A comma-separated list of mod IDs to retrieve versions for.
+	 *   - *Example*: `modids=1234,5678,9012`
 	 *
 	 * - **option**: *(required for non-search options)*
 	 *   Specifies the action to be performed. Supported values:
 	 *   - `"info"`: Retrieves metadata of a specific mod.
 	 *   - `"download"`: Downloads a mod version.
-	 *   - `"versions"`: Fetches a list of available versions for the mod.
-	 *     - With `data=true` parameter: Returns full version data for each version.
-	 *     - Without `data` parameter: Returns only version numbers (default behavior).
+	 *   - `"versions"`: Fetches a list of available versions for the mod(s).
+	 *     - With `modid` parameter: Returns versions for a single mod.
+	 *       - With `data=true` parameter: Returns full version data for each version.
+	 *       - Without `data` parameter: Returns only version numbers (default behavior).
+	 *     - With `modids` parameter: Returns version numbers for multiple mods as an object mapping each modID to its array of versions.
+	 *       - Note: `data=true` is not supported with `modids` parameter.
 	 *   - *Example*: `option=info`
 	 *
 	 * - **version**: *(optional)*
@@ -242,7 +249,30 @@ module.exports = {
 	 *   }
 	 * }
 	 * 
-	 * @example <caption>Example 10: Batch search for multiple specific mod IDs</caption>
+	 * @example <caption>Example 10: Fetch version numbers for multiple mods at once</caption>
+	 * // URL: /api/mods?modids=1234,5678,9012&option=versions
+	 * async function fetchMultipleModVersions(modIds) {
+	 *   try {
+	 *     // Join the array of mod IDs with commas
+	 *     const modIdsParam = modIds.join(',');
+	 *     const response = await fetch(`/api/mods?modids=${modIdsParam}&option=versions`);
+	 *     const data = await response.json();
+	 *     
+	 *     // data.versions is an object where keys are mod IDs and values are arrays of version numbers
+	 *     console.log("Versions for multiple mods:", data.versions);
+	 *     
+	 *     // Example of accessing versions for a specific mod
+	 *     if (data.versions[modIds[0]]) {
+	 *       console.log(`Versions for ${modIds[0]}:`, data.versions[modIds[0]]);
+	 *     }
+	 *     
+	 *     return data.versions;
+	 *   } catch (error) {
+	 *     console.error("Error fetching multiple mod versions:", error);
+	 *   }
+	 * }
+	 * 
+	 * @example <caption>Example 11: Batch search for multiple specific mod IDs</caption>
 	 * // Search for several mods by their IDs in a single query
 	 * async function batchSearchByModIds(modIds) {
 	 *   try {
@@ -290,7 +320,7 @@ module.exports = {
 	 * // const result = await batchSearchByModIds(['mod-123', 'mod-456', 'mod-789']);
 	 * // Access specific mod: result.foundMap['mod-123']
 	 * 
-	 * @example <caption>Example 11: Search for mods containing multiple specific tags</caption>
+	 * @example <caption>Example 12: Search for mods containing multiple specific tags</caption>
 	 * // Search for mods that have ALL of the specified tags
 	 * async function searchModsByMultipleTags(requiredTags) {
 	 *   try {
@@ -448,51 +478,90 @@ module.exports = {
 					case "versions":
 						try {
 							var modID = querys["modid"];
-							if (!modID) {
+							var modIDs = querys["modids"];
+
+							// Check if modids parameter is provided (for multiple mod IDs)
+							if (modIDs) {
+								// Parse the comma-separated list of mod IDs
+								var modIDsArray = modIDs.split(',');
+
+								// Check if full version data is requested
+								if (querys["data"] === "true") {
+									// This feature is not implemented for multiple mod IDs
+									res.writeHead(201, { "Content-Type": "application/json" });
+									res.end(
+										JSON.stringify({
+											error: "Full version data is not supported for multiple mod IDs. Use single modid parameter for full data.",
+										})
+									);
+									return;
+								} else {
+									// Get version numbers for multiple mod IDs
+									var versionsMap = await Mongo.GetMod.Versions.MultipleNumbers(modIDsArray);
+
+									// Check if any versions were found
+									if (Object.keys(versionsMap).length === 0) {
+										res.writeHead(201, { "Content-Type": "application/json" });
+										res.end(
+											JSON.stringify({
+												message: "No versions found for any of the specified mod IDs.",
+												modIDs: modIDsArray,
+											})
+										);
+										return;
+									}
+
+									res.writeHead(201, { "Content-Type": "application/json" });
+									res.end(JSON.stringify({ versions: versionsMap }));
+								}
+							} 
+							// Handle single mod ID case (original behavior)
+							else if (modID) {
+								// Check if full version data is requested
+								if (querys["data"] === "true") {
+									// Get all version data (excluding the modfile to reduce payload size)
+									var versionsData = await Mongo.GetMod.Versions.All(modID, { modfile: 0 });
+
+									if (versionsData.length === 0) {
+										res.writeHead(201, { "Content-Type": "application/json" });
+										res.end(
+											JSON.stringify({
+												message: "No versions found for the specified mod ID.",
+												modID: modID,
+											})
+										);
+										return;
+									}
+
+									res.writeHead(201, { "Content-Type": "application/json" });
+									res.end(JSON.stringify({ versions: versionsData }));
+								} else {
+									// Get only version numbers (original behavior)
+									var versions = await Mongo.GetMod.Versions.Numbers(modID);
+
+									if (versions.length === 0) {
+										res.writeHead(201, { "Content-Type": "application/json" });
+										res.end(
+											JSON.stringify({
+												message: "No versions found for the specified mod ID.",
+												modID: modID,
+											})
+										);
+										return;
+									}
+
+									res.writeHead(201, { "Content-Type": "application/json" });
+									res.end(JSON.stringify({ versions }));
+								}
+							} else {
+								// Neither modid nor modids parameter was provided
 								res.writeHead(201, { "Content-Type": "application/json" });
 								res.end(
 									JSON.stringify({
-										error: "ModID is required to fetch versions.",
+										error: "Either modid or modids parameter is required to fetch versions.",
 									})
 								);
 								return;
-							}
-
-							// Check if full version data is requested
-							if (querys["data"] === "true") {
-								// Get all version data (excluding the modfile to reduce payload size)
-								var versionsData = await Mongo.GetMod.Versions.All(modID, { modfile: 0 });
-
-								if (versionsData.length === 0) {
-									res.writeHead(201, { "Content-Type": "application/json" });
-									res.end(
-										JSON.stringify({
-											message: "No versions found for the specified mod ID.",
-											modID: modID,
-										})
-									);
-									return;
-								}
-
-								res.writeHead(201, { "Content-Type": "application/json" });
-								res.end(JSON.stringify({ versions: versionsData }));
-							} else {
-								// Get only version numbers (original behavior)
-								var versions = await Mongo.GetMod.Versions.Numbers(modID);
-
-								if (versions.length === 0) {
-									res.writeHead(201, { "Content-Type": "application/json" });
-									res.end(
-										JSON.stringify({
-											message: "No versions found for the specified mod ID.",
-											modID: modID,
-										})
-									);
-									return;
-								}
-
-								res.writeHead(201, { "Content-Type": "application/json" });
-								res.end(JSON.stringify({ versions }));
 							}
 						} catch (err) {
 							log.info("Error fetching versions: " + err.message);
