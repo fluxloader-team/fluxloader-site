@@ -287,6 +287,31 @@ var GetMod = {
             return endresult;
         },
         /**
+         * Retrieves the oldest version of a mod.
+         * 
+         * @async
+         * @function
+         * @memberof module:DB.GetMod.Versions
+         * @param {string} [modID] - The ID of the mod.
+         * @param {object} [project] - Fields to include in the results
+         * @returns {Promise<modVersionEntry|null>} The oldest version of the mod, or null if not found
+         */
+        Oldest: async function (modID = "", project = {}) {
+            var endresult = await HandleClient(async (client) => {
+                var db = client.db('SandustryMods');
+                var modVersionsCollection = db.collection('ModVersions');
+                var result = await modVersionsCollection.findOne(
+                    { modID: modID },
+                    { 
+                        sort: { uploadTime: 1 },
+                        projection: project
+                    }
+                );
+                return result;
+            });
+            return endresult;
+        },
+        /**
          * Retrieves the data of a specific mod version.
          * @async
          * @function
@@ -501,6 +526,28 @@ var GetMod = {
             return endresult;
         },
         /**
+         * Finds unverified mods with optional limit and projection.
+         * 
+         * @async
+         * @function
+         * @memberof module:DB.GetMod.Data
+         * @param {number} [limit=10000] - Maximum number of mods to return
+         * @param {object} [project={}] - Fields to include in the results
+         * @returns {Promise<modEntry[]>} Array of unverified mods
+         */
+        FindUnverified: async function (limit = 10000, project = {}) {
+            var endresult = await HandleClient(async (client) => {
+                var db = client.db('SandustryMods');
+                var modsCollection = db.collection('Mods');
+                var result = await modsCollection.find({ verified: false })
+                    .project(project)
+                    .limit(limit)
+                    .toArray();
+                return result;
+            });
+            return endresult;
+        },
+        /**
          * Retrieves the data of a specific mod.
          * @async
          * @function
@@ -531,7 +578,7 @@ var GetMod = {
          * @param {boolean} [discordBypass]
          * @returns {Promise<void>}
          */
-        Upload: async function (payload = { filename:"", filedata:"", discordInfo:{id:"",tokenResponse:{access_token:""}} },discordBypass = false) {
+        Upload: async function (payload = { filename:"", filedata:"", discordInfo:{id:"",tokenResponse:{access_token:""}} }, discordBypass = false, bypassUpdateCheck = false) {
             var endresult = await HandleClient(async (client) => {
                 var db = client.db('SandustryMods');
                 var modsCollection = db.collection("Mods");
@@ -589,17 +636,33 @@ var GetMod = {
                         modInfo[key] = sanitizeHtml(modInfo[key]);
                     }
                 });
-                //if(modInfo[""][""] == undefined || )
+
+                // Check if modID is defined in modinfo.json
+                if (!modInfo.modID) {
+                    return 'Missing modID in modinfo.json. A unique modID is required.';
+                }
+
                 var modData = {
                     ...modInfo,
                     description: description,
                 };
-                var modEntry = null;
-                modEntry = await modsCollection.findOne({ modID: modID, "Author.discordID": discordInfo.id });
-                if (modEntry == null) {
-                    modEntry = await modsCollection.findOne({ "modData.name": modData.name, "Author.discordID": discordInfo.id });
+
+                // Use the modID from modinfo.json instead of a random one
+                modID = modInfo.modID;
+
+                // Check if a mod with this ID exists
+                var existingMod = await modsCollection.findOne({ modID: modID });
+
+                // If mod exists, check ownership (unless bypassUpdateCheck is true)
+                if (existingMod && !bypassUpdateCheck) {
+                    if (existingMod.Author.discordID !== discordInfo.id) {
+                        return 'A mod with this modID already exists and belongs to another user. Please use a different modID.';
+                    } else {
+                        return 'UPDATE_EXISTING_MOD:' + modID;
+                    }
                 }
-                modID = modEntry ? modEntry.modID : modID;
+
+                var modEntry = existingMod;
                 var uploadTime =  new Date()
                 if (modEntry == null) {
                     modEntry = {
@@ -691,31 +754,31 @@ var GetMod = {
             var endresult = await HandleClient(async (client) => {
                 var db = client.db('SandustryMods');
                 var modsCollection = db.collection('Mods');
-                
+
                 var query = {};
                 if (verifiedOnly === true) {
                     query.verified = true;
                 } else if (verifiedOnly === false) {
                     query.verified = false;
                 }
-                
+
                 var count = await modsCollection.countDocuments(query);
-                
+
                 if (count === 0) {
                     return null;
                 }
-                
+
                 var random = Math.floor(Math.random() * count);
-                
+
                 var result = await modsCollection.find(query)
                     .project(project)
                     .skip(random)
                     .limit(1)
                     .toArray();
-                
+
                 return result.length > 0 ? result[0] : null;
             });
-            
+
             return endresult;
         }
     },
@@ -867,6 +930,149 @@ var GetUser = {
             return restult;
         })
         return endresult;
+    },
+    /**
+     * Unbans a user by updating their record in the database.
+     *
+     * This function marks a user as not banned in the `Users` collection by setting the `banned` field to `false`.
+     *
+     * @async
+     * @function Unban
+     * @memberof module:DB.GetUser
+     *
+     * @param {string} [discordID=""] - The Discord ID of the user to be unbanned.
+     *
+     * @returns {Promise<Object>} A promise that resolves to the result of the update operation.
+     * - The result contains information about the success of the update.
+     *
+     * @throws {Error} Throws an error if there is an issue connecting to the database or updating the user record.
+     *
+     * @example
+     * // Unbanning a user with a given Discord ID
+     * const result = await GetUser.Unban("123456789012345678");
+     * if (result.modifiedCount > 0) {
+     *     console.log("User unbanned successfully.");
+     * } else {
+     *     console.log("User not found or ban status not updated.");
+     * }
+     */
+    Unban:async function (discordID = "") {
+        var endresult = await HandleClient(async (client) => {
+            var db = client.db('SandustryMods');
+            var userCollection = db.collection("Users");
+            var restult = await userCollection.updateOne({ "discordID": discordID }, { $set: { banned: false } });
+            return restult;
+        })
+        return endresult;
+    },
+    /**
+     * Updates a user's permissions by adding or removing a specific permission.
+     *
+     * @async
+     * @function UpdatePermissions
+     * @memberof module:DB.GetUser
+     *
+     * @param {string} [discordID=""] - The Discord ID of the user to update.
+     * @param {string} [permission=""] - The permission to add or remove.
+     * @param {boolean} [add=true] - Whether to add (true) or remove (false) the permission.
+     *
+     * @returns {Promise<Object>} A promise that resolves to the result of the update operation.
+     * - The result contains information about the success of the update.
+     *
+     * @throws {Error} Throws an error if there is an issue connecting to the database or updating the user record.
+     *
+     * @example
+     * // Adding admin permission to a user
+     * const result = await GetUser.UpdatePermissions("123456789012345678", "admin", true);
+     * if (result.modifiedCount > 0) {
+     *     console.log("Permission added successfully.");
+     * } else {
+     *     console.log("User not found or permission not updated.");
+     * }
+     *
+     * // Removing admin permission from a user
+     * const result = await GetUser.UpdatePermissions("123456789012345678", "admin", false);
+     * if (result.modifiedCount > 0) {
+     *     console.log("Permission removed successfully.");
+     * } else {
+     *     console.log("User not found or permission not updated.");
+     * }
+     */
+    UpdatePermissions:async function (discordID = "", permission = "", add = true) {
+        var endresult = await HandleClient(async (client) => {
+            var db = client.db('SandustryMods');
+            var userCollection = db.collection("Users");
+            var operation = add ? { $push: { permissions: permission } } : { $pull: { permissions: permission } };
+            var restult = await userCollection.updateOne({ "discordID": discordID }, operation);
+            return restult;
+        })
+        return endresult;
+    },
+    /**
+     * Searches for users by Discord ID or username.
+     *
+     * @async
+     * @function Search
+     * @memberof module:DB.GetUser
+     *
+     * @param {string} [search=""] - The search query to match against Discord ID or username.
+     * @param {number} [limit=50] - The maximum number of results to return.
+     *
+     * @returns {Promise<Object[]>} A promise that resolves to an array of user objects matching the search criteria.
+     *
+     * @throws {Error} Throws an error if there is an issue connecting to the database or performing the search.
+     *
+     * @example
+     * // Search for users with "john" in their username
+     * const users = await GetUser.Search("john");
+     * console.log(`Found ${users.length} users matching "john"`);
+     */
+    Search:async function (search = "", limit = 50) {
+        var endresult = await HandleClient(async (client) => {
+            var db = client.db('SandustryMods');
+            var userCollection = db.collection("Users");
+            var query = search ? {
+                $or: [
+                    { discordID: { $regex: search, $options: 'i' } },
+                    { discordUsername: { $regex: search, $options: 'i' } }
+                ]
+            } : {};
+            var restult = await userCollection.find(query).limit(limit).toArray();
+            return restult;
+        })
+        return endresult;
+    },
+    /**
+     * Lists users with pagination.
+     *
+     * @async
+     * @function List
+     * @memberof module:DB.GetUser
+     *
+     * @param {number} [limit=50] - The maximum number of results to return.
+     * @param {Object} [query={}] - Additional query parameters to filter users.
+     *
+     * @returns {Promise<Object[]>} A promise that resolves to an array of user objects.
+     *
+     * @throws {Error} Throws an error if there is an issue connecting to the database or retrieving the users.
+     *
+     * @example
+     * // List the first 20 users
+     * const users = await GetUser.List(20);
+     * console.log(`Retrieved ${users.length} users`);
+     *
+     * // List banned users
+     * const bannedUsers = await GetUser.List(50, { banned: true });
+     * console.log(`Found ${bannedUsers.length} banned users`);
+     */
+    List:async function (limit = 50, query = {}) {
+        var endresult = await HandleClient(async (client) => {
+            var db = client.db('SandustryMods');
+            var userCollection = db.collection("Users");
+            var restult = await userCollection.find(query).limit(limit).toArray();
+            return restult;
+        })
+        return endresult;
     }
 }
 /**
@@ -962,12 +1168,59 @@ var GetAction = {
             return restult;
         })
         return endresult;
+    },
+    /**
+     * Counts the number of action entries in the database that match the provided query.
+     *
+     * @async
+     * @function Count
+     * @memberof module:DB.GetAction
+     *
+     * @param {Object} [query={}] - The query object to filter actions for counting.
+     * If no query is provided, all actions are counted.
+     *
+     * @returns {Promise<number>} A promise that resolves to the count of actions matching the query.
+     *
+     * @throws {Error} Throws an error if there is an issue connecting to the database or counting the actions.
+     *
+     * @example
+     * // Count all actions
+     * const totalActions = await GetAction.Count();
+     * console.log(`Total actions: ${totalActions}`);
+     *
+     * // Count actions for a specific user
+     * const userActions = await GetAction.Count({ discordID: "123456789012345678" });
+     * console.log(`Actions for user: ${userActions}`);
+     */
+    Count: async function (query = {}) {
+        var endresult = await HandleClient(async (client) => {
+            var db = client.db('SandustryMods');
+            var actionCollection = db.collection("Actions");
+            var count = await actionCollection.countDocuments(query);
+            return count;
+        })
+        return endresult;
     }
 }
+/**
+ * Handles operations using a MongoDB client.
+ * This function is exported to allow other modules to use it for custom database operations.
+ * 
+ * @async
+ * @function HandleClient
+ * @memberof module:DB
+ * @param {function(MongoClient): Promise<any>} [runClient] - Async function to run with the connected client.
+ * @returns {Promise<any>} The result of the operation.
+ */
+async function exportedHandleClient(runClient = async function (client = new MongoClient(mongoUri)) {}) {
+    return await HandleClient(runClient);
+}
+
 module.exports = {
     GetMod,
     GetUser,
-    GetAction
+    GetAction,
+    HandleClient: exportedHandleClient
 }
 
 function verifyDiscordUser(userId, accessToken) {

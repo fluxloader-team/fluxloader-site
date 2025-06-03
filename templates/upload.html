@@ -14,9 +14,13 @@
 		</div>
 		<div class="mb-3" id="ModInfo">
 			<h3>Mod Information</h3>
+			<div class="alert alert-info">
+				<strong>Important:</strong> Your mod must have a unique <code>modID</code> defined in the <code>modinfo.json</code> file. 
+				This ID is used to identify your mod and track updates.
+			</div>
 			<pre id="modDataContent" style="white-space: pre-wrap"></pre>
 		</div>
-		<button type="submit" class="btn btn-primary" onclick="handleUpload()">Upload Mod</button>
+		<button type="submit" class="btn btn-primary" id="uploadButton" onclick="handleUpload()">Upload Mod</button>
 	</div>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -55,14 +59,16 @@
 			window.location.href = "/";
 		}
 
-		async function handleUpload() {
+		// Global variables to store mod data
+		let currentModData = null;
+
+		// Function to perform the actual upload
+		async function performUpload() {
 			var fileInput = document.getElementById("ModFile");
 			var file = fileInput.files[0];
 
-			console.log("File:", !file);
-			console.log("File:", file.type);
 			if (!file || (file.type !== "application/zip" && file.type !== "application/x-zip-compressed")) {
-				alert("Please upload a valid ZIP file.");
+				showError("Please upload a valid ZIP file.");
 				return;
 			}
 
@@ -78,6 +84,10 @@
 					filedata: base64Data,
 					discordInfo: discordUser,
 				});
+
+				document.getElementById("uploadButton").disabled = true;
+				document.getElementById("uploadButton").innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Uploading...';
+
 				var response = await fetch("/api/uploadmod", {
 					method: "POST",
 					headers: {
@@ -89,27 +99,100 @@
 				var result = await response.json();
 				console.log("Server response:", result);
 
+				document.getElementById("uploadButton").disabled = false;
+				document.getElementById("uploadButton").innerHTML = 'Upload Mod';
+
 				if (result.message) {
-					alert(`Upload Successful: ${result.message}`);
+					if (result.isUpdate) {
+						// Show update success message
+						showSuccess(`Update Successful: Your mod has been updated.`);
+					} else {
+						// Show new upload success message
+						showSuccess(`Upload Successful: ${result.message}`);
+					}
+					setTimeout(() => {
+						window.location.href = "/";
+					}, 2000);
+				} else if (result.error) {
+					// Show error message
+					showError(result.error);
 				}
 			} catch (error) {
 				console.error("Error processing ZIP file:", error);
-				alert("Error processing the ZIP file.");
+				document.getElementById("uploadButton").disabled = false;
+				document.getElementById("uploadButton").innerHTML = 'Upload Mod';
+				showError("Error processing the ZIP file: " + (error.message || "Unknown error"));
 			}
 		}
 
+		// Function to show error message
+		function showError(message) {
+			const errorDiv = document.createElement("div");
+			errorDiv.className = "alert alert-danger alert-dismissible fade show mt-3";
+			errorDiv.innerHTML = `
+				<strong>Error:</strong> ${message}
+				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+			`;
+			document.querySelector(".modUploadForm").prepend(errorDiv);
+
+			// Auto-dismiss after 5 seconds
+			setTimeout(() => {
+				errorDiv.classList.remove("show");
+				setTimeout(() => errorDiv.remove(), 500);
+			}, 5000);
+		}
+
+		// Function to show success message
+		function showSuccess(message) {
+			const successDiv = document.createElement("div");
+			successDiv.className = "alert alert-success alert-dismissible fade show mt-3";
+			successDiv.innerHTML = `
+				<strong>Success:</strong> ${message}
+				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+			`;
+			document.querySelector(".modUploadForm").prepend(successDiv);
+
+			// Auto-dismiss after 5 seconds
+			setTimeout(() => {
+				successDiv.classList.remove("show");
+				setTimeout(() => successDiv.remove(), 500);
+			}, 5000);
+		}
+
+		// Main upload handler function
+		async function handleUpload() {
+			if (!currentModData || !currentModData.modID) {
+				showError("No valid mod selected or missing modID in modinfo.json");
+				return;
+			}
+
+			// Proceed with upload - server will handle if it's an update
+			await performUpload();
+		}
+
 		function displayModData(modData) {
+			// Store the current mod data in the global variable
+			currentModData = modData;
+
+			// Check if modID is defined
+			const modIDStatus = modData.modID 
+				? `<span class="badge bg-success">ModID: ${modData.modID}</span>` 
+				: `<span class="badge bg-danger">Missing ModID!</span>`;
+
 			var container = document.getElementById("ModInfo");
 			container.innerHTML = `
     <div class="card">
       <div class="card-header">
         <h4>${modData.name} <small class="text-muted">v${modData.version}</small></h4>
-        <span class="badge bg-primary" style="margin-right: 10px;">Author: ${modData.author}</span>
-        ${modData.tags.map((tag) => `<span class="badge bg-secondary">${tag}</span>`).join(" ")}
+        <div class="mb-2">
+          ${modIDStatus}
+          <span class="badge bg-primary" style="margin-left: 10px;">Author: ${modData.author}</span>
+        </div>
+        ${modData.tags && modData.tags.length ? modData.tags.map((tag) => `<span class="badge bg-secondary">${tag}</span>`).join(" ") : ""}
       </div>
       <div class="card-body">
         <h5>Short Description</h5>
-        <p class="text-muted">${modData.shortDescription}</p>
+        <p class="text-muted">${modData.shortDescription || "No short description provided."}</p>
         <h5>Description</h5>
         <div>${modData.description ? marked.parse(modData.description) : "<em>No description provided.</em>"}</div>
 
@@ -118,6 +201,10 @@
         <h5>Details</h5>
         <table class="table table-striped">
           <tbody>
+            <tr>
+              <th scope="row">Mod ID</th>
+              <td>${modData.modID || '<span class="text-danger">Missing! A unique modID is required.</span>'}</td>
+            </tr>
             <tr>
               <th scope="row">Fluxloader Version</th>
               <td>${modData.fluxloaderVersion || "N/A"}</td>

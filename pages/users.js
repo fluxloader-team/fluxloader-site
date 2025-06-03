@@ -113,31 +113,7 @@ module.exports = {
                         const search = data.search || '';
 
                         // Search for users
-                        let users = [];
-                        if (search) {
-                            // Search by Discord ID or username
-                            const client = await require('mongodb').MongoClient.connect(require('./../config.json').mongoUri);
-                            const db = client.db('SandustryMods');
-                            const userCollection = db.collection("Users");
-
-                            users = await userCollection.find({
-                                $or: [
-                                    { discordID: { $regex: search, $options: 'i' } },
-                                    { discordUsername: { $regex: search, $options: 'i' } }
-                                ]
-                            }).limit(50).toArray();
-
-                            client.close();
-                        } else {
-                            // Get all users (limited to 50)
-                            const client = await require('mongodb').MongoClient.connect(require('./../config.json').mongoUri);
-                            const db = client.db('SandustryMods');
-                            const userCollection = db.collection("Users");
-
-                            users = await userCollection.find({}).limit(50).toArray();
-
-                            client.close();
-                        }
+                        let users = await Mongo.GetUser.Search(search);
 
                         // Log the action
                         var actionEntry = {
@@ -152,13 +128,7 @@ module.exports = {
                         res.end(JSON.stringify({ users: users }));
                     } else if (data.action === 'listUsers') {
                         // Get all users (limited to 50)
-                        const client = await require('mongodb').MongoClient.connect(require('./../config.json').mongoUri);
-                        const db = client.db('SandustryMods');
-                        const userCollection = db.collection("Users");
-
-                        const users = await userCollection.find({}).limit(50).toArray();
-
-                        client.close();
+                        const users = await Mongo.GetUser.List();
 
                         // Log the action
                         var actionEntry = {

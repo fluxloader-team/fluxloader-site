@@ -10,27 +10,7 @@ var config = require('./../config.json');
 
 const log = new Utils.log.log("Sandustry.web.pages.adminactions", "./sandustry.web.main.txt", true);
 
-/**
- * Handles operations using a MongoDB client.
- * @async
- * @function
- * @param {function(MongoClient): Promise<any>} [runClient] - Async function to run with the connected client.
- * @returns {Promise<any>} The result of the operation.
- */
-async function HandleClient(runClient = async function (client) {}) {
-    var client = new (require('mongodb').MongoClient)(config.mongoUri);
-    var result = null;
-    try {
-        await client.connect();
-        result = await runClient(client);
-        await client.close();
-        return result;
-    } catch (err) {
-        log.info(`${err}`);
-    } finally {
-        //await client.close();
-    }
-}
+// Using Mongo.HandleClient from DB.js instead of local implementation
 
 /**
  * @namespace adminactions
@@ -182,11 +162,7 @@ module.exports = {
                             }
 
                             // Update user's banned status
-                            await HandleClient(async (client) => {
-                                var db = client.db('SandustryMods');
-                                var userCollection = db.collection("Users");
-                                await userCollection.updateOne({ "discordID": authorID }, { $set: { banned: false } });
-                            });
+                            await Mongo.GetUser.Unban(authorID);
 
                             // Log the action
                             var actionEntry = {
@@ -215,14 +191,7 @@ module.exports = {
 
                             // Update user's permissions
                             if (!user.permissions.includes("admin")) {
-                                await HandleClient(async (client) => {
-                                    var db = client.db('SandustryMods');
-                                    var userCollection = db.collection("Users");
-                                    await userCollection.updateOne(
-                                        { "discordID": authorID }, 
-                                        { $push: { permissions: "admin" } }
-                                    );
-                                });
+                                await Mongo.GetUser.UpdatePermissions(authorID, "admin", true);
                             }
 
                             // Log the action
@@ -252,14 +221,7 @@ module.exports = {
 
                             // Update user's permissions
                             if (user.permissions.includes("admin")) {
-                                await HandleClient(async (client) => {
-                                    var db = client.db('SandustryMods');
-                                    var userCollection = db.collection("Users");
-                                    await userCollection.updateOne(
-                                        { "discordID": authorID }, 
-                                        { $pull: { permissions: "admin" } }
-                                    );
-                                });
+                                await Mongo.GetUser.UpdatePermissions(authorID, "admin", false);
                             }
 
                             // Log the action

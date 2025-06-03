@@ -71,12 +71,12 @@
 			if (!searchText || searchText.trim() === "") {
 				return JSON.stringify({"modData.name":{$regex: "", $options: "i"}});
 			}
-			
+
 			var query = { $and: [] };
 			var terms = searchText.trim().split(" ");
 			var tags = [];
 			var nonTagTerms = [];
-			
+
 			terms.forEach(term => {
 				if (term.startsWith("#")) {
 					tags.push(term.substring(1).toLowerCase());
@@ -84,7 +84,7 @@
 					nonTagTerms.push(term);
 				}
 			});
-			
+
 			if (tags.length > 0) {
 				query.$and.push({
 					"modData.tags": { 
@@ -92,7 +92,7 @@
 					}
 				});
 			}
-			
+
 			if (nonTagTerms.length > 0) {
 				var searchString = nonTagTerms.join(" ");
 				var nameAuthorSearch = {
@@ -104,11 +104,11 @@
 				};
 				query.$and.push(nameAuthorSearch);
 			}
-			
+
 			if (query.$and.length === 0) {
 				return JSON.stringify({"modData.name":{$regex: "", $options: "i"}});
 			}
-			
+
 			return JSON.stringify(query);
 		};
 		var modList = document.getElementById('modList');
@@ -145,7 +145,7 @@
 				`;
 				}
 
-				
+
 				var response = await fetch(`/api/mods?search=${encodedQuery}&verified=null&size=${perPage}&page=${pageToget}`);
 				var result = await response.json();
 				if(pageToget === 1) {
@@ -165,7 +165,7 @@
 					globalThis.Searching = false;
 					return;
 				}
-				
+
 				if (!result.mods || result.mods.length === 0) {
 					if(pageToget === 1){
 						modList.innerHTML = `<div class="alert alert-info">No mods found matching your search.</div>`;
@@ -183,7 +183,7 @@
 				result.mods.forEach((mod) => {
 					globalThis.Mods[mod.modID] = mod;
 				});
-				
+
 				if (searchText.trim() === "") {
 					console.log(`Loaded all ${result.mods.length} mods`);
 				} else {
@@ -206,29 +206,29 @@
 				var encodedQuery = encodeURIComponent(JSON.stringify({"modData.name":{$regex: "", $options: "i"}}));
 				var response = await fetch(`/api/mods?search=${encodedQuery}&verified=null&size=5000&page=1`);
 				var result = await response.json();
-				
+
 				globalThis.Mods = {};
-				
+
 				if (result.error) {
 					console.error("Error loading initial mods:", result.error);
 					var modList = document.getElementById("modList");
 					modList.innerHTML = `<div class="alert alert-danger">Error loading mods: ${result.error}</div>`;
 					return;
 				}
-				
+
 				if (!result.mods || result.mods.length === 0) {
 					var modList = document.getElementById("modList");
 					modList.innerHTML = `<div class="alert alert-info">No mods found in the database.</div>`;
 					return;
 				}
-				
+
 				result.mods.forEach((mod) => {
 					globalThis.Mods[mod.modID] = mod;
 				});
-				
+
 				console.log(`Loaded ${result.mods.length} mods`);
 				UpdateModList();
-				
+
 				document.getElementById("searchInput").addEventListener("keypress", function(event) {
 					if (event.key === "Enter") {
 						event.preventDefault();
@@ -286,10 +286,11 @@
 </div>`
 			var dependenciesList = document.getElementById("dependencies");
 			var dependencies = "";
-			Object.keys(mod.modData.dependencies).forEach((dependency) => {
-				dependencies += `<tr><td>${dependency}</td><td>${mod.modData.dependencies[dependency]}</td></tr>`
-
-			})
+			if (mod.modData.dependencies) {
+				Object.keys(mod.modData.dependencies).forEach((dependency) => {
+					dependencies += `<tr><td>${dependency}</td><td>${mod.modData.dependencies[dependency]}</td></tr>`
+				});
+			}
 			dependenciesList.innerHTML = `<table><tr><th style="width: 250px">Name</th><th style="width: 250px">Version</th></tr> ${dependencies}`;
 			dependenciesList.innerHTML += "</table>";
 			if (globalThis.ModCache[mod.modID]){
@@ -336,7 +337,7 @@
 			var modList = document.getElementById("modList");
 			var modItems = "";
 			var mods = Object.values(globalThis.Mods);
-			
+
 			if (mods.length === 0) {
 				if(onPage === 1){
 					modList.innerHTML = `<div class="alert alert-info">No mods found matching your search criteria.</div>`;
@@ -363,12 +364,12 @@
 				globalThis.Searching = false;
 				return;
 			}
-			
+
 			mods.forEach((mod) => {
 				var tagList = mod.modData.tags && mod.modData.tags.length > 0 
 					? mod.modData.tags.slice(0, Math.min(mod.modData.tags.length, 4)).join("</span><a> </a><span class=\"badge text-bg-secondary\">")
 					: "";
-					
+
 				modItems += `<tr class="modListItem" onclick='globalThis.DisplayMod("${mod.modID}")'>
 					<td>${mod.modData.name}</td>
 					<td>${mod.modData.author}</td>

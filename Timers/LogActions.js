@@ -3,7 +3,7 @@
  * @description logs unlogged actions to the discord
  */
 
-var { MongoClient } = require('mongodb');
+// Using Mongo module from DB.js instead of direct MongoDB access
 var colors = require("colors");
 var Utils = require('./../utils');
 const Mongo = require("../Shared/DB");

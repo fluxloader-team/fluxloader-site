@@ -406,9 +406,11 @@ globalThis.Pages = {
             var result = await response.json();
             console.log(result.mods);
             globalThis.Mods = {}
-            result.mods.forEach((mod) => {
-                globalThis.Mods[mod.modID] = mod
-            })
+            if (result.mods && Array.isArray(result.mods)) {
+                result.mods.forEach((mod) => {
+                    globalThis.Mods[mod.modID] = mod
+                });
+            }
             console.log("Response:", result.mods);
             UpdateModList()
         }
@@ -447,12 +449,10 @@ globalThis.PerformSearch = async function() {
     var result = await response.json();
     console.log(result.mods);
     globalThis.Mods = {}
-    try{
+    if (result.mods && Array.isArray(result.mods)) {
         result.mods.forEach((mod) => {
             globalThis.Mods[mod.modID] = mod
-        })
-    }catch(e){
-
+        });
     }
     console.log("Response:", result.mods);
     UpdateModList()
@@ -478,10 +478,11 @@ globalThis.DisplayMod = async function (modID) {
 </div>`
     var dependenciesList = document.getElementById("dependencies");
     var dependencies = "";
-    Object.keys(mod.modData.dependencies).forEach((dependency) => {
-        dependencies += `<tr><td>${dependency}</td><td>${mod.modData.dependencies[dependency]}</td></tr>`
-
-    })
+    if (mod.modData.dependencies) {
+        Object.keys(mod.modData.dependencies).forEach((dependency) => {
+            dependencies += `<tr><td>${dependency}</td><td>${mod.modData.dependencies[dependency]}</td></tr>`
+        });
+    }
     dependenciesList.innerHTML = `<table><tr><th style="width: 250px">Name</th><th style="width: 250px">Version</th></tr> ${dependencies}`;
     dependenciesList.innerHTML += "</table>";
     if (globalThis.ModCache[mod.modID]){

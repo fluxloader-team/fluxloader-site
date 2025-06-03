@@ -80,11 +80,7 @@ module.exports = {
                     const actions = await Mongo.GetAction.Get(query, { number: page, size: size });
 
                     // Get total count for pagination
-                    const client = await require('mongodb').MongoClient.connect(require('./../config.json').mongoUri);
-                    const db = client.db('SandustryMods');
-                    const actionCollection = db.collection("Actions");
-                    const totalCount = await actionCollection.countDocuments(query);
-                    client.close();
+                    const totalCount = await Mongo.GetAction.Count(query);
 
                     // Log the action
                     var actionEntry = {

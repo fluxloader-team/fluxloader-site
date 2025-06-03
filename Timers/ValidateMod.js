@@ -4,13 +4,10 @@
  * This implementation supports the auto-approval workflow for mods that have passed the waiting period without moderation action.
  */
 
-var { MongoClient } = require('mongodb');
 var colors = require("colors");
 var Utils = require('./../utils');
 const Mongo = require("../Shared/DB");
 var log = new Utils.log.log("Sandustry.Timer.Validate", "./sandustry.Timer.main.txt", true);
-
-var mongoUri = globalThis.Config.mongodb.uri;
 var validationTime = globalThis.Config.ModSettings.validationTime;
 /**
  * Namespace for Sandustry timer tasks related to mod validation.
@@ -44,43 +41,37 @@ var validationTime = globalThis.Config.ModSettings.validationTime;
  */
 module.exports = {
     async run() {
-        var client = new MongoClient(mongoUri);
-
         try {
-            await client.connect();
-            var db = client.db('SandustryMods');
+            // Get all unverified mods
+            var unverifiedMods = await Mongo.GetMod.Data.FindUnverified();
 
-            var modsCollection = db.collection('Mods');
-            var modVersionsCollection = db.collection('ModVersions');
-
-            var unverifiedMods = await modsCollection.find({ verified: false }).limit(10000).toArray();
             if(unverifiedMods.length > 0){
                 log.info(`Found ${unverifiedMods.length} unverified mod(s) to check.`);
                 var now = new Date();
 
                 for (var mod of unverifiedMods) {
-                    var modVersion = await modVersionsCollection.findOne(
-                        { modID: mod.modID },
-                        { sort: { uploadTime: 1 } }
-                    );
+                    // Get the oldest version of the mod
+                    var modVersion = await Mongo.GetMod.Versions.Oldest(mod.modID);
 
                     if (!modVersion) {
                         //log.info(`No version found for modID: ${mod.modID}. Skipping...`);
                         continue;
                     }
+
                     var uploadTime = new Date(modVersion.uploadTime);
                     var elapsedTime = (now - uploadTime);
 
                     if (elapsedTime > validationTime) {
-                        await modsCollection.updateOne(
-                            { modID: mod.modID },
-                            { $set: { verified: true } }
-                        );
+                        // Update the mod to be verified
+                        mod.verified = true;
+                        await Mongo.GetMod.Data.Update(mod.modID, mod);
+
+                        // Log the action
                         var action = {
                             discordID: "Timer",
                             action: `Auto-Verified mod ${mod.modID}`,
                             time: new Date(),
-                            logged:false
+                            logged: false
                         }
                         await Mongo.GetAction.Add(action)
                         //log.info(`ModID: ${mod.modID} verified successfully.`);
@@ -91,8 +82,6 @@ module.exports = {
             }
         } catch (error) {
             log.info(`Error verifying mods: ${error.message}`);
-        } finally {
-            await client.close();
         }
 
     }
