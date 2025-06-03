@@ -49,6 +49,8 @@ module.exports = {
 	 *   - `"info"`: Retrieves metadata of a specific mod.
 	 *   - `"download"`: Downloads a mod version.
 	 *   - `"versions"`: Fetches a list of available versions for the mod.
+	 *     - With `data=true` parameter: Returns full version data for each version.
+	 *     - Without `data` parameter: Returns only version numbers (default behavior).
 	 *   - *Example*: `option=info`
 	 *
 	 * - **version**: *(optional)*
@@ -227,7 +229,20 @@ module.exports = {
 	 *   }
 	 * }
 	 * 
-	 * @example <caption>Example 9: Batch search for multiple specific mod IDs</caption>
+	 * @example <caption>Example 9: Fetch full version data for all versions of a mod</caption>
+	 * // URL: /api/mods?modid=1234&option=versions&data=true
+	 * async function fetchAllModVersionsData(modId) {
+	 *   try {
+	 *     const response = await fetch(`/api/mods?modid=${modId}&option=versions&data=true`);
+	 *     const data = await response.json();
+	 *     console.log("Full version data:", data.versions);
+	 *     return data.versions;
+	 *   } catch (error) {
+	 *     console.error("Error fetching version data:", error);
+	 *   }
+	 * }
+	 * 
+	 * @example <caption>Example 10: Batch search for multiple specific mod IDs</caption>
 	 * // Search for several mods by their IDs in a single query
 	 * async function batchSearchByModIds(modIds) {
 	 *   try {
@@ -275,7 +290,7 @@ module.exports = {
 	 * // const result = await batchSearchByModIds(['mod-123', 'mod-456', 'mod-789']);
 	 * // Access specific mod: result.foundMap['mod-123']
 	 * 
-	 * @example <caption>Example 10: Search for mods containing multiple specific tags</caption>
+	 * @example <caption>Example 11: Search for mods containing multiple specific tags</caption>
 	 * // Search for mods that have ALL of the specified tags
 	 * async function searchModsByMultipleTags(requiredTags) {
 	 *   try {
@@ -443,21 +458,42 @@ module.exports = {
 								return;
 							}
 
-							var versions = await Mongo.GetMod.Versions.Numbers(modID);
+							// Check if full version data is requested
+							if (querys["data"] === "true") {
+								// Get all version data (excluding the modfile to reduce payload size)
+								var versionsData = await Mongo.GetMod.Versions.All(modID, { modfile: 0 });
 
-							if (versions.length === 0) {
+								if (versionsData.length === 0) {
+									res.writeHead(201, { "Content-Type": "application/json" });
+									res.end(
+										JSON.stringify({
+											message: "No versions found for the specified mod ID.",
+											modID: modID,
+										})
+									);
+									return;
+								}
+
 								res.writeHead(201, { "Content-Type": "application/json" });
-								res.end(
-									JSON.stringify({
-										message: "No versions found for the specified mod ID.",
-										modID: modID,
-									})
-								);
-								return;
-							}
+								res.end(JSON.stringify({ versions: versionsData }));
+							} else {
+								// Get only version numbers (original behavior)
+								var versions = await Mongo.GetMod.Versions.Numbers(modID);
 
-							res.writeHead(201, { "Content-Type": "application/json" });
-							res.end(JSON.stringify({ versions }));
+								if (versions.length === 0) {
+									res.writeHead(201, { "Content-Type": "application/json" });
+									res.end(
+										JSON.stringify({
+											message: "No versions found for the specified mod ID.",
+											modID: modID,
+										})
+									);
+									return;
+								}
+
+								res.writeHead(201, { "Content-Type": "application/json" });
+								res.end(JSON.stringify({ versions }));
+							}
 						} catch (err) {
 							log.info("Error fetching versions: " + err.message);
 							res.writeHead(201, { "Content-Type": "application/json" });

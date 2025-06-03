@@ -17,44 +17,48 @@ var mongoUri = globalThis.Config.mongodb.uri;
 
 class modEntry {
     /**
-     * The ID of the mod.
+     * The unique identifier of the mod.
      * @type {string}
      */
-    modID = ""
+    modID = "";
+
     /**
-     * Data associated with the mod taken from mod info
+     * The data associated with the mod.
      * @type {Object}
      * @property {string} modID - The ID of the mod.
      * @property {string} name - The name of the mod.
      * @property {string} version - The version of the mod.
      * @property {string} author - The author of the mod.
-     * @property {string} shortDescription - A brief description of the mod.
-     * @property {string} modloaderVersion - The version of the modloader required.
-     * @property {Object} dependencies - The dependencies of the mod. Key-value pairs.
-     * @property {string[]} tags - Tags or categories associated with the mod.
-     * @property {string} electronEntrypoint - The entry point for the Electron application.
-     * @property {string} browserEntrypoint - The entry point for the browser application.
-     * @property {string} workerEntrypoint - The entry point for the worker process.
-     * @property {Object} defaultConfig - Default configuration for the mod.
+     * @property {string} fluxloaderVersion - The required version of the fluxloader.
+     * @property {string} shortDescription - A short description of the mod.
+     * @property {string} description - The full description of the mod.
+     * @property {Object} dependencies - Dependencies required by the mod.
+     * @property {string[]} tags - Tags or categories assigned to the mod.
+     * @property {string} electronEntrypoint - The entry point for the Electron app.
+     * @property {string} gameEntrypoint - The entry point for the Game app.
+     * @property {string} workerEntrypoint - The entry point for the Worker process.
+     * @property {string} scriptPath - The path to the mod's script file.
+     * @property {Object} configSchema - The configuration schema for the mod.
      */
     modData = {
         modID: "",
         name: "",
         version: "",
         author: "",
+        fluxloaderVersion: "",
         shortDescription: "",
-        modloaderVersion: "",
-        dependencies: {
-            "": "",
-        },
-        tags: [""],
+        description: "",
+        dependencies: {},
+        tags: [],
         electronEntrypoint: "",
-        browserEntrypoint: "",
+        gameEntrypoint: "",
         workerEntrypoint: "",
-        defaultConfig: {},
-    }
+        scriptPath: "",
+        configSchema: {},
+    };
+
     /**
-     * Author information.
+     * Information about the mod's author.
      * @type {Object}
      * @property {string} discordID - The Discord ID of the author.
      * @property {string} discordUsername - The Discord username of the author.
@@ -62,22 +66,26 @@ class modEntry {
     Author = {
         discordID: "",
         discordUsername: "",
-    }
+    };
+
     /**
-     * The upload time of the mod.
+     * The date and time when the mod was uploaded.
      * @type {Date}
      */
-    uploadTime = new Date()
+    uploadTime = new Date();
+
     /**
-     * The number of votes for the mod.
+     * The number of votes that the mod has received.
      * @type {number}
      */
-    votes = 0
+    votes = 0;
+
     /**
      * Whether the mod is verified.
      * @type {boolean}
      */
-    verified = false
+    verified = false;
+
 }
 
 /**
@@ -97,37 +105,39 @@ class modVersionEntry {
      */
     modfile = "";
     /**
-     * Data associated with the mod taken from mod info
+     * The data associated with the mod.
      * @type {Object}
      * @property {string} modID - The ID of the mod.
      * @property {string} name - The name of the mod.
      * @property {string} version - The version of the mod.
      * @property {string} author - The author of the mod.
-     * @property {string} shortDescription - A brief description of the mod.
-     * @property {string} modloaderVersion - The version of the modloader required.
-     * @property {Object} dependencies - The dependencies of the mod. Key-value pairs.
-     * @property {string[]} tags - Tags or categories associated with the mod.
-     * @property {string} electronEntrypoint - The entry point for the Electron application.
-     * @property {string} browserEntrypoint - The entry point for the browser application.
-     * @property {string} workerEntrypoint - The entry point for the worker process.
-     * @property {Object} defaultConfig - Default configuration for the mod.
+     * @property {string} fluxloaderVersion - The required version of the fluxloader.
+     * @property {string} shortDescription - A short description of the mod.
+     * @property {string} description - The full description of the mod.
+     * @property {Object} dependencies - Dependencies required by the mod.
+     * @property {string[]} tags - Tags or categories assigned to the mod.
+     * @property {string} electronEntrypoint - The entry point for the Electron app.
+     * @property {string} gameEntrypoint - The entry point for the Game app.
+     * @property {string} workerEntrypoint - The entry point for the Worker process.
+     * @property {string} scriptPath - The path to the mod's script file.
+     * @property {Object} configSchema - The configuration schema for the mod.
      */
     modData = {
         modID: "",
         name: "",
         version: "",
         author: "",
+        fluxloaderVersion: "",
         shortDescription: "",
-        modloaderVersion: "",
-        dependencies: {
-            "": "",
-        },
-        tags: [""],
+        description: "",
+        dependencies: {},
+        tags: [],
         electronEntrypoint: "",
-        browserEntrypoint: "",
+        gameEntrypoint: "",
         workerEntrypoint: "",
-        defaultConfig: {},
-    }
+        scriptPath: "",
+        configSchema: {},
+    };
     /**
      * The upload time of the mod version.
      * @type {Date}

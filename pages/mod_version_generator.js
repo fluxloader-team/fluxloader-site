@@ -101,13 +101,13 @@ module.exports = {
                     }
                 }
             }
-            
+
             // Function to generate random strings
             var randomString = (length) =>
                 Math.random()
                     .toString(36)
                     .substring(2, 2 + length);
-    
+
             // Function to increment semantic version
             var incrementSemVer = ({major, minor, patch}) => {
                 var type = Math.floor(Math.random() * 3); // 0 = major, 1 = minor, 2 = patch
@@ -119,7 +119,7 @@ module.exports = {
                     return {major, minor, patch: patch + 1};
                 }
             };
-    
+
             // Predefined static list of 25 realistic tags
             var predefinedTags = [
                 "multiplayer",
@@ -148,23 +148,23 @@ module.exports = {
                 "platformer",
                 "tactical",
             ];
-            
+
             // Generate a pool of authors (65% of the total count)
             var authorCount = Math.max(5, Math.floor(count * 0.65));
             var authorPool = [];
-            
+
             for (var i = 0; i < authorCount; i++) {
                 authorPool.push(`author-${randomString(8)}`);
             }
-            
+
             log.info(`Generated author pool with ${authorPool.length} authors`);
-    
+
             // Function to generate tags for a version
             var generateTagsForVersion = (previousTags = null) => {
                 // Number of tags to use for this version
                 var numTags = Math.floor(Math.random() * 6) + 10; // 10 to 15 tags
                 var tags = previousTags ? [...previousTags] : [];
-    
+
                 // If this isn't the first version, randomly replace some tags
                 if (previousTags) {
                     var numReplacements = Math.floor(Math.random() * 4) + 1; // Replace 1-3 tags
@@ -183,10 +183,10 @@ module.exports = {
                         }
                     }
                 }
-    
+
                 return tags;
             };
-    
+
             // Function to generate a random modinfo.json file
             var generateModInfo = (modName, version, tags, modID, author) => {
                 return {
@@ -195,45 +195,46 @@ module.exports = {
                     version: version,
                     author: author,
                     shortDescription: `A test mod for the Electron Modloader`,
-                    modloaderVersion: ">=1.0.0",
+                    fluxloaderVersion: ">=1.0.0",
                     dependencies: {
                         [`module-${randomString(6)}`]: `=1.0.0`,
                         [`module-${randomString(6)}`]: `=2.0.0`,
                     },
                     tags: tags,
                     electronEntrypoint: "entry.electron.js",
-                    browserEntrypoint: "entry.browser.js",
+                    gameEntrypoint: "entry.game.js",
                     workerEntrypoint: "entry.worker.js",
-                    defaultConfig: {
+                    scriptPath: "",
+                    configSchema: {
                         someSetting: true,
                         someValue: Math.floor(Math.random() * 1000),
                     },
                 };
             };
-    
+
             async function generate() {
                 // Generate a random number of versions between 1 and 5
                 var numVersions = 10
-    
+
                 // Create a main zip archive to hold all version zips
                 var mainZip = new JSZip();
-    
+
                 // Generate a random mod name
                 var modName = `testmod-${randomString(5)}`;
-    
+
                 // Start with the first version
                 var currentVersion = {major: 1, minor: 0, patch: 0};
-    
+
                 // Tags for the first version
                 var currentTags = generateTagsForVersion();
                 var discordInfo = {
                     id: "FakeMod",
                     username: "FakeMod",
                 }
-                
+
                 // Select a random author from the author pool
                 var authorname = authorPool[Math.floor(Math.random() * authorPool.length)];
-                
+
                 // Generate `.zip` files for each version
                 for (var i = 0; i < numVersions; i++) {
                     var modID = crypto.randomUUID();
@@ -251,7 +252,7 @@ module.exports = {
 
                     // Add entry point files to the version zip
                     versionZip.file("entry.electron.js", `// Electron entry point for version ${versionString}`);
-                    versionZip.file("entry.browser.js", `// Browser entry point for version ${versionString}`);
+                    versionZip.file("entry.game.js", `// Game entry point for version ${versionString}`);
                     versionZip.file("entry.worker.js", `// Worker entry point for version ${versionString}`);
 
                     // Add README
@@ -366,12 +367,12 @@ Right aligned columns
                 count: count,
                 authorCount: authorPool.length
             }));
-            
+
             // Generate the specified number of mods
             for(var i = 0; i < count; i++){
                 await generate();
             }
-            
+
             log.info(`Successfully generated ${count} mods with ${authorPool.length} unique authors`);
         } catch (error) {
             // Handle errors here

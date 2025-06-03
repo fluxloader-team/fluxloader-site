@@ -23,24 +23,11 @@ module.exports = {
 	paths: ["/api/uploadmod"],
 	/**
 	 * Handles client requests to the upload mod API.
+	 *
 	 * @function run
 	 * @memberof module:api.uploadmod
 	 * @param {IncomingMessage} req - The HTTP request object.
 	 * @param {ServerResponse} res - The HTTP response object.
-	 *
-	 * @example
-	 * // Example usage for POST request to this endpoint:
-	 * fetch("/api/uploadmod", {
-	 *    method: "POST",
-	 *    body: JSON.stringify({
-	 *       filename: "example-mod.zip",
-	 *       filedata: "encodedDataString",
-	 *       discordInfo: {
-	 *          id: "12345",
-	 *          username: "DiscordUser"
-	 *       }
-	 *    })
-	 * });
 	 */
 
 	run: function (req, res) {

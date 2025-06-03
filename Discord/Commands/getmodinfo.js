@@ -83,7 +83,7 @@ module.exports = {
                 .addFields(
                     { name: 'Author', value: modData.modData.author || 'Unknown', inline: true },
                     { name: 'Version', value: modData.modData.version, inline: true },
-                    { name: 'Modloader Version', value: modData.modData.modloaderVersion || 'N/A', inline: true },
+                    { name: 'Fluxloader Version', value: modData.modData.fluxloaderVersion || 'N/A', inline: true },
                     { name: 'Tags', value: modData.modData.tags.join(', ') || 'None' },
                     {
                         name: 'Dependencies',
@@ -95,7 +95,7 @@ module.exports = {
                     { name: 'Downloads', value: modData.downloadCount.toString() || '0', inline: true }
                 ).addFields(
                     { name: 'Electron Entrypoint', value: modData.modData.electronEntrypoint || 'None', inline: false },
-                    { name: 'Browser Entrypoint', value: modData.modData.browserEntrypoint || 'None', inline: true },
+                    { name: 'Game Entrypoint', value: modData.modData.gameEntrypoint || 'None', inline: true },
                     { name: 'Worker Entrypoint', value: modData.modData.workerEntrypoint || 'None', inline: true })
 
             if (modData.modData.description) {

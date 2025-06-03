@@ -119,16 +119,16 @@
         <table class="table table-striped">
           <tbody>
             <tr>
-              <th scope="row">Modloader Version</th>
-              <td>${modData.modloaderVersion || "N/A"}</td>
+              <th scope="row">Fluxloader Version</th>
+              <td>${modData.fluxloaderVersion || "N/A"}</td>
             </tr>
             <tr>
               <th scope="row">Electron Entrypoint</th>
               <td>${modData.electronEntrypoint || "N/A"}</td>
             </tr>
             <tr>
-              <th scope="row">Browser Entrypoint</th>
-              <td>${modData.browserEntrypoint || "N/A"}</td>
+              <th scope="row">Game Entrypoint</th>
+              <td>${modData.gameEntrypoint || "N/A"}</td>
             </tr>
             <tr>
               <th scope="row">Worker Entrypoint</th>
@@ -151,8 +151,8 @@
 
         <hr>
 
-        <h5>Default Configuration</h5>
-        <pre class="p-3 rounded">${modData.defaultConfig ? JSON.stringify(modData.defaultConfig, null, 2) : "No default config available."}</pre>
+        <h5>Configuration Schema</h5>
+        <pre class="p-3 rounded">${modData.configSchema ? JSON.stringify(modData.configSchema, null, 2) : "No configuration schema available."}</pre>
       </div>
     </div>
   `;
