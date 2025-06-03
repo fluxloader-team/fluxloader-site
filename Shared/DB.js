@@ -479,7 +479,12 @@ var GetMod = {
 
                 if (IdsOnly === true) {
                     searchResults = searchResults.map(entry => entry.modData.modID);
+                } else {
+                    for (var mod of searchResults) {
+                        mod.versionNumbers = await GetMod.Versions.Numbers(mod.modID);
+                    }
                 }
+
 
                 return searchResults;
             })
