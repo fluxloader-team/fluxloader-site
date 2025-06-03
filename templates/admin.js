@@ -428,7 +428,26 @@ globalThis.UpdateModList = function() {
     })
     modList.innerHTML = `<table class="displayInner"><tr><th width="200">Name</th><th width="200">Author</th><th width="100">Version</th></tr> ${modItems}`;
     modList.innerHTML += "</table>";
-    globalThis.DisplayMod(Object.values(globalThis.Mods)[0].modID)
+
+    // Check if there are any mods before trying to display the first one
+    if (Object.values(globalThis.Mods).length > 0) {
+        globalThis.DisplayMod(Object.values(globalThis.Mods)[0].modID);
+    } else {
+        // Display a message when no mods are found
+        var modDisplay = document.getElementById("modDisplay");
+        if (modDisplay) {
+            modDisplay.innerHTML = `<div class="displayInner">
+                <h3>No mods found</h3>
+                <p>Try changing your search criteria or verification filter.</p>
+            </div>`;
+        }
+
+        // Clear the actions panel
+        var modDisplayActions = document.getElementById("modDisplayActions");
+        if (modDisplayActions) {
+            modDisplayActions.innerHTML = '';
+        }
+    }
 }
 globalThis.PerformSearch = async function() {
     var searchInput = document.getElementById("searchInput");
@@ -458,12 +477,51 @@ globalThis.PerformSearch = async function() {
     UpdateModList()
 }
 globalThis.DisplayMod = async function (modID) {
-    var mod = globalThis.Mods[modID]
+    // Check if the mod exists
+    var mod = globalThis.Mods[modID];
+    if (!mod) {
+        console.error(`Mod with ID ${modID} not found`);
+        var modDisplay = document.getElementById("modDisplay");
+        modDisplay.innerHTML = `<div class="displayInner">
+            <h3>Mod not found</h3>
+            <p>The requested mod could not be found. It may have been removed or the ID is incorrect.</p>
+        </div>`;
+
+        // Clear the actions panel
+        var modDisplayActions = document.getElementById("modDisplayActions");
+        if (modDisplayActions) {
+            modDisplayActions.innerHTML = '';
+        }
+        return;
+    }
+
+    // Check if the mod has the required properties
+    if (!mod.modData) {
+        console.error(`Mod with ID ${modID} has no modData property`);
+        var modDisplay = document.getElementById("modDisplay");
+        modDisplay.innerHTML = `<div class="displayInner">
+            <h3>Invalid mod data</h3>
+            <p>The mod data is invalid or incomplete.</p>
+        </div>`;
+        return;
+    }
+
     var modDisplay = document.getElementById("modDisplay");
+
+    // Safely access mod properties with fallbacks for missing data
+    const name = mod.modData.name || 'Unknown';
+    const version = mod.modData.version || 'Unknown';
+    const author = mod.modData.author || 'Unknown';
+    const shortDescription = mod.modData.shortDescription || 'No description available';
+    const tags = Array.isArray(mod.modData.tags) ? mod.modData.tags : [];
+    const tagsHtml = tags.length > 0 ? 
+        `<span class="badge text-bg-primary">${tags.join("</span><a> </a><span class=\"badge text-bg-primary\">")}</span>` : 
+        '<span class="badge text-bg-secondary">No tags</span>';
+
     modDisplay.innerHTML = `<div class="displayInner">
-<h3 id="modDisplayModName">${mod.modData.name}<a> </a><span class="badge text-bg-info">${mod.modData.version}</span><a> </a><span class="badge text-bg-warning">${mod.modData.author}</span></h3>
-<h6 id="modDisplayshortDescription">${mod.modData.shortDescription}</h6>
-<h6 id="modDisplayTags"><span class="badge text-bg-primary">${mod.modData.tags.join("</span><a> </a><span class=\"badge text-bg-primary\">")}</span></h6>
+<h3 id="modDisplayModName">${name}<a> </a><span class="badge text-bg-info">${version}</span><a> </a><span class="badge text-bg-warning">${author}</span></h3>
+<h6 id="modDisplayshortDescription">${shortDescription}</h6>
+<h6 id="modDisplayTags">${tagsHtml}</h6>
 <br>
 <h5>Dependencies</h5>
 <div id="dependencies">
@@ -478,83 +536,283 @@ globalThis.DisplayMod = async function (modID) {
 </div>`
     var dependenciesList = document.getElementById("dependencies");
     var dependencies = "";
-    if (mod.modData.dependencies) {
+    if (mod.modData.dependencies && typeof mod.modData.dependencies === 'object') {
         Object.keys(mod.modData.dependencies).forEach((dependency) => {
             dependencies += `<tr><td>${dependency}</td><td>${mod.modData.dependencies[dependency]}</td></tr>`
         });
     }
     dependenciesList.innerHTML = `<table><tr><th style="width: 250px">Name</th><th style="width: 250px">Version</th></tr> ${dependencies}`;
     dependenciesList.innerHTML += "</table>";
-    if (globalThis.ModCache[mod.modID]){
-        await globalThis.DisplayModApi(globalThis.ModCache[mod.modID]);
-    }else{
-        var response = await fetch(`/api/mods?modid=${mod.modID}&option=info`);
-        var result = await response.json();
-        console.log("Response:", result.mod);
-        globalThis.ModCache[result.mod.modID] = result.mod
-        await globalThis.DisplayModApi(globalThis.ModCache[result.mod.modID]);
+
+    try {
+        if (globalThis.ModCache[mod.modID]){
+            await globalThis.DisplayModApi(globalThis.ModCache[mod.modID]);
+        } else {
+            var response = await fetch(`/api/mods?modid=${mod.modID}&option=info`);
+            var result = await response.json();
+            console.log("Response:", result.mod);
+            if (result.mod) {
+                globalThis.ModCache[result.mod.modID] = result.mod;
+                await globalThis.DisplayModApi(globalThis.ModCache[result.mod.modID]);
+            } else {
+                console.error(`API returned no mod data for ID ${mod.modID}`);
+                document.getElementById("modDisplayDescription").innerHTML = "Failed to load detailed mod information.";
+            }
+        }
+    } catch (error) {
+        console.error(`Error fetching mod details: ${error.message}`);
+        document.getElementById("modDisplayDescription").innerHTML = "An error occurred while loading mod details.";
     }
 }
 globalThis.ModCache = {}
 globalThis.DisplayModApi = async function (mod) {
-    document.getElementById("modDisplayModName").innerHTML = `${mod.modData.name}<a> </a><span class="badge text-bg-info">${mod.modData.version}</span><a> </a><span class="badge text-bg-warning">${mod.modData.author}</span>`;
-    document.getElementById("modDisplayshortDescription").innerHTML = `${mod.modData.shortDescription}`;
-    document.getElementById("modDisplayTags").innerHTML = `<span class="badge text-bg-primary">${mod.modData.tags.join("</span><a> </a><span class=\"badge text-bg-primary\">")}</span>`;
-    document.getElementById("modDisplayDescription").innerHTML = `${marked.parse(mod.modData.description)}`
+    try {
+        // Check if mod and modData exist
+        if (!mod || !mod.modData) {
+            console.error("Invalid mod data provided to DisplayModApi");
+            document.getElementById("modDisplayDescription").innerHTML = "Error: Invalid mod data";
+            return;
+        }
 
-    await globalThis.UpdateModDisplayActions(mod.modID)
-    var response = await fetch(`/api/mods?modid=${mod.modID}&option=versions`);
-    var result = await response.json();
-    console.log("Response:", result);
-    await globalThis.UpdateVersionsList(mod.modID,result.versions);
+        // Safely access mod properties with fallbacks
+        const name = mod.modData.name || 'Unknown';
+        const version = mod.modData.version || 'Unknown';
+        const author = mod.modData.author || 'Unknown';
+        const shortDescription = mod.modData.shortDescription || 'No description available';
+        const description = mod.modData.description || 'No detailed description available';
+        const tags = Array.isArray(mod.modData.tags) ? mod.modData.tags : [];
+        const tagsHtml = tags.length > 0 ? 
+            `<span class="badge text-bg-primary">${tags.join("</span><a> </a><span class=\"badge text-bg-primary\">")}</span>` : 
+            '<span class="badge text-bg-secondary">No tags</span>';
+
+        // Update the DOM elements
+        document.getElementById("modDisplayModName").innerHTML = `${name}<a> </a><span class="badge text-bg-info">${version}</span><a> </a><span class="badge text-bg-warning">${author}</span>`;
+        document.getElementById("modDisplayshortDescription").innerHTML = `${shortDescription}`;
+        document.getElementById("modDisplayTags").innerHTML = tagsHtml;
+
+        // Use marked.parse safely
+        try {
+            document.getElementById("modDisplayDescription").innerHTML = marked.parse(description);
+        } catch (parseError) {
+            console.error("Error parsing markdown:", parseError);
+            document.getElementById("modDisplayDescription").innerHTML = description;
+        }
+
+        // Update mod display actions
+        if (mod.modID) {
+            await globalThis.UpdateModDisplayActions(mod.modID);
+
+            // Fetch versions
+            try {
+                var response = await fetch(`/api/mods?modid=${mod.modID}&option=versions`);
+                var result = await response.json();
+                console.log("Response:", result);
+
+                if (result.versions) {
+                    await globalThis.UpdateVersionsList(mod.modID, result.versions);
+                } else {
+                    console.warn("No versions found for mod:", mod.modID);
+                }
+            } catch (versionError) {
+                console.error("Error fetching versions:", versionError);
+            }
+        } else {
+            console.error("Mod ID is missing, cannot update actions or fetch versions");
+        }
+    } catch (error) {
+        console.error("Error in DisplayModApi:", error);
+        document.getElementById("modDisplayDescription").innerHTML = "An error occurred while displaying mod details.";
+    }
 }
 globalThis.GetModVersion = async function (modID, version) {
-    var response = await fetch(`/api/mods?modid=${modID}&option=info&version=${version}`);
-    var result = await response.json();
-    console.log("Response:", result.mod);
-    globalThis.ModCache[result.mod.modID] = result.mod
-    await globalThis.DisplayModApi(globalThis.ModCache[result.mod.modID]);
+    try {
+        // Check if modID and version are valid
+        if (!modID) {
+            console.error("Invalid mod ID provided to GetModVersion");
+            alert("Error: Invalid mod ID");
+            return;
+        }
+
+        if (!version || version === "Change Version") {
+            console.warn("No version selected");
+            return;
+        }
+
+        try {
+            var response = await fetch(`/api/mods?modid=${modID}&option=info&version=${version}`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            var result = await response.json();
+            console.log("Response:", result.mod);
+
+            if (!result.mod) {
+                console.error("API returned no mod data");
+                alert("Error: Could not retrieve mod version data");
+                return;
+            }
+
+            // Cache the mod data and display it
+            globalThis.ModCache[result.mod.modID] = result.mod;
+            await globalThis.DisplayModApi(globalThis.ModCache[result.mod.modID]);
+        } catch (fetchError) {
+            console.error("Error fetching mod version:", fetchError);
+            alert("Failed to retrieve mod version. Please try again later.");
+        }
+    } catch (error) {
+        console.error("Error in GetModVersion:", error);
+        alert("An unexpected error occurred while retrieving the mod version.");
+    }
 }
-globalThis.UpdateVersionsList = async function (modID,versions){
-    var versionSelection = document.getElementById("versionSelection");
-    console.log("Versions: " + JSON.stringify(versions));
-    versions.forEach((version) => {
-        var versionOption = document.createElement("option");
-        versionOption.value = version;
-        versionOption.innerHTML = version;
-        versionSelection.appendChild(versionOption);
-    });
+globalThis.UpdateVersionsList = async function (modID, versions) {
+    try {
+        // Check if modID is valid
+        if (!modID) {
+            console.error("Invalid mod ID provided to UpdateVersionsList");
+            return;
+        }
+
+        var versionSelection = document.getElementById("versionSelection");
+        if (!versionSelection) {
+            console.error("versionSelection element not found");
+            return;
+        }
+
+        // Clear existing options except the first one (Change Version)
+        while (versionSelection.options.length > 1) {
+            versionSelection.remove(1);
+        }
+
+        // Check if versions is valid
+        if (!versions || !Array.isArray(versions) || versions.length === 0) {
+            console.warn(`No versions found for mod ${modID}`);
+            var noVersionOption = document.createElement("option");
+            noVersionOption.value = "";
+            noVersionOption.innerHTML = "No versions available";
+            noVersionOption.disabled = true;
+            versionSelection.appendChild(noVersionOption);
+            return;
+        }
+
+        console.log("Versions: " + JSON.stringify(versions));
+
+        // Add each version as an option
+        versions.forEach((version) => {
+            if (version) {  // Only add non-null/undefined versions
+                var versionOption = document.createElement("option");
+                versionOption.value = version;
+                versionOption.innerHTML = version;
+                versionSelection.appendChild(versionOption);
+            }
+        });
+    } catch (error) {
+        console.error("Error in UpdateVersionsList:", error);
+    }
 }
 globalThis.UpdateModDisplayActions = async function (modID) {
-    var mod = globalThis.Mods[modID]
-    var modDisplayActions = document.getElementById("modDisplayActions");
-    modDisplayActions.innerHTML =`<div class="btn-group" role="group" style="padding-left: 15px;margin-top:5px; height: 40px;">
+    try {
+        // Check if modID is valid
+        if (!modID) {
+            console.error("Invalid mod ID provided to UpdateModDisplayActions");
+            return;
+        }
+
+        var modDisplayActions = document.getElementById("modDisplayActions");
+        if (!modDisplayActions) {
+            console.error("modDisplayActions element not found");
+            return;
+        }
+
+        var mod = globalThis.Mods[modID];
+
+        // Basic actions that don't require mod data
+        var actionsHtml = `<div class="btn-group" role="group" style="padding-left: 15px;margin-top:5px; height: 40px;">
 <button class="btn btn-primary" onclick='globalThis.DownloadMod("${modID}")'>Download</button>
 <button class="btn btn-success" onclick="navigator.clipboard.writeText('${modID}')">Copy ID</button>
 </div>
 <select class="form-select" id="versionSelection" style="padding-left: 15px;margin-top:5px; height: 40px;width: 230px" onchange='globalThis.GetModVersion("${modID}",this.value)'>
 <option selected>Change Version</option>
-</select>
-<div class="btn-group" role="group" style="padding-left: 15px;margin-top:5px; height: 40px;">
+</select>`;
+
+        // Admin actions that require mod data
+        if (mod) {
+            // Check if mod has Author property with discordID
+            var authorId = mod.Author && mod.Author.discordID ? mod.Author.discordID : null;
+
+            actionsHtml += `<div class="btn-group" role="group" style="padding-left: 15px;margin-top:5px; height: 40px;">
 <button class="btn btn-success" onclick='globalThis.VerifyMod("${modID}")'>Verify</button>
-<button class="btn btn-danger" onclick='globalThis.DenyMod("${modID}")'>Deny</button>
-<button class="btn btn-danger" onclick='globalThis.BanAuthor("${mod.Author.discordID}")'>Ban Author</button>
-</div>`
+<button class="btn btn-danger" onclick='globalThis.DenyMod("${modID}")'>Deny</button>`;
+
+            // Only add Ban Author button if we have a valid author ID
+            if (authorId) {
+                actionsHtml += `<button class="btn btn-danger" onclick='globalThis.BanAuthor("${authorId}")'>Ban Author</button>`;
+            }
+
+            actionsHtml += `</div>`;
+        } else {
+            console.warn(`Mod with ID ${modID} not found in globalThis.Mods`);
+        }
+
+        modDisplayActions.innerHTML = actionsHtml;
+    } catch (error) {
+        console.error("Error in UpdateModDisplayActions:", error);
+    }
 }
 
 // Download mod function
 globalThis.DownloadMod = async function (modID) {
-    var mod = globalThis.Mods[modID]
-    var response = await fetch(`/api/mods?modid=${mod.modID}&option=download`);
-    var result = await response.blob();
-    var url = window.URL.createObjectURL(new Blob([result]));
-    var link = document.createElement('a');
-    link.href = url;
-    link.style.display = 'none';
-    link.setAttribute('download', `${mod.modData.name}.zip`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+        // Check if modID is valid
+        if (!modID) {
+            console.error("Invalid mod ID provided to DownloadMod");
+            alert("Error: Invalid mod ID");
+            return;
+        }
+
+        var mod = globalThis.Mods[modID];
+        if (!mod) {
+            console.error(`Mod with ID ${modID} not found`);
+            alert("Error: Mod not found");
+            return;
+        }
+
+        // Make sure mod has required properties
+        if (!mod.modID) {
+            console.error("Mod is missing modID property");
+            alert("Error: Invalid mod data");
+            return;
+        }
+
+        try {
+            var response = await fetch(`/api/mods?modid=${mod.modID}&option=download`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            var result = await response.blob();
+            var url = window.URL.createObjectURL(new Blob([result]));
+            var link = document.createElement('a');
+            link.href = url;
+            link.style.display = 'none';
+
+            // Use mod name if available, otherwise use mod ID
+            var fileName = (mod.modData && mod.modData.name) ? `${mod.modData.name}.zip` : `mod-${mod.modID}.zip`;
+            link.setAttribute('download', fileName);
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (fetchError) {
+            console.error("Error downloading mod:", fetchError);
+            alert("Failed to download mod. Please try again later.");
+        }
+    } catch (error) {
+        console.error("Error in DownloadMod:", error);
+        alert("An unexpected error occurred while downloading the mod.");
+    }
 }
 
 // Admin action functions

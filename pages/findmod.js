@@ -367,13 +367,14 @@ module.exports = {
 				var varsplit = urlvar.split("=");
 				querys[varsplit[0]] = varsplit[1];
 			});
-			if (querys["search"] == undefined && (querys["modid"] == undefined || querys["option"] == undefined)) {
+			if (querys["search"] == undefined && ((querys["modid"] == undefined && querys["modids"] == undefined) || querys["option"] == undefined)) {
 				res.writeHead(201, { "Content-Type": "application/json" });
 				res.end(
 					JSON.stringify({
 						error: "Missing required query parameters",
 						missing: {
 							modid: querys["modid"] === undefined,
+							modids: querys["modids"] === undefined,
 							option: querys["option"] === undefined,
 						},
 					})
