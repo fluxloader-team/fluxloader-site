@@ -515,9 +515,34 @@ var GetMod = {
                 if (IdsOnly === true) {
                     searchResults = searchResults.map(entry => entry.modData.modID);
                 } else {
-                    for (var mod of searchResults) {
-                        mod.versionNumbers = await GetMod.Versions.Numbers(mod.modID);
-                    }
+                    // Get all mod IDs from search results
+                    const modIds = searchResults.map(mod => mod.modID);
+
+                    // Fetch all version numbers in a single database query
+                    const allVersions = await HandleClient(async (client) => {
+                        const db = client.db('SandustryMods');
+                        const modVersionsCollection = db.collection('ModVersions');
+                        const results = await modVersionsCollection.find(
+                            { modID: { $in: modIds } },
+                            { projection: { 'modID': 1, 'modData.version': 1, _id: 0 } }
+                        ).sort({ uploadTime: -1 }).toArray();
+
+                        // Group versions by modID
+                        const versionsByModId = {};
+                        results.forEach(item => {
+                            if (!versionsByModId[item.modID]) {
+                                versionsByModId[item.modID] = [];
+                            }
+                            versionsByModId[item.modID].push(item.modData.version || "Unknown");
+                        });
+
+                        return versionsByModId;
+                    });
+
+                    // Assign version numbers to each mod
+                    searchResults.forEach(mod => {
+                        mod.versionNumbers = allVersions[mod.modID] || [];
+                    });
                 }
 
 

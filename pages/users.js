@@ -76,7 +76,7 @@ module.exports = {
                         }
 
                         // Get user's mods
-                        const mods = await Mongo.GetMod.Data.All({ "Author.discordID": userID });
+                        const mods = await Mongo.GetMod.Data.Search(JSON.stringify({ "Author.discordID": userID }), null, false);
 
                         // Get user's mod versions
                         let modVersions = [];
