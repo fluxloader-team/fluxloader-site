@@ -500,18 +500,6 @@ module.exports = {
 									// Get version numbers for multiple mod IDs
 									var versionsMap = await Mongo.GetMod.Versions.MultipleNumbers(modIDsArray);
 
-									// Check if any versions were found
-									if (Object.keys(versionsMap).length === 0) {
-										res.writeHead(201, { "Content-Type": "application/json" });
-										res.end(
-											JSON.stringify({
-												message: "No versions found for any of the specified mod IDs.",
-												modIDs: modIDsArray,
-											})
-										);
-										return;
-									}
-
 									res.writeHead(201, { "Content-Type": "application/json" });
 									res.end(JSON.stringify({ versions: versionsMap }));
 								}
