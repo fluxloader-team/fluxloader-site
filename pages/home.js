@@ -4,11 +4,7 @@
  * This module renders the home page.
  */
 
-var colors = require("colors");
 var ejs = require("ejs");
-var Utils = require("./../utils");
-
-const log = new Utils.log.log("Sandustry.web.pages.home", "./sandustry.web.main.txt", true);
 
 /**
  * @namespace home
@@ -22,6 +18,7 @@ module.exports = {
 	 * @memberof module:web.home
 	 */
 	paths: ["", "/", "/home"],
+
 	/**
 	 * Handles HTTP requests for the home page.
 	 *

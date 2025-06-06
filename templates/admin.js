@@ -1,5 +1,6 @@
 console.log("admin page loaded");
 var styleContainer = document.getElementById("styleContainer");
+
 globalThis.BaseStyle = `
      body,
 	html {
@@ -23,6 +24,7 @@ globalThis.BaseStyle = `
 		height: 50px;
 	}
 `;
+
 globalThis.UpdatePageStyle = function (style) {
 	globalThis.PageStyle = `
     ${BaseStyle}
@@ -30,6 +32,7 @@ globalThis.UpdatePageStyle = function (style) {
 `;
 	styleContainer.textContent = PageStyle;
 };
+
 globalThis.UpdatePageStyle(`
     .fullpage{
         width:100%;
@@ -50,7 +53,9 @@ globalThis.UpdatePageStyle(`
         scrollbar-width: none;
         height: calc(100% );
     }`);
+
 globalThis.adminPageData = document.getElementById("adminPageData");
+
 globalThis.Pages = {
 	Selection: {
 		content: `
@@ -423,9 +428,11 @@ globalThis.Pages = {
 		},
 	},
 };
+
 globalThis.Pages.Selection.action();
 
 globalThis.SearchQuery = "";
+
 globalThis.UpdateModList = function () {
 	var modList = document.getElementById("modList");
 	var modItems = "";
@@ -455,6 +462,7 @@ globalThis.UpdateModList = function () {
 		}
 	}
 };
+
 globalThis.PerformSearch = async function () {
 	var searchInput = document.getElementById("searchInput");
 	var searchText = searchInput.value;
@@ -501,6 +509,7 @@ globalThis.PerformSearch = async function () {
 	console.log("Response:", result.mods);
 	UpdateModList();
 };
+
 globalThis.DisplayMod = async function (modID) {
 	// Check if the mod exists
 	var mod = globalThis.Mods[modID];
@@ -587,6 +596,7 @@ globalThis.DisplayMod = async function (modID) {
 		document.getElementById("modDisplayDescription").innerHTML = "An error occurred while loading mod details.";
 	}
 };
+
 globalThis.ModCache = {};
 globalThis.DisplayModApi = async function (mod) {
 	try {
@@ -645,6 +655,7 @@ globalThis.DisplayModApi = async function (mod) {
 		document.getElementById("modDisplayDescription").innerHTML = "An error occurred while displaying mod details.";
 	}
 };
+
 globalThis.GetModVersion = async function (modID, version) {
 	try {
 		// Check if modID and version are valid
@@ -687,6 +698,7 @@ globalThis.GetModVersion = async function (modID, version) {
 		alert("An unexpected error occurred while retrieving the mod version.");
 	}
 };
+
 globalThis.UpdateVersionsList = async function (modID, versions) {
 	try {
 		// Check if modID is valid
@@ -733,6 +745,7 @@ globalThis.UpdateVersionsList = async function (modID, versions) {
 		console.error("Error in UpdateVersionsList:", error);
 	}
 };
+
 globalThis.UpdateModDisplayActions = async function (modID) {
 	try {
 		// Check if modID is valid

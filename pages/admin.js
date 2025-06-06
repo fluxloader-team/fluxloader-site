@@ -3,11 +3,7 @@
  * @description Loads the admin page without any data
  */
 
-var colors = require("colors");
 var ejs = require("ejs");
-var Utils = require("./../utils");
-
-const log = new Utils.log.log("Sandustry.web.pages.admin", "./sandustry.web.main.txt", true);
 
 /**
  * @namespace admin

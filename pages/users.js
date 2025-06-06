@@ -3,7 +3,6 @@
  * @description Handles user-related API endpoints
  */
 
-var colors = require("colors");
 var Utils = require("./../utils");
 var Mongo = require("./../Shared/DB");
 
@@ -13,7 +12,6 @@ const log = new Utils.log.log("Sandustry.web.pages.users", "./sandustry.web.main
  * @namespace users
  * @memberof module:api
  */
-
 module.exports = {
 	/**
 	 * The paths that use this module.
@@ -21,6 +19,7 @@ module.exports = {
 	 * @memberof module:api.users
 	 */
 	paths: ["/api/users"],
+
 	/**
 	 * Handles HTTP requests for user data.
 	 *

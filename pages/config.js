@@ -3,7 +3,6 @@
  * @description Handles config-related API endpoints
  */
 
-var colors = require("colors");
 var Utils = require("./../utils");
 var fs = require("fs");
 var path = require("path");

@@ -4,9 +4,6 @@
  * This file manages POST requests to upload a mod, validate the payload and user, and interact with the database.
  */
 
-var colors = require("colors");
-var Utils = require("./../utils");
-var log = new Utils.log.log("Sandustry.web.pages.upload", "./sandustry.web.main.txt", true);
 var Mongo = require("./../Shared/DB");
 
 /**
@@ -20,6 +17,7 @@ module.exports = {
 	 * @memberof module:api.uploadmod
 	 */
 	paths: ["/api/uploadmod"],
+
 	/**
 	 * Handles client requests to the upload mod API.
 	 *
@@ -28,7 +26,6 @@ module.exports = {
 	 * @param {IncomingMessage} req - The HTTP request object.
 	 * @param {ServerResponse} res - The HTTP response object.
 	 */
-
 	run: function (req, res) {
 		if (req.method !== "POST") {
 			res.writeHead(404, { "Content-Type": "text/html" });

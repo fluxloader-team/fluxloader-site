@@ -3,10 +3,8 @@
  * @description Handles admin actions like verifying mods, denying mods, and banning authors
  */
 
-var colors = require("colors");
 var Utils = require("./../utils");
 var Mongo = require("./../Shared/DB");
-var config = require("./../config.json");
 
 const log = new Utils.log.log("Sandustry.web.pages.adminactions", "./sandustry.web.main.txt", true);
 

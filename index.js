@@ -3,7 +3,6 @@
  * @description The main entry point of the Sandustry mod site application.
  */
 
-var colors = require("colors");
 var http = require("http");
 var crypto = require("crypto");
 var fs = require("fs");
@@ -67,6 +66,7 @@ const CONFIG_PATH = path.join(__dirname, "config.json");
  * globalThis.Config.git.pull = false; // Disable automatic git pull
  */
 globalThis.Config = {};
+
 /**
  * Default configuration for the application. This is written to `config.json` if no file exists.
  * @type {Object}
@@ -93,6 +93,7 @@ var defaultConfig = {
 		validationTime: 172800,
 	},
 };
+
 globalThis.Config = defaultConfig;
 
 var lastRepoHash = "";
@@ -108,6 +109,7 @@ if (!fs.existsSync(CONFIG_PATH)) {
 	log.info("Default config.json generated.");
 	process.exit(0);
 }
+
 globalThis.Config = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf-8"));
 
 /**
@@ -125,6 +127,7 @@ var pages = {
 		run: function (req, res) {},
 	},
 };
+
 /**
  * Function to load template files into memory.
  *
@@ -138,6 +141,7 @@ var LoadTemplates = function () {
 	});
 	log.info("Templates loaded");
 };
+
 /**
  * Function to load dynamically defined pages from the `pages` directory.
  *
@@ -163,6 +167,7 @@ var LoadPages = function () {
  * @memberof module:Timers
  */
 globalThis.Timers = [];
+
 /**
  * Function to dynamically load all timer tasks from the `Timers` directory and store them globally.
  *
@@ -179,6 +184,7 @@ var LoadTimers = function () {
 		Timers.push(require("./Timers/" + file));
 	});
 };
+
 /**
  * Computes a hash of the files within the specified directory to track changes in the repository.
  *
@@ -207,6 +213,7 @@ function computeRepoHash(directory = "./") {
 	hashDirectory(directory);
 	return folderHash.digest("hex");
 }
+
 /**
  * Performs a `git pull` to update the repository, then reloads templates, pages, and Timers if changes are detected.
  *
@@ -282,4 +289,5 @@ if (globalThis.Config.discord.runbot) {
 		log.info(`Error initializing or starting Discord bot: ${error.stack}`);
 	}
 }
+
 var WebServer = http.createServer(WebRequestHandler).listen(20221);

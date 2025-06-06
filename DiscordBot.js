@@ -8,11 +8,13 @@
  * discord bot stuff
  * @module discord
  */
+
 /**
  * Namespace for Discord bot events handling.
  * @namespace Events
  * @memberof module:discord
  */
+
 /**
  * Namespace for Discord bot command handling.
  * @namespace Commands
@@ -20,7 +22,6 @@
  */
 
 var { Client, Events, GatewayIntentBits, REST, Routes, Collection } = require("discord.js");
-var colors = require("colors");
 var crypto = require("crypto");
 var fs = require("fs");
 var Utils = require("./utils");
@@ -74,6 +75,7 @@ function computeRepoHash(directory = "./") {
 	hashDirectory(directory);
 	return folderHash.digest("hex");
 }
+
 /**
  * Reloads event listeners for the bot.
  * This function dynamically loads event files from the `./Discord/Events` directory and registers them with the bot client.
@@ -101,6 +103,7 @@ function reloadEvents() {
 	});
 	log.info("Events registered");
 }
+
 /**
  * Dynamically reloads command modules.
  * This function scans the `./Discord/Commands` directory and loads valid commands into the bot's global `BotCommands` collection.

@@ -3,7 +3,6 @@
  * @description Loads the admin api
  */
 
-var colors = require("colors");
 var Utils = require("./../utils");
 const https = require("https");
 var Mongo = require("./../Shared/DB");

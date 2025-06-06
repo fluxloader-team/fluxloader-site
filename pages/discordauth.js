@@ -4,7 +4,6 @@
  * Supports user redirection to the Discord authorization URL and processes the callback to retrieve user information.
  */
 
-var colors = require("colors");
 var querystring = require("querystring");
 var https = require("https");
 var Utils = require("./../utils");

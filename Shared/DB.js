@@ -14,7 +14,6 @@ var mongoUri = globalThis.Config.mongodb.uri;
  * @class
  * @memberof module:DB
  */
-
 class modEntry {
 	/**
 	 * The unique identifier of the mod.
@@ -148,6 +147,7 @@ class modVersionEntry {
 	 */
 	downloadCount = 0;
 }
+
 /**
  * Represents a user entry in the database.
  *
@@ -252,6 +252,7 @@ async function HandleClient(runClient = async function (client = new MongoClient
  * all global db functions
  * @module DB
  */
+
 /**
  * Functions related to mods.
  * @namespace GetMod
@@ -850,6 +851,7 @@ var GetMod = {
 		return endresult;
 	},
 };
+
 /**
  * Functions related to user management in the database.
  * @namespace GetUser
@@ -1107,6 +1109,7 @@ var GetUser = {
 		return endresult;
 	},
 };
+
 /**
  * Functions related to action logging
  * @namespace GetAction
@@ -1238,6 +1241,7 @@ var GetAction = {
 		return endresult;
 	},
 };
+
 /**
  * Handles operations using a MongoDB client.
  * This function is exported to allow other modules to use it for custom database operations.

@@ -9,11 +9,13 @@ var Utils = require("./../utils");
 const Mongo = require("../Shared/DB");
 var log = new Utils.log.log("Sandustry.Timer.ActionLog", "./sandustry.Timer.main.txt", true);
 var validationTime = globalThis.Config.ModSettings.validationTime;
+
 /**
  * Namespace for Sandustry bot timer tasks.
  * @namespace LogActions
  * @memberof module:timers
  */
+
 /**
  *
  * @async

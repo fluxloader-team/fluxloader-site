@@ -6,9 +6,8 @@
  * @author FluxLoaderApp <support@fluxloader.app>
  */
 
-//requires
+// requires
 var colors = require("colors");
-const { Console } = require("console");
 var fs = require("fs");
 
 //code

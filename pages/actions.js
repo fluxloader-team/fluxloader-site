@@ -3,7 +3,6 @@
  * @description Handles action-related API endpoints
  */
 
-var colors = require("colors");
 var Utils = require("./../utils");
 var Mongo = require("./../Shared/DB");
 

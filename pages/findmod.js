@@ -5,9 +5,8 @@
  * It serves as the primary interface between the frontend and the mod database.
  */
 
-var colors = require("colors");
 var Utils = require("./../utils");
-var { compress, decompress } = require("@mongodb-js/zstd");
+var { decompress } = require("@mongodb-js/zstd");
 var log = new Utils.log.log("Sandustry.web.pages.search", "./sandustry.web.main.txt", true);
 var Mongo = require("./../Shared/DB");
 
@@ -24,6 +23,7 @@ module.exports = {
 	 * @memberof module:api.search
 	 */
 	paths: ["/api/mods"],
+	
 	/**
 	 * Handles API requests for mod search and retrieval.
 	 *

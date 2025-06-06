@@ -5,7 +5,6 @@
  * This module is for validating and testing the modding platform with realistic sample data.
  */
 
-var colors = require("colors");
 var JSZip = require("jszip");
 var Utils = require("./../utils");
 var crypto = require("crypto");
@@ -23,6 +22,7 @@ module.exports = {
 	 * @memberof module:web.generateMod
 	 */
 	paths: ["/generateMod"],
+
 	/**
 	 * Handles the mod version generation process.
 	 *

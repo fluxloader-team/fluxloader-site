@@ -4,16 +4,17 @@
  * This implementation supports the auto-approval workflow for mods that have passed the waiting period without moderation action.
  */
 
-var colors = require("colors");
 var Utils = require("./../utils");
 const Mongo = require("../Shared/DB");
 var log = new Utils.log.log("Sandustry.Timer.Validate", "./sandustry.Timer.main.txt", true);
 var validationTime = globalThis.Config.ModSettings.validationTime;
+
 /**
  * Namespace for Sandustry timer tasks related to mod validation.
  * @namespace ValidateMod
  * @memberof module:timers
  */
+
 /**
  * Timer script that automatically validates unverified mods after they've been in the database for the configured time period.
  *

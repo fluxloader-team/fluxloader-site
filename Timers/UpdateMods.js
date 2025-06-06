@@ -3,7 +3,7 @@
  * @description A timer to make sure ModDB data is using the latest mod version data from the ModVersions collection.
  * This timer ensures that mod metadata in the Mods collection stays synchronized with the latest version information.
  */
-var colors = require("colors");
+
 var Utils = require("./../utils");
 var log = new Utils.log.log("Sandustry.Timer.ModData", "./sandustry.Timer.main.txt", true);
 var Mongo = require("./../Shared/DB");

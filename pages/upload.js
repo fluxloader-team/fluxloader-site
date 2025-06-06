@@ -4,18 +4,7 @@
  * This file renders the upload page.
  */
 
-var colors = require("colors");
-var http = require("http");
-var os = require("os");
-var Websocket = require("ws");
-var crypto = require("crypto");
-var util = require("util");
-var fs = require("fs");
 var ejs = require("ejs");
-var { exec } = require("child_process");
-var Utils = require("./../utils");
-
-const log = new Utils.log.log("Sandustry.web.pages.upload", "./sandustry.web.main.txt", true);
 
 /**
  * @namespace upload
