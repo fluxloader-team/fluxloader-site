@@ -2,7 +2,7 @@
 	<div class="headerContainer" id="headerContainer">
 		<a class="btn btn-secondary headerButton" style="margin-left: 15px" href="/">Mod List</a>
 		<div class="input-group mb-3" style="width: 50%; padding-top: 15px">
-			<input type="text" class="form-control" id="searchInput" placeholder="Search by name, author, or #tag1 #tag2 for multiple tags" onchange="globalThis.PerformSearch()"/>
+			<input type="text" class="form-control" id="searchInput" placeholder="Search by name, author, or #tag1 #tag2 for multiple tags" onchange="globalThis.PerformSearch()" />
 			<button class="btn btn-outline-secondary" type="button" onclick="globalThis.PerformSearch()">Search</button>
 		</div>
 		<a href="/auth/discord" class="btn btn-primary" style="margin-right: 15px" id="discordLogin">
@@ -27,9 +27,7 @@
 			</div>
 		</div>
 	</div>
-	<div class="modDisplayActions" id="modDisplayActions">
-
-	</div>
+	<div class="modDisplayActions" id="modDisplayActions"></div>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
 	<script>
@@ -63,13 +61,13 @@
 			});
 		}
 
-		globalThis.Mods = {}
-		globalThis.SearchQuery = ""
-		globalThis.Searching = false
+		globalThis.Mods = {};
+		globalThis.SearchQuery = "";
+		globalThis.Searching = false;
 
-		globalThis.buildSearchQuery = function(searchText) {
+		globalThis.buildSearchQuery = function (searchText) {
 			if (!searchText || searchText.trim() === "") {
-				return JSON.stringify({"modData.name":{$regex: "", $options: "i"}});
+				return JSON.stringify({ "modData.name": { $regex: "", $options: "i" } });
 			}
 
 			var query = { $and: [] };
@@ -77,7 +75,7 @@
 			var tags = [];
 			var nonTagTerms = [];
 
-			terms.forEach(term => {
+			terms.forEach((term) => {
 				if (term.startsWith("#")) {
 					tags.push(term.substring(1).toLowerCase());
 				} else if (term.trim()) {
@@ -87,45 +85,41 @@
 
 			if (tags.length > 0) {
 				query.$and.push({
-					"modData.tags": { 
-						$all: tags
-					}
+					"modData.tags": {
+						$all: tags,
+					},
 				});
 			}
 
 			if (nonTagTerms.length > 0) {
 				var searchString = nonTagTerms.join(" ");
 				var nameAuthorSearch = {
-					$or: [
-						{ "modData.name": { $regex: searchString, $options: "i" } },
-						{ "modData.author": { $regex: searchString, $options: "i" } },
-						{ "modData.shortDescription": { $regex: searchString, $options: "i" } }
-					]
+					$or: [{ "modData.name": { $regex: searchString, $options: "i" } }, { "modData.author": { $regex: searchString, $options: "i" } }, { "modData.shortDescription": { $regex: searchString, $options: "i" } }],
 				};
 				query.$and.push(nameAuthorSearch);
 			}
 
 			if (query.$and.length === 0) {
-				return JSON.stringify({"modData.name":{$regex: "", $options: "i"}});
+				return JSON.stringify({ "modData.name": { $regex: "", $options: "i" } });
 			}
 
 			return JSON.stringify(query);
 		};
-		var modList = document.getElementById('modList');
+		var modList = document.getElementById("modList");
 		globalThis.pageGet = 1;
-		modList.addEventListener('scroll', () => {
+		modList.addEventListener("scroll", () => {
 			var isAtBottom = modList.scrollHeight - modList.scrollTop === modList.clientHeight;
 			if (isAtBottom) {
 				globalThis.PerformSearch(globalThis.pageGet++);
 			}
 		});
 
-		globalThis.PerformSearch = async function(pageToget = 1, perPage = 5000) {
-			if(globalThis.Searching === true){
+		globalThis.PerformSearch = async function (pageToget = 1, perPage = 5000) {
+			if (globalThis.Searching === true) {
 				return;
 			}
 			globalThis.Searching = true;
-			console.log("Performing search for:", globalThis.SearchQuery)
+			console.log("Performing search for:", globalThis.SearchQuery);
 			try {
 				var searchInput = document.getElementById("searchInput");
 				var searchText = searchInput.value;
@@ -135,7 +129,7 @@
 				var encodedQuery = encodeURIComponent(queryJson);
 
 				var modList = document.getElementById("modList");
-				if(pageToget === 1){
+				if (pageToget === 1) {
 					modList.innerHTML = `
 					<div class="d-flex justify-content-center">
 						<div class="spinner-border" role="status">
@@ -145,36 +139,35 @@
 				`;
 				}
 
-
 				var response = await fetch(`/api/mods?search=${encodedQuery}&verified=null&size=${perPage}&page=${pageToget}`);
 				var result = await response.json();
-				if(pageToget === 1) {
-					globalThis.Mods = {}
+				if (pageToget === 1) {
+					globalThis.Mods = {};
 				}
 				if (result.error) {
 					console.error("Search error:", result.error);
-					if(pageToget === 1){
+					if (pageToget === 1) {
 						modList.innerHTML = `<div class="alert alert-danger">Search error: ${result.error}</div>`;
-					}else{
+					} else {
 						document.getElementById("modListTable").innerHTML += `
 					<tr>
 						<td colspan="4">Search error: ${result.error}</td>
 					</tr>
-					`
+					`;
 					}
 					globalThis.Searching = false;
 					return;
 				}
 
 				if (!result.mods || result.mods.length === 0) {
-					if(pageToget === 1){
+					if (pageToget === 1) {
 						modList.innerHTML = `<div class="alert alert-info">No mods found matching your search.</div>`;
-					}else{
+					} else {
 						document.getElementById("modListTable").innerHTML += `
 					<tr>
 						<td colspan="4">All mods loaded</td>
 					</tr>
-					`
+					`;
 					}
 					globalThis.Searching = false;
 					return;
@@ -196,14 +189,14 @@
 				var modList = document.getElementById("modList");
 				modList.innerHTML = `<div class="alert alert-danger">Error performing search. Please try again.</div>`;
 			}
-		}
+		};
 		document.addEventListener("DOMContentLoaded", async () => {
-			if(globalThis.Searching === true){
+			if (globalThis.Searching === true) {
 				return;
 			}
 			globalThis.searching = true;
 			try {
-				var encodedQuery = encodeURIComponent(JSON.stringify({"modData.name":{$regex: "", $options: "i"}}));
+				var encodedQuery = encodeURIComponent(JSON.stringify({ "modData.name": { $regex: "", $options: "i" } }));
 				var response = await fetch(`/api/mods?search=${encodedQuery}&verified=null&size=5000&page=1`);
 				var result = await response.json();
 
@@ -229,7 +222,7 @@
 				console.log(`Loaded ${result.mods.length} mods`);
 				UpdateModList();
 
-				document.getElementById("searchInput").addEventListener("keypress", function(event) {
+				document.getElementById("searchInput").addEventListener("keypress", function (event) {
 					if (event.key === "Enter") {
 						event.preventDefault();
 						globalThis.PerformSearch();
@@ -242,36 +235,36 @@
 			}
 		});
 		globalThis.DownloadMod = async function (modID) {
-			var mod = globalThis.Mods[modID]
+			var mod = globalThis.Mods[modID];
 			var response = await fetch(`/api/mods?modid=${mod.modID}&option=download`);
 			var result = await response.blob();
 			var url = window.URL.createObjectURL(new Blob([result]));
-			var link = document.createElement('a');
+			var link = document.createElement("a");
 			link.href = url;
-			link.style.display = 'none';
-			link.setAttribute('download', `${mod.modData.name}.zip`);
+			link.style.display = "none";
+			link.setAttribute("download", `${mod.modData.name}.zip`);
 			document.body.appendChild(link);
 			link.click();
 			document.body.removeChild(link);
-		}
+		};
 		globalThis.UpdateModDisplayActions = async function (modID) {
-			var mod = globalThis.Mods[modID]
+			var mod = globalThis.Mods[modID];
 			var modDisplayActions = document.getElementById("modDisplayActions");
-			modDisplayActions.innerHTML =`<div class="btn-group" role="group" style="padding-left: 15px;margin-top:5px; height: 40px;">
+			modDisplayActions.innerHTML = `<div class="btn-group" role="group" style="padding-left: 15px;margin-top:5px; height: 40px;">
 <button class="btn btn-primary" onclick='globalThis.DownloadMod("${modID}")'>Download</button>
 <button class="btn btn-success" onclick="navigator.clipboard.writeText('${modID}')">Copy ID</button>
 </div>
 <select class="form-select" id="versionSelection" style="padding-left: 15px;margin-top:5px; height: 40px;width: 230px" onchange='globalThis.GetModVersion("${modID}",this.value)'>
 <option selected>Change Version</option>
-</select>`
-		}
+</select>`;
+		};
 		globalThis.DisplayMod = async function (modID) {
-			var mod = globalThis.Mods[modID]
+			var mod = globalThis.Mods[modID];
 			var modDisplay = document.getElementById("modDisplay");
 			modDisplay.innerHTML = `<div class="displayInner">
 <h3 id="modDisplayModName">${mod.modData.name}<a> </a><span class="badge text-bg-info">${mod.modData.version}</span><a> </a><span class="badge text-bg-warning">${mod.modData.author}</span></h3>
 <h6 id="modDisplayshortDescription">${mod.modData.shortDescription}</h6>
-<h6 id="modDisplayTags"><span class="badge text-bg-primary">${mod.modData.tags.join("</span><a> </a><span class=\"badge text-bg-primary\">")}</span></h6>
+<h6 id="modDisplayTags"><span class="badge text-bg-primary">${mod.modData.tags.join('</span><a> </a><span class="badge text-bg-primary">')}</span></h6>
 <br>
 <h5>Dependencies</h5>
 <div id="dependencies">
@@ -283,47 +276,47 @@
 <p id="modDisplayDescription">
 </p>
 <h6></h6>
-</div>`
+</div>`;
 			var dependenciesList = document.getElementById("dependencies");
 			var dependencies = "";
 			if (mod.modData.dependencies) {
 				Object.keys(mod.modData.dependencies).forEach((dependency) => {
-					dependencies += `<tr><td>${dependency}</td><td>${mod.modData.dependencies[dependency]}</td></tr>`
+					dependencies += `<tr><td>${dependency}</td><td>${mod.modData.dependencies[dependency]}</td></tr>`;
 				});
 			}
 			dependenciesList.innerHTML = `<table><tr><th style="width: 250px">Name</th><th style="width: 250px">Version</th></tr> ${dependencies}`;
 			dependenciesList.innerHTML += "</table>";
-			if (globalThis.ModCache[mod.modID]){
+			if (globalThis.ModCache[mod.modID]) {
 				await globalThis.DisplayModApi(globalThis.ModCache[mod.modID]);
-			}else{
+			} else {
 				var response = await fetch(`/api/mods?modid=${mod.modID}&option=info`);
 				var result = await response.json();
 				console.log("Response:", result.mod);
-				globalThis.ModCache[result.mod.modID] = result.mod
+				globalThis.ModCache[result.mod.modID] = result.mod;
 				await globalThis.DisplayModApi(globalThis.ModCache[result.mod.modID]);
 			}
-		}
-		globalThis.ModCache = {}
+		};
+		globalThis.ModCache = {};
 		globalThis.DisplayModApi = async function (mod) {
 			document.getElementById("modDisplayModName").innerHTML = `${mod.modData.name}<a> </a><span class="badge text-bg-info">${mod.modData.version}</span><a> </a><span class="badge text-bg-warning">${mod.modData.author}</span>`;
 			document.getElementById("modDisplayshortDescription").innerHTML = `${mod.modData.shortDescription}`;
-			document.getElementById("modDisplayTags").innerHTML = `<span class="badge text-bg-primary">${mod.modData.tags.join("</span><a> </a><span class=\"badge text-bg-primary\">")}</span>`;
-			document.getElementById("modDisplayDescription").innerHTML = `${marked.parse(mod.modData.description)}`
+			document.getElementById("modDisplayTags").innerHTML = `<span class="badge text-bg-primary">${mod.modData.tags.join('</span><a> </a><span class="badge text-bg-primary">')}</span>`;
+			document.getElementById("modDisplayDescription").innerHTML = `${marked.parse(mod.modData.description)}`;
 
-			await globalThis.UpdateModDisplayActions(mod.modID)
+			await globalThis.UpdateModDisplayActions(mod.modID);
 			var response = await fetch(`/api/mods?modid=${mod.modID}&option=versions`);
 			var result = await response.json();
 			console.log("Response:", result);
-			await globalThis.UpdateVersionsList(mod.modID,result.versions);
-		}
+			await globalThis.UpdateVersionsList(mod.modID, result.versions);
+		};
 		globalThis.GetModVersion = async function (modID, version) {
 			var response = await fetch(`/api/mods?modid=${modID}&option=info&version=${version}`);
 			var result = await response.json();
 			console.log("Response:", result.mod);
-			globalThis.ModCache[result.mod.modID] = result.mod
+			globalThis.ModCache[result.mod.modID] = result.mod;
 			await globalThis.DisplayModApi(globalThis.ModCache[result.mod.modID]);
-		}
-		globalThis.UpdateVersionsList = async function (modID,versions){
+		};
+		globalThis.UpdateVersionsList = async function (modID, versions) {
 			var versionSelection = document.getElementById("versionSelection");
 			console.log("Versions: " + JSON.stringify(versions));
 			versions.forEach((version) => {
@@ -332,14 +325,14 @@
 				versionOption.innerHTML = version;
 				versionSelection.appendChild(versionOption);
 			});
-		}
-		function UpdateModList(onPage = 1){
+		};
+		function UpdateModList(onPage = 1) {
 			var modList = document.getElementById("modList");
 			var modItems = "";
 			var mods = Object.values(globalThis.Mods);
 
 			if (mods.length === 0) {
-				if(onPage === 1){
+				if (onPage === 1) {
 					modList.innerHTML = `<div class="alert alert-info">No mods found matching your search criteria.</div>`;
 					document.getElementById("modDisplay").innerHTML = `
 					<div class="alert alert-secondary">
@@ -354,21 +347,19 @@
 					</div>
 				`;
 					document.getElementById("modDisplayActions").innerHTML = "";
-				}else{
+				} else {
 					document.getElementById("modListTable").innerHTML += `
 					<tr>
 						<td colspan="4">No more mods to load.</td>
 					</tr>
-					`
+					`;
 				}
 				globalThis.Searching = false;
 				return;
 			}
 
 			mods.forEach((mod) => {
-				var tagList = mod.modData.tags && mod.modData.tags.length > 0 
-					? mod.modData.tags.slice(0, Math.min(mod.modData.tags.length, 4)).join("</span><a> </a><span class=\"badge text-bg-secondary\">")
-					: "";
+				var tagList = mod.modData.tags && mod.modData.tags.length > 0 ? mod.modData.tags.slice(0, Math.min(mod.modData.tags.length, 4)).join('</span><a> </a><span class="badge text-bg-secondary">') : "";
 
 				modItems += `<tr class="modListItem" onclick='globalThis.DisplayMod("${mod.modID}")'>
 					<td>${mod.modData.name}</td>
@@ -388,13 +379,10 @@
 					${modItems}
 				</table>
 			`;
-			if(onPage === 1){
-
+			if (onPage === 1) {
 				globalThis.DisplayMod(mods[0].modID);
 			}
 			globalThis.Searching = false;
-
-
 		}
 	</script>
 </div>

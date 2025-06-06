@@ -396,19 +396,21 @@ module.exports = {
 								return;
 							}
 							log.info(`Attempting to retrieve mod data for modID: ${modID}, version: ${querys["version"] || "latest"}`);
-							var modData = {}
-							if(querys["version"]){
-								modData = Mongo.GetMod.Versions.One(modID,querys["version"]);
-							}else{
+							var modData = {};
+							if (querys["version"]) {
+								modData = Mongo.GetMod.Versions.One(modID, querys["version"]);
+							} else {
 								modData = Mongo.GetMod.Versions.One(modID);
 							}
-							log.info(`Retrieved modData: ${JSON.stringify({
-								modID: modID,
-								version: querys["version"] || "latest",
-								hasModData: !!modData,
-								hasModfile: modData && !!modData.modfile,
-								modDataKeys: modData ? Object.keys(modData) : []
-							})}`);
+							log.info(
+								`Retrieved modData: ${JSON.stringify({
+									modID: modID,
+									version: querys["version"] || "latest",
+									hasModData: !!modData,
+									hasModfile: modData && !!modData.modfile,
+									modDataKeys: modData ? Object.keys(modData) : [],
+								})}`
+							);
 							if (!modData) {
 								res.writeHead(201, { "Content-Type": "application/json" });
 								res.end(
@@ -443,12 +445,14 @@ module.exports = {
 						} catch (error) {
 							log.info(`Error processing mod download: ${error.message}`);
 							log.info(`Error stack: ${error.stack}`);
-							log.info(`Error context: modID=${modID}, version=${querys["version"] || "latest"}, modData=${JSON.stringify({
-								exists: !!modData,
-								hasModfile: modData && !!modData.modfile,
-								modfileLength: modData && modData.modfile ? modData.modfile.length : 0,
-								modDataKeys: modData ? Object.keys(modData) : []
-							})}`);
+							log.info(
+								`Error context: modID=${modID}, version=${querys["version"] || "latest"}, modData=${JSON.stringify({
+									exists: !!modData,
+									hasModfile: modData && !!modData.modfile,
+									modfileLength: modData && modData.modfile ? modData.modfile.length : 0,
+									modDataKeys: modData ? Object.keys(modData) : [],
+								})}`
+							);
 
 							res.writeHead(201, { "Content-Type": "application/json" });
 							res.end(
@@ -456,7 +460,7 @@ module.exports = {
 									error: "An error occurred while processing the download.",
 									details: error.message,
 									modID: modID,
-									version: querys["version"] || "latest"
+									version: querys["version"] || "latest",
 								})
 							);
 						}
@@ -475,18 +479,20 @@ module.exports = {
 								return;
 							}
 							log.info(`Attempting to retrieve mod info for modID: ${modID}, version: ${querys["version"] || "latest"}`);
-							var modVersion = {}
-							if(querys["version"]){
-								modVersion = await Mongo.GetMod.Versions.One(modID,querys["version"],{ modfile: 0 });
-							}else{
-								modVersion = await Mongo.GetMod.Versions.One(modID,"",{ modfile: 0 });
+							var modVersion = {};
+							if (querys["version"]) {
+								modVersion = await Mongo.GetMod.Versions.One(modID, querys["version"], { modfile: 0 });
+							} else {
+								modVersion = await Mongo.GetMod.Versions.One(modID, "", { modfile: 0 });
 							}
-							log.info(`Retrieved modVersion: ${JSON.stringify({
-								modID: modID,
-								version: querys["version"] || "latest",
-								hasModVersion: !!modVersion,
-								modVersionKeys: modVersion ? Object.keys(modVersion) : []
-							})}`);
+							log.info(
+								`Retrieved modVersion: ${JSON.stringify({
+									modID: modID,
+									version: querys["version"] || "latest",
+									hasModVersion: !!modVersion,
+									modVersionKeys: modVersion ? Object.keys(modVersion) : [],
+								})}`
+							);
 
 							if (!modVersion) {
 								res.writeHead(201, { "Content-Type": "application/json" });
@@ -505,10 +511,12 @@ module.exports = {
 						} catch (err) {
 							log.info(`Error fetching mod info: ${err.message}`);
 							log.info(`Error stack: ${err.stack}`);
-							log.info(`Error context: modID=${modID}, version=${querys["version"] || "latest"}, modVersion=${JSON.stringify({
-								exists: !!modVersion,
-								modVersionKeys: modVersion ? Object.keys(modVersion) : []
-							})}`);
+							log.info(
+								`Error context: modID=${modID}, version=${querys["version"] || "latest"}, modVersion=${JSON.stringify({
+									exists: !!modVersion,
+									modVersionKeys: modVersion ? Object.keys(modVersion) : [],
+								})}`
+							);
 
 							res.writeHead(201, { "Content-Type": "application/json" });
 							res.end(
@@ -516,7 +524,7 @@ module.exports = {
 									error: "An internal server error occurred while fetching mod information.",
 									details: err.message,
 									modID: modID,
-									version: querys["version"] || "latest"
+									version: querys["version"] || "latest",
 								})
 							);
 						}
@@ -527,17 +535,19 @@ module.exports = {
 							var modID = querys["modid"];
 							var modIDs = querys["modids"];
 
-							log.info(`Attempting to retrieve versions with parameters: ${JSON.stringify({
-								modID: modID || null,
-								modIDs: modIDs || null,
-								data: querys["data"] || false
-							})}`);
+							log.info(
+								`Attempting to retrieve versions with parameters: ${JSON.stringify({
+									modID: modID || null,
+									modIDs: modIDs || null,
+									data: querys["data"] || false,
+								})}`
+							);
 
 							// Check if modids parameter is provided (for multiple mod IDs)
 							if (modIDs) {
 								// Parse the comma-separated list of mod IDs
-								var modIDsArray = modIDs.split(',');
-								log.info(`Processing versions request for multiple modIDs: ${modIDsArray.join(', ')}`);
+								var modIDsArray = modIDs.split(",");
+								log.info(`Processing versions request for multiple modIDs: ${modIDsArray.join(", ")}`);
 
 								// Check if full version data is requested
 								if (querys["data"] === "true") {
@@ -553,16 +563,18 @@ module.exports = {
 									// Get version numbers for multiple mod IDs
 									var versionsMap = await Mongo.GetMod.Versions.MultipleNumbers(modIDsArray);
 
-									log.info(`Retrieved versions for multiple modIDs: ${JSON.stringify({
-										requestedCount: modIDsArray.length,
-										returnedCount: Object.keys(versionsMap).length,
-										missingModIDs: modIDsArray.filter(id => !versionsMap[id] || versionsMap[id].length === 0)
-									})}`);
+									log.info(
+										`Retrieved versions for multiple modIDs: ${JSON.stringify({
+											requestedCount: modIDsArray.length,
+											returnedCount: Object.keys(versionsMap).length,
+											missingModIDs: modIDsArray.filter((id) => !versionsMap[id] || versionsMap[id].length === 0),
+										})}`
+									);
 
 									res.writeHead(201, { "Content-Type": "application/json" });
 									res.end(JSON.stringify({ versions: versionsMap }));
 								}
-							} 
+							}
 							// Handle single mod ID case (original behavior)
 							else if (modID) {
 								log.info(`Processing versions request for single modID: ${modID}`);
@@ -571,10 +583,12 @@ module.exports = {
 									// Get all version data (excluding the modfile to reduce payload size)
 									var versionsData = await Mongo.GetMod.Versions.All(modID, { modfile: 0 });
 
-									log.info(`Retrieved full version data for modID ${modID}: ${JSON.stringify({
-										count: versionsData.length,
-										versions: versionsData.length > 0 ? versionsData.map(v => v.version) : []
-									})}`);
+									log.info(
+										`Retrieved full version data for modID ${modID}: ${JSON.stringify({
+											count: versionsData.length,
+											versions: versionsData.length > 0 ? versionsData.map((v) => v.version) : [],
+										})}`
+									);
 
 									if (versionsData.length === 0) {
 										res.writeHead(201, { "Content-Type": "application/json" });
@@ -593,10 +607,12 @@ module.exports = {
 									// Get only version numbers (original behavior)
 									var versions = await Mongo.GetMod.Versions.Numbers(modID);
 
-									log.info(`Retrieved version numbers for modID ${modID}: ${JSON.stringify({
-										count: versions.length,
-										versions: versions
-									})}`);
+									log.info(
+										`Retrieved version numbers for modID ${modID}: ${JSON.stringify({
+											count: versions.length,
+											versions: versions,
+										})}`
+									);
 
 									if (versions.length === 0) {
 										res.writeHead(201, { "Content-Type": "application/json" });
@@ -625,12 +641,14 @@ module.exports = {
 						} catch (err) {
 							log.info(`Error fetching versions: ${err.message}`);
 							log.info(`Error stack: ${err.stack}`);
-							log.info(`Error context: ${JSON.stringify({
-								modID: modID || null,
-								modIDs: modIDs || null,
-								modIDsArray: modIDs ? modIDsArray : null,
-								dataRequested: querys["data"] === "true"
-							})}`);
+							log.info(
+								`Error context: ${JSON.stringify({
+									modID: modID || null,
+									modIDs: modIDs || null,
+									modIDsArray: modIDs ? modIDsArray : null,
+									dataRequested: querys["data"] === "true",
+								})}`
+							);
 
 							res.writeHead(201, { "Content-Type": "application/json" });
 							res.end(
@@ -638,7 +656,7 @@ module.exports = {
 									error: "An internal server error occurred while fetching versions.",
 									details: err.message,
 									modID: modID || null,
-									modIDs: modIDs ? modIDsArray : null
+									modIDs: modIDs ? modIDsArray : null,
 								})
 							);
 						}
@@ -651,7 +669,7 @@ module.exports = {
 					var parsedQuery;
 					try {
 						parsedQuery = JSON.parse(searchQuery);
-						if (!parsedQuery || (typeof parsedQuery !== 'object')) {
+						if (!parsedQuery || typeof parsedQuery !== "object") {
 							throw new Error("Invalid search query format");
 						}
 					} catch (jsonError) {
@@ -660,19 +678,19 @@ module.exports = {
 						res.end(
 							JSON.stringify({
 								error: "Invalid search query format. Please provide a valid JSON query.",
-								details: jsonError.message
+								details: jsonError.message,
 							})
 						);
 						return;
 					}
 
-					var mods = []
+					var mods = [];
 					var VerifiedOnly = true;
-					if(querys["verified"]){
-						if(querys["verified"] == "true"){
-						}else if (querys["verified"] == "false"){
-							VerifiedOnly = false
-						}else{
+					if (querys["verified"]) {
+						if (querys["verified"] == "true") {
+						} else if (querys["verified"] == "false") {
+							VerifiedOnly = false;
+						} else {
 							VerifiedOnly = null;
 						}
 					}
@@ -680,14 +698,14 @@ module.exports = {
 						searchQuery = "[]";
 					}
 
-					if(querys["page"]){
-						var page = {number:parseInt(querys["page"]),size:200}
-						if(querys["size"]){
-							page.size = parseInt(querys["size"])
+					if (querys["page"]) {
+						var page = { number: parseInt(querys["page"]), size: 200 };
+						if (querys["size"]) {
+							page.size = parseInt(querys["size"]);
 						}
-						mods =  await Mongo.GetMod.Data.Search(searchQuery,VerifiedOnly,false,page);
-					}else{
-						mods = await Mongo.GetMod.Data.Search(searchQuery,VerifiedOnly,false);
+						mods = await Mongo.GetMod.Data.Search(searchQuery, VerifiedOnly, false, page);
+					} else {
+						mods = await Mongo.GetMod.Data.Search(searchQuery, VerifiedOnly, false);
 					}
 
 					if (mods.length === 0) {
@@ -723,7 +741,7 @@ module.exports = {
 			}
 		} catch (error) {
 			res.writeHead(200, { "Content-Type": "application/json" });
-			res.end(JSON.stringify({"error":"Missing required query parameters"}));
+			res.end(JSON.stringify({ error: "Missing required query parameters" }));
 		}
 	},
 };

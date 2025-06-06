@@ -14,10 +14,7 @@
 		</div>
 		<div class="mb-3" id="ModInfo">
 			<h3>Mod Information</h3>
-			<div class="alert alert-info">
-				<strong>Important:</strong> Your mod must have a unique <code>modID</code> defined in the <code>modinfo.json</code> file. 
-				This ID is used to identify your mod and track updates.
-			</div>
+			<div class="alert alert-info"><strong>Important:</strong> Your mod must have a unique <code>modID</code> defined in the <code>modinfo.json</code> file. This ID is used to identify your mod and track updates.</div>
 			<pre id="modDataContent" style="white-space: pre-wrap"></pre>
 		</div>
 		<button type="submit" class="btn btn-primary" id="uploadButton" onclick="handleUpload()">Upload Mod</button>
@@ -100,7 +97,7 @@
 				console.log("Server response:", result);
 
 				document.getElementById("uploadButton").disabled = false;
-				document.getElementById("uploadButton").innerHTML = 'Upload Mod';
+				document.getElementById("uploadButton").innerHTML = "Upload Mod";
 
 				if (result.message) {
 					if (result.isUpdate) {
@@ -120,7 +117,7 @@
 			} catch (error) {
 				console.error("Error processing ZIP file:", error);
 				document.getElementById("uploadButton").disabled = false;
-				document.getElementById("uploadButton").innerHTML = 'Upload Mod';
+				document.getElementById("uploadButton").innerHTML = "Upload Mod";
 				showError("Error processing the ZIP file: " + (error.message || "Unknown error"));
 			}
 		}
@@ -175,9 +172,7 @@
 			currentModData = modData;
 
 			// Check if modID is defined
-			const modIDStatus = modData.modID 
-				? `<span class="badge bg-success">ModID: ${modData.modID}</span>` 
-				: `<span class="badge bg-danger">Missing ModID!</span>`;
+			const modIDStatus = modData.modID ? `<span class="badge bg-success">ModID: ${modData.modID}</span>` : `<span class="badge bg-danger">Missing ModID!</span>`;
 
 			var container = document.getElementById("ModInfo");
 			container.innerHTML = `

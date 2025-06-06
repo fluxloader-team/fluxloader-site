@@ -4,12 +4,12 @@
  * Validates and executes the appropriate command from the global command collection.
  */
 
-var colors = require('colors');
-var Utils = require('./../../utils')
+var colors = require("colors");
+var Utils = require("./../../utils");
 
 var log = new Utils.log.log("Sandustry.bot.event.interactionCreate", "./sandustry.bot.main.txt", true);
-process.on('uncaughtException', function (err) {
-    log.info(`Caught exception: ${err.stack}`);
+process.on("uncaughtException", function (err) {
+	log.info(`Caught exception: ${err.stack}`);
 });
 /**
  * Namespace for Discord bot interaction handling.
@@ -31,25 +31,25 @@ process.on('uncaughtException', function (err) {
  *
  */
 module.exports = {
-    run: async (interaction) => {
-        log.info(`Interaction: ${interaction.commandName}`)
-        if (!interaction.isCommand()) return;
+	run: async (interaction) => {
+		log.info(`Interaction: ${interaction.commandName}`);
+		if (!interaction.isCommand()) return;
 
-        var command = globalThis.BotCommands.get(interaction.commandName);
-        if (!command) {
-            await interaction.reply({ content: `Command \`${interaction.commandName}\` not found.`, ephemeral: true });
-            return;
-        }
+		var command = globalThis.BotCommands.get(interaction.commandName);
+		if (!command) {
+			await interaction.reply({ content: `Command \`${interaction.commandName}\` not found.`, ephemeral: true });
+			return;
+		}
 
-        try {
-            await command.execute(interaction);
-        } catch (error) {
-            console.error(`Error executing command ${interaction.commandName}:`, error);
+		try {
+			await command.execute(interaction);
+		} catch (error) {
+			console.error(`Error executing command ${interaction.commandName}:`, error);
 
-            await interaction.reply({ 
-                content: 'There was an error while executing this command. Please try again later.', 
-                ephemeral: true 
-            });
-        }
-    },
+			await interaction.reply({
+				content: "There was an error while executing this command. Please try again later.",
+				ephemeral: true,
+			});
+		}
+	},
 };

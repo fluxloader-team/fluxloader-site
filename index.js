@@ -3,14 +3,14 @@
  * @description The main entry point of the Sandustry mod site application.
  */
 
- var colors = require('colors');
-var http = require("http")
-var crypto = require("crypto")
-var fs = require('fs')
-var { exec } = require('child_process');
-var Utils = require('./utils')
-var path = require('path');
-var Discord = require('./DiscordBot.js');
+var colors = require("colors");
+var http = require("http");
+var crypto = require("crypto");
+var fs = require("fs");
+var { exec } = require("child_process");
+var Utils = require("./utils");
+var path = require("path");
+var Discord = require("./DiscordBot.js");
 
 /**
  * Functions related to the web server and its routes.
@@ -32,7 +32,7 @@ var Discord = require('./DiscordBot.js');
  * @module main
  */
 
-const CONFIG_PATH = path.join(__dirname, 'config.json');
+const CONFIG_PATH = path.join(__dirname, "config.json");
 /**
  * A global configuration object that stores application-wide settings, loaded from `config.json` or defaults if not found.
  * This object is used across the application for configuring behavior, such as Discord bot settings, MongoDB connection details, and other core features.
@@ -66,118 +66,119 @@ const CONFIG_PATH = path.join(__dirname, 'config.json');
  * // Example of modifying globalThis.Config at runtime
  * globalThis.Config.git.pull = false; // Disable automatic git pull
  */
-globalThis.Config = {}
+globalThis.Config = {};
 /**
  * Default configuration for the application. This is written to `config.json` if no file exists.
  * @type {Object}
  * @memberof module:main
  */
 var defaultConfig = {
-    discord: {
-        clientId: 'CLIENT_ID',
-        clientSecret: 'CLIENT_SECRET',
-        redirectUri: 'https://example.com/auth/discord/callback',
-        token: 'TOKEN',
-        runbot: false,
-        serverLog: true,
-        serverLogChannel: 'SERVER_LOG_CHANNEL',
-        serverActionsChannel: 'SERVER_ACTIONS_CHANNEL',
-    },
-    mongodb:{
-        uri: 'mongodb://localhost:27017/somejoinstring',
-    },
-    git:{
-        pull: true,
-    },
-    ModSettings:{
-        validationTime:172800
-    }
+	discord: {
+		clientId: "CLIENT_ID",
+		clientSecret: "CLIENT_SECRET",
+		redirectUri: "https://example.com/auth/discord/callback",
+		token: "TOKEN",
+		runbot: false,
+		serverLog: true,
+		serverLogChannel: "SERVER_LOG_CHANNEL",
+		serverActionsChannel: "SERVER_ACTIONS_CHANNEL",
+	},
+	mongodb: {
+		uri: "mongodb://localhost:27017/somejoinstring",
+	},
+	git: {
+		pull: true,
+	},
+	ModSettings: {
+		validationTime: 172800,
+	},
 };
 globalThis.Config = defaultConfig;
 
-var lastRepoHash = '';
+var lastRepoHash = "";
 const log = new Utils.log.log("Sandustry.web.main", "./sandustry.web.main.txt", true);
 
-process.on('uncaughtException', function (err) {
-    log.info(`Caught exception: ${err.stack}`);
+process.on("uncaughtException", function (err) {
+	log.info(`Caught exception: ${err.stack}`);
 });
 
 if (!fs.existsSync(CONFIG_PATH)) {
-    log.info('Config file not found, generating default config.json...');
-    fs.writeFileSync(CONFIG_PATH, JSON.stringify(defaultConfig, null, 2), 'utf-8');
-    log.info('Default config.json generated.');
-    process.exit(0);
+	log.info("Config file not found, generating default config.json...");
+	fs.writeFileSync(CONFIG_PATH, JSON.stringify(defaultConfig, null, 2), "utf-8");
+	log.info("Default config.json generated.");
+	process.exit(0);
 }
-globalThis.Config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
+globalThis.Config = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf-8"));
 
 /**
  * Global object to hold templates loaded into memory.
  * @memberof module:web
  */
-globalThis.Templates = {"filename": "content"}
+globalThis.Templates = { filename: "content" };
 /**
  * Global object to store all dynamically loaded web pages.
  * @type {Object}
  * @memberof module:web
  */
-var pages = {"/": {
-    run: function (req,res){}
-}}
+var pages = {
+	"/": {
+		run: function (req, res) {},
+	},
+};
 /**
  * Function to load template files into memory.
  *
  * @memberof module:web
  * @function LoadTemplates
  */
-var LoadTemplates = function (){
-    log.info("Loading templates")
-    fs.readdirSync( "./templates").forEach(file => {
-        Templates[file] = fs.readFileSync("./templates/"+file, "utf8")
-    })
-    log.info("Templates loaded")
-}
+var LoadTemplates = function () {
+	log.info("Loading templates");
+	fs.readdirSync("./templates").forEach((file) => {
+		Templates[file] = fs.readFileSync("./templates/" + file, "utf8");
+	});
+	log.info("Templates loaded");
+};
 /**
  * Function to load dynamically defined pages from the `pages` directory.
  *
  * @memberof module:web
  * @function LoadPages
  */
-var LoadPages = function (){
-    log.info("Loading pages")
-    fs.readdirSync( "./pages").forEach(file => {
-        if(require.resolve("./pages/"+file)){
-            delete require.cache[require.resolve("./pages/"+file)]
-        }
-        var temprequire = require("./pages/"+file)
-        temprequire.paths.forEach(path => {
-            pages[path] = temprequire;
-        })
-
-    })
-    log.info("pages loaded")
-}
+var LoadPages = function () {
+	log.info("Loading pages");
+	fs.readdirSync("./pages").forEach((file) => {
+		if (require.resolve("./pages/" + file)) {
+			delete require.cache[require.resolve("./pages/" + file)];
+		}
+		var temprequire = require("./pages/" + file);
+		temprequire.paths.forEach((path) => {
+			pages[path] = temprequire;
+		});
+	});
+	log.info("pages loaded");
+};
 /**
  * Global array to store all loaded timer tasks.
  * @type {Array}
  * @memberof module:Timers
  */
-globalThis.Timers = []
+globalThis.Timers = [];
 /**
  * Function to dynamically load all timer tasks from the `Timers` directory and store them globally.
  *
  * @memberof module:timers
  * @function LoadTimers
  */
-var LoadTimers = function (){
-    log.info("Loading Timers")
-    Timers = []
-    fs.readdirSync( "./Timers").forEach(file => {
-        if(require.resolve("./Timers/"+file)){
-            delete require.cache[require.resolve("./Timers/"+file)]
-        }
-        Timers.push(require("./Timers/"+file))
-    })
-}
+var LoadTimers = function () {
+	log.info("Loading Timers");
+	Timers = [];
+	fs.readdirSync("./Timers").forEach((file) => {
+		if (require.resolve("./Timers/" + file)) {
+			delete require.cache[require.resolve("./Timers/" + file)];
+		}
+		Timers.push(require("./Timers/" + file));
+	});
+};
 /**
  * Computes a hash of the files within the specified directory to track changes in the repository.
  *
@@ -186,25 +187,25 @@ var LoadTimers = function (){
  * @param {string} [directory='./'] - The directory to hash. Defaults to the current folder.
  * @returns {string} A SHA-256 hash representing the state of the specified directory.
  */
-function computeRepoHash(directory = './') {
-    var folderHash = crypto.createHash('sha256');
+function computeRepoHash(directory = "./") {
+	var folderHash = crypto.createHash("sha256");
 
-    function hashDirectory(dir) {
-        var files = fs.readdirSync(dir);
-        files.forEach(file => {
-            var fullPath = path.join(dir, file);
-            var fileStat = fs.statSync(fullPath);
+	function hashDirectory(dir) {
+		var files = fs.readdirSync(dir);
+		files.forEach((file) => {
+			var fullPath = path.join(dir, file);
+			var fileStat = fs.statSync(fullPath);
 
-            if (fileStat.isDirectory()) {
-                hashDirectory(fullPath);
-            } else if (fileStat.isFile()) {
-                folderHash.update(fs.readFileSync(fullPath));
-            }
-        });
-    }
+			if (fileStat.isDirectory()) {
+				hashDirectory(fullPath);
+			} else if (fileStat.isFile()) {
+				folderHash.update(fs.readFileSync(fullPath));
+			}
+		});
+	}
 
-    hashDirectory(directory);
-    return folderHash.digest('hex');
+	hashDirectory(directory);
+	return folderHash.digest("hex");
 }
 /**
  * Performs a `git pull` to update the repository, then reloads templates, pages, and Timers if changes are detected.
@@ -213,73 +214,72 @@ function computeRepoHash(directory = './') {
  * @memberof module:main
  */
 async function performUpdate() {
-    if(globalThis.Config.git.pull){
-        exec('git pull', (error, stdout, stderr) => {
-            if (error) {
-                log.info(`Error running git pull: ${error}`);
-                return;
-            }
-            log.info(stdout);
+	if (globalThis.Config.git.pull) {
+		exec("git pull", (error, stdout, stderr) => {
+			if (error) {
+				log.info(`Error running git pull: ${error}`);
+				return;
+			}
+			log.info(stdout);
 
-            const newRepoHash = computeRepoHash();
-            log.info(newRepoHash)
-            if (newRepoHash !== lastRepoHash) {
-                log.info('Changes detected in the repository. Reloading templates and pages...');
-                lastRepoHash = newRepoHash;
+			const newRepoHash = computeRepoHash();
+			log.info(newRepoHash);
+			if (newRepoHash !== lastRepoHash) {
+				log.info("Changes detected in the repository. Reloading templates and pages...");
+				lastRepoHash = newRepoHash;
 
-                LoadTemplates();
-                LoadPages();
-                LoadTimers();
-            } else {
-                log.info('No changes detected.');
-            }
-        });
-    }else{
-        const newRepoHash = computeRepoHash();
-        log.info(newRepoHash)
-        if (newRepoHash !== lastRepoHash) {
-            log.info('Changes detected in the repository. Reloading templates and pages...');
-            lastRepoHash = newRepoHash;
+				LoadTemplates();
+				LoadPages();
+				LoadTimers();
+			} else {
+				log.info("No changes detected.");
+			}
+		});
+	} else {
+		const newRepoHash = computeRepoHash();
+		log.info(newRepoHash);
+		if (newRepoHash !== lastRepoHash) {
+			log.info("Changes detected in the repository. Reloading templates and pages...");
+			lastRepoHash = newRepoHash;
 
-            LoadTemplates();
-            LoadPages();
-            LoadTimers();
-        } else {
-            log.info('No changes detected.');
-        }
-    }
-    for (const timer of Timers) {
-        await timer.run();
-    }
-    setTimeout(performUpdate, 10000);
+			LoadTemplates();
+			LoadPages();
+			LoadTimers();
+		} else {
+			log.info("No changes detected.");
+		}
+	}
+	for (const timer of Timers) {
+		await timer.run();
+	}
+	setTimeout(performUpdate, 10000);
 }
-
 
 LoadTemplates();
 LoadPages();
 LoadTimers();
 lastRepoHash = computeRepoHash();
-log.info(lastRepoHash)
-var WebRequestHandler = function (req, res){
-    var url = req.url
-    var urlSplit = url.split("?")
-    var urlName = urlSplit[0]
-    var template = pages[urlName]
-    if(template){
-        template.run(req, res)
-    }else{
-        res.writeHead(404, {"Content-Type": "text/html"})
-        res.end("404")
-    }
-}
+log.info(lastRepoHash);
+var WebRequestHandler = function (req, res) {
+	var url = req.url;
+	var urlSplit = url.split("?");
+	var urlName = urlSplit[0];
+	var template = pages[urlName];
+	if (template) {
+		template.run(req, res);
+	} else {
+		res.writeHead(404, { "Content-Type": "text/html" });
+		res.end("404");
+	}
+};
 setTimeout(performUpdate, 10000);
 
 if (globalThis.Config.discord.runbot) {
-    try {
-        Discord.init();
-        Discord.start();
-    } catch (error) {
-        log.info(`Error initializing or starting Discord bot: ${error.stack}`);
-    }
+	try {
+		Discord.init();
+		Discord.start();
+	} catch (error) {
+		log.info(`Error initializing or starting Discord bot: ${error.stack}`);
+	}
 }
-var WebServer = http.createServer(WebRequestHandler).listen(20221)
+var WebServer = http.createServer(WebRequestHandler).listen(20221);

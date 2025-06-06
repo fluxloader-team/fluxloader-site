@@ -4,12 +4,12 @@
  * It performs necessary setup tasks, such as command registration, and logs the status for monitoring purposes.
  */
 
-var colors = require('colors');
-var Utils = require('./../../utils')
+var colors = require("colors");
+var Utils = require("./../../utils");
 
 const log = new Utils.log.log("Sandustry.bot.event.ClientReady", "./sandustry.bot.main.txt", true);
-process.on('uncaughtException', function (err) {
-    log.info(`Caught exception: ${err.stack}`);
+process.on("uncaughtException", function (err) {
+	log.info(`Caught exception: ${err.stack}`);
 });
 /**
  * Namespace for Discord bot events handling.
@@ -30,8 +30,8 @@ process.on('uncaughtException', function (err) {
  *
  */
 module.exports = {
-    run: async function (readyClient) {
-        await registerCommands();
-        log.info("Client ready!");
-    }
-}
+	run: async function (readyClient) {
+		await registerCommands();
+		log.info("Client ready!");
+	},
+};

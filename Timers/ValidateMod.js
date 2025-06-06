@@ -5,7 +5,7 @@
  */
 
 var colors = require("colors");
-var Utils = require('./../utils');
+var Utils = require("./../utils");
 const Mongo = require("../Shared/DB");
 var log = new Utils.log.log("Sandustry.Timer.Validate", "./sandustry.Timer.main.txt", true);
 var validationTime = globalThis.Config.ModSettings.validationTime;
@@ -40,49 +40,48 @@ var validationTime = globalThis.Config.ModSettings.validationTime;
  * }, 3600000); // Run every hour
  */
 module.exports = {
-    async run() {
-        try {
-            // Get all unverified mods
-            var unverifiedMods = await Mongo.GetMod.Data.FindUnverified();
+	async run() {
+		try {
+			// Get all unverified mods
+			var unverifiedMods = await Mongo.GetMod.Data.FindUnverified();
 
-            if(unverifiedMods.length > 0){
-                log.info(`Found ${unverifiedMods.length} unverified mod(s) to check.`);
-                var now = new Date();
+			if (unverifiedMods.length > 0) {
+				log.info(`Found ${unverifiedMods.length} unverified mod(s) to check.`);
+				var now = new Date();
 
-                for (var mod of unverifiedMods) {
-                    // Get the oldest version of the mod
-                    var modVersion = await Mongo.GetMod.Versions.Oldest(mod.modID);
+				for (var mod of unverifiedMods) {
+					// Get the oldest version of the mod
+					var modVersion = await Mongo.GetMod.Versions.Oldest(mod.modID);
 
-                    if (!modVersion) {
-                        //log.info(`No version found for modID: ${mod.modID}. Skipping...`);
-                        continue;
-                    }
+					if (!modVersion) {
+						//log.info(`No version found for modID: ${mod.modID}. Skipping...`);
+						continue;
+					}
 
-                    var uploadTime = new Date(modVersion.uploadTime);
-                    var elapsedTime = (now - uploadTime);
+					var uploadTime = new Date(modVersion.uploadTime);
+					var elapsedTime = now - uploadTime;
 
-                    if (elapsedTime > validationTime) {
-                        // Update the mod to be verified
-                        mod.verified = true;
-                        await Mongo.GetMod.Data.Update(mod.modID, mod);
+					if (elapsedTime > validationTime) {
+						// Update the mod to be verified
+						mod.verified = true;
+						await Mongo.GetMod.Data.Update(mod.modID, mod);
 
-                        // Log the action
-                        var action = {
-                            discordID: "Timer",
-                            action: `Auto-Verified mod ${mod.modID}`,
-                            time: new Date(),
-                            logged: false
-                        }
-                        await Mongo.GetAction.Add(action)
-                        //log.info(`ModID: ${mod.modID} verified successfully.`);
-                    } else {
-                        // log.info(`ModID: ${mod.modID} not yet eligible for verification. Validating at ${uploadTime + elapsedTime}`);
-                    }
-                }
-            }
-        } catch (error) {
-            log.info(`Error verifying mods: ${error.message}`);
-        }
-
-    }
+						// Log the action
+						var action = {
+							discordID: "Timer",
+							action: `Auto-Verified mod ${mod.modID}`,
+							time: new Date(),
+							logged: false,
+						};
+						await Mongo.GetAction.Add(action);
+						//log.info(`ModID: ${mod.modID} verified successfully.`);
+					} else {
+						// log.info(`ModID: ${mod.modID} not yet eligible for verification. Validating at ${uploadTime + elapsedTime}`);
+					}
+				}
+			}
+		} catch (error) {
+			log.info(`Error verifying mods: ${error.message}`);
+		}
+	},
 };

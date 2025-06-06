@@ -1,5 +1,5 @@
-var log = require("./log")
+var log = require("./log");
 
 module.exports = {
-    log:log
-}
+	log: log,
+};
