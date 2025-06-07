@@ -627,6 +627,7 @@ var GetMod = {
 				if (!filename || !filedata) {
 					return "Invalid payload";
 				}
+
 				if (!discordBypass) {
 					if (!discordInfo || !discordInfo.id || !discordInfo.tokenResponse || !discordInfo.tokenResponse.access_token) {
 						return "Invalid discordInfo";
@@ -652,6 +653,10 @@ var GetMod = {
 						}
 					}
 				}
+
+				console.log("DB.js");
+				console.log(filedata);
+
 				var zipBuffer = Buffer.from(filedata, "base64");
 				var compressedZipBuffer = await compress(zipBuffer, 10);
 
@@ -674,6 +679,9 @@ var GetMod = {
 						modInfo[key] = sanitizeHtml(modInfo[key]);
 					}
 				});
+
+				console.log("Stopping early");
+				return;
 
 				// Check if modID is defined in modinfo.json
 				if (!modInfo.modID) {
@@ -699,9 +707,10 @@ var GetMod = {
 						return "UPDATE_EXISTING_MOD:" + modID;
 					}
 				}
-
 				var modEntry = existingMod;
 				var uploadTime = new Date();
+
+				// Create a new mod entry
 				if (modEntry == null) {
 					modEntry = {
 						modID: modID,
@@ -715,11 +724,16 @@ var GetMod = {
 						verified: false,
 					};
 					await modsCollection.insertOne(modEntry);
-				} else {
+				}
+				
+				// Update the existing mod entry
+				else {
 					modEntry.modData = modData;
 					modEntry.uploadTime = uploadTime;
 					await modsCollection.replaceOne({ modID: modID }, modEntry);
 				}
+
+				// Create a new mod version entry
 				var modVersionEntry = {
 					modID: modEntry.modID,
 					modfile: compressedZipBuffer.toString("base64"),
@@ -727,6 +741,7 @@ var GetMod = {
 					uploadTime: uploadTime,
 					downloadCount: 0,
 				};
+
 				await versionsCollection.insertOne(modVersionEntry);
 				var action = new ActionEntry();
 				action.action = `Uploaded mod ${modData.name} ID ${modID} version ${modData.version}`;

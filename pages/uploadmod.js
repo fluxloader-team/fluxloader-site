@@ -43,7 +43,7 @@ module.exports = {
 				var payload = await JSON.parse(body);
 				var { filename } = payload;
 
-				var uploadResult = await Mongo.GetMod.Data.Upload(payload);
+				var uploadResult = await Mongo.GetMod.Data.Upload(payload, true);
 
 				// Check if this is an update to an existing mod
 				if (typeof uploadResult === "string" && uploadResult.startsWith("UPDATE_EXISTING_MOD:")) {

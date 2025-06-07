@@ -2,6 +2,7 @@
 // Log system
 // ---------------------------------
 // Custom Log system
+
 /**
  * @author FluxLoaderApp <support@fluxloader.app>
  */
@@ -10,7 +11,7 @@
 var colors = require("colors");
 var fs = require("fs");
 
-//code
+// code
 
 /**
  * @param {string} [Name] - Log name
@@ -26,6 +27,7 @@ class log {
 	SaveInterval = 0;
 	SaveLoopInterval = {};
 	loglevel = "debug"; //debug info
+
 	constructor(Name = "", Path = "./log.txt", date = false, SaveInterval = 10000) {
 		this.Name = Name;
 		this.Path = Path;
@@ -33,9 +35,11 @@ class log {
 		this.SaveInterval = SaveInterval;
 		this.startSave();
 	}
+
 	logLevel(level) {
 		this.loglevel = level;
 	}
+
 	startSave() {
 		this.SaveLoopInterval = setInterval(() => {
 			if (this.CurrentLog.length == 0) {
@@ -95,9 +99,11 @@ class log {
 			}
 		}, this.SaveInterval);
 	}
+
 	stopSave() {
 		clearInterval(this.SaveLoopInterval);
 	}
+
 	/**
 	 * @param {string} [Input] - What to log
 	 */
@@ -112,6 +118,7 @@ class log {
 		this.CurrentLog.push(ThisLog);
 		console.log(ThisLog);
 	}
+
 	debug(Input = "") {
 		if (this.loglevel == "debug") {
 			var ThisLog = "";
@@ -125,6 +132,7 @@ class log {
 			console.log(ThisLog);
 		}
 	}
+
 	error(Input = "") {
 		var ThisLog = "";
 
@@ -138,7 +146,7 @@ class log {
 	}
 }
 
-//exports
+// exports
 
 module.exports = {
 	log: log,

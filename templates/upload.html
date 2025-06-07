@@ -53,7 +53,7 @@
 				window.location.reload();
 			});
 		} else {
-			window.location.href = "/";
+			// window.location.href = "/";
 		}
 
 		// Global variables to store mod data
@@ -74,6 +74,7 @@
 					const byteArray = new Uint8Array(buffer);
 					return window.btoa(byteArray.reduce((data, byte) => data + String.fromCharCode(byte), ""));
 				}
+
 				const zipBinaryData = await file.arrayBuffer();
 				const base64Data = arrayBufferToBase64(zipBinaryData);
 				const jsonPayload = JSON.stringify({
@@ -81,6 +82,9 @@
 					filedata: base64Data,
 					discordInfo: discordUser,
 				});
+
+				console.log("upload.html:");
+				console.log(jsonPayload);
 
 				document.getElementById("uploadButton").disabled = true;
 				document.getElementById("uploadButton").innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Uploading...';
