@@ -35,7 +35,7 @@ process.on("uncaughtException", function (err) {
 
 /**
  * Default structure for bot events.
- * @namespace BotEvents
+ * @namespace botEvents
  * @memberof module:discord
  * @property {Object} eventName - Placeholder for an event.
  * @property {Function} eventName.run - The function to execute for the event.
@@ -91,13 +91,13 @@ function reloadEvents() {
 		if (require.resolve("./discord/Events/" + file)) {
 			delete require.cache[require.resolve("./discord/Events/" + file)];
 		}
-		BotEvents[file.split(".")[0]] = require("./discord/Events/" + file);
+		botEvents[file.split(".")[0]] = require("./discord/Events/" + file);
 	});
 	log.info("Events loaded");
-	Object.keys(BotEvents).forEach((key) => {
+	Object.keys(botEvents).forEach((key) => {
 		discord.client.removeAllListeners(Events[key]);
 		discord.client.on(Events[key], (event) => {
-			BotEvents[key].run(event);
+			botEvents[key].run(event);
 		});
 		log.info(`Event listener registered for: ${key}`);
 	});
