@@ -5,9 +5,10 @@
 
 var Utils = require("./../utils");
 const https = require("https");
-var Mongo = require("./../Shared/DB");
+var Mongo = require("./../shared/db");
+var verifyDiscordUser = require("./../shared/verifydiscorduser");
 
-var log = new Utils.log.log("Sandustry.web.pages.admin", "./sandustry.web.main.txt", true);
+var log = new Utils.Log("sandustry.web.pages.admin", "./sandustry.web.main.txt", true);
 
 /**
  * @namespace admin
@@ -41,26 +42,26 @@ module.exports = {
 			req.on("end", async () => {
 				try {
 					res.writeHead(200, { "Content-Type": "application/json" });
-					var DiscordUserData = (await JSON.parse(body)).discordUser;
-					var UserData = await Mongo.GetUser.One(DiscordUserData.id);
+					var discordUserData = (await JSON.parse(body)).discordUser;
+					var UserData = await Mongo.GetUser.One(discordUserData.id);
 					if (UserData) {
 					} else {
 						UserData = await Mongo.GetUser.Add({
-							discordID: DiscordUserData.id,
-							discordUsername: DiscordUserData.username,
+							discordID: discordUserData.id,
+							discordUsername: discordUserData.username,
 							permissions: ["user"],
 							description: "new User",
 							joinedAt: new Date(),
 							banned: false,
 						});
 					}
-					var isValidUser = await verifyDiscordUser(DiscordUserData.id, DiscordUserData.tokenResponse.access_token);
+					var isValidUser = await verifyDiscordUser(discordUserData.id, discordUserData.tokenResponse.access_token);
 					if (!isValidUser) {
-						res.end(JSON.stringify({ error: "Invalid Discord user" }));
+						res.end(JSON.stringify({ error: "Invalid discord user" }));
 						return;
 					}
 					if (UserData.permissions.includes("admin")) {
-						res.end(JSON.stringify({ data: globalThis.Templates["adminpage.html"], run: globalThis.Templates["admin.js"] }));
+						res.end(JSON.stringify({ data: globalThis.templates["adminpage.html"], run: globalThis.templates["admin.js"] }));
 						return;
 					} else {
 						res.end(JSON.stringify({ error: "User does not have admin permissions" }));
@@ -76,48 +77,3 @@ module.exports = {
 		}
 	},
 };
-
-function verifyDiscordUser(userId, accessToken) {
-	return new Promise((resolve, reject) => {
-		var options = {
-			hostname: "discord.com",
-			path: "/api/users/@me",
-			method: "GET",
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
-			},
-		};
-
-		var req = https.request(options, (res) => {
-			let data = "";
-
-			res.on("data", (chunk) => {
-				data += chunk.toString();
-			});
-
-			res.on("end", () => {
-				try {
-					var userResponse = JSON.parse(data);
-
-					// Check if the user ID matches the ID from the token response
-					if (res.statusCode === 200 && userResponse.id === userId) {
-						resolve(true);
-					} else {
-						console.warn("User ID mismatch or token is invalid:", userResponse);
-						resolve(false);
-					}
-				} catch (err) {
-					console.error("Error parsing user verification response:", err);
-					resolve(false);
-				}
-			});
-		});
-
-		req.on("error", (err) => {
-			console.error("Error verifying Discord user:", err);
-			resolve(false);
-		});
-
-		req.end();
-	});
-}

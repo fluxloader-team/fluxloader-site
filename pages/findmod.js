@@ -7,8 +7,9 @@
 
 var Utils = require("./../utils");
 var { decompress } = require("@mongodb-js/zstd");
-var log = new Utils.log.log("Sandustry.web.pages.search", "./sandustry.web.main.txt", true);
-var Mongo = require("./../Shared/DB");
+var Mongo = require("../shared/DB");
+
+var log = new Utils.Log("sandustry.web.pages.search", "./sandustry.web.main.txt", true);
 
 /**
  * Namespace for mod search and retrieval functionality within the web module.
@@ -23,7 +24,7 @@ module.exports = {
 	 * @memberof module:api.search
 	 */
 	paths: ["/api/mods"],
-	
+
 	/**
 	 * Handles API requests for mod search and retrieval.
 	 *
@@ -360,6 +361,7 @@ module.exports = {
 	 */
 	run: async function (req, res) {
 		try {
+			// Extract query parameters from the request URL
 			var queryurl = req.url.split("?")[1];
 			var query = queryurl.split("&");
 			var querys = {};
@@ -367,6 +369,8 @@ module.exports = {
 				var varsplit = urlvar.split("=");
 				querys[varsplit[0]] = varsplit[1];
 			});
+
+			// Check that atleast one of the endpoints will be used
 			if (querys["search"] == undefined && ((querys["modid"] == undefined && querys["modids"] == undefined) || querys["option"] == undefined)) {
 				res.writeHead(201, { "Content-Type": "application/json" });
 				res.end(
@@ -381,8 +385,11 @@ module.exports = {
 				);
 				return;
 			}
+
+			// /api/mods
 			if (querys["search"] == undefined) {
 				switch (querys["option"]) {
+					// /api/mods?option=download
 					case "download":
 						try {
 							var modID = querys["modid"];
@@ -398,9 +405,9 @@ module.exports = {
 							log.info(`Attempting to retrieve mod data for modID: ${modID}, version: ${querys["version"] || "latest"}`);
 							var modData = {};
 							if (querys["version"]) {
-								modData = Mongo.GetMod.Versions.One(modID, querys["version"]);
+								modData = await Mongo.GetMod.Versions.One(modID, querys["version"]);
 							} else {
-								modData = Mongo.GetMod.Versions.One(modID);
+								modData = await Mongo.GetMod.Versions.One(modID);
 							}
 							log.info(
 								`Retrieved modData: ${JSON.stringify({
@@ -466,6 +473,8 @@ module.exports = {
 						}
 
 						break;
+
+					// /api/mods?option=info
 					case "info":
 						try {
 							var modID = querys["modid"];
@@ -530,6 +539,8 @@ module.exports = {
 						}
 
 						break;
+
+					// /api/mods?option=versions
 					case "versions":
 						try {
 							var modID = querys["modid"];
@@ -559,21 +570,21 @@ module.exports = {
 										})
 									);
 									return;
-								} else {
-									// Get version numbers for multiple mod IDs
-									var versionsMap = await Mongo.GetMod.Versions.MultipleNumbers(modIDsArray);
-
-									log.info(
-										`Retrieved versions for multiple modIDs: ${JSON.stringify({
-											requestedCount: modIDsArray.length,
-											returnedCount: Object.keys(versionsMap).length,
-											missingModIDs: modIDsArray.filter((id) => !versionsMap[id] || versionsMap[id].length === 0),
-										})}`
-									);
-
-									res.writeHead(201, { "Content-Type": "application/json" });
-									res.end(JSON.stringify({ versions: versionsMap }));
 								}
+
+								// Get version numbers for multiple mod IDs
+								var versionsMap = await Mongo.GetMod.Versions.MultipleNumbers(modIDsArray);
+
+								log.info(
+									`Retrieved versions for multiple modIDs: ${JSON.stringify({
+										requestedCount: modIDsArray.length,
+										returnedCount: Object.keys(versionsMap).length,
+										missingModIDs: modIDsArray.filter((id) => !versionsMap[id] || versionsMap[id].length === 0),
+									})}`
+								);
+
+								res.writeHead(201, { "Content-Type": "application/json" });
+								res.end(JSON.stringify({ versions: versionsMap }));
 							}
 							// Handle single mod ID case (original behavior)
 							else if (modID) {
@@ -603,8 +614,10 @@ module.exports = {
 
 									res.writeHead(201, { "Content-Type": "application/json" });
 									res.end(JSON.stringify({ versions: versionsData }));
-								} else {
-									// Get only version numbers (original behavior)
+								}
+								
+								// Get only version numbers (origina#l behavior)
+								else {
 									var versions = await Mongo.GetMod.Versions.Numbers(modID);
 
 									log.info(
@@ -663,8 +676,12 @@ module.exports = {
 						break;
 					default:
 				}
-			} else {
+			}
+
+			// /api/mods?search
+			else {
 				try {
+					// Parse search query from the URL-encoded JSON string
 					var searchQuery = decodeURIComponent(querys["search"]);
 					var parsedQuery;
 					try {
@@ -728,7 +745,7 @@ module.exports = {
 						})
 					);
 				} catch (error) {
-					log.info("Error occurred while searching mods:", error);
+					log.info("Error occurred while searching mods:" + error);
 
 					res.writeHead(201, { "Content-Type": "application/json" });
 					res.end(

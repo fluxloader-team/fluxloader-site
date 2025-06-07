@@ -16,6 +16,7 @@ module.exports = {
 	 * @type {Array<string>}
 	 * @memberof module:web.admin
 	 */
+
 	paths: ["/admin"],
 	/**
 	 * Handles HTTP requests for the admin page.
@@ -29,6 +30,6 @@ module.exports = {
 	 */
 	run: function (req, res) {
 		res.writeHead(201, { "Content-Type": "text/html" });
-		res.end(ejs.render(globalThis.Templates["base.ejs"], { data: [globalThis.Templates["basicheaders.html"], globalThis.Templates["admin.html"]] }));
+		res.end(ejs.render(globalThis.templates["base.ejs"], { data: [globalThis.templates["basicheaders.html"], globalThis.templates["admin.html"]] }));
 	},
 };

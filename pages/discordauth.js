@@ -1,17 +1,17 @@
 /**
  * @file discordauth.js
- * @description Handles Discord OAuth2 authentication and callback processing for the application.
- * Supports user redirection to the Discord authorization URL and processes the callback to retrieve user information.
+ * @description Handles discord OAuth2 authentication and callback processing for the application.
+ * Supports user redirection to the discord authorization URL and processes the callback to retrieve user information.
  */
 
 var querystring = require("querystring");
 var https = require("https");
 var Utils = require("./../utils");
 
-var log = new Utils.log.log("Sandustry.web.pages.discord", "./sandustry.web.main.txt", true);
+var log = new Utils.Log("sandustry.web.pages.discord", "./sandustry.web.main.txt", true);
 
 /**
- * Namespace for Discord authentication functionality in the API.
+ * Namespace for discord authentication functionality in the API.
  * @namespace discordAuth
  * @memberof module:web
  */
@@ -23,14 +23,14 @@ module.exports = {
 	 */
 	paths: ["/auth/discord", "/auth/discord/callback"],
 	/**
-	 * Handles Discord OAuth2 authentication and callback.
+	 * Handles discord OAuth2 authentication and callback.
 	 *
-	 * - `/auth/discord`: Redirects the client to Discord's OAuth2 authorization URL.
+	 * - `/auth/discord`: Redirects the client to discord's OAuth2 authorization URL.
 	 * - `/auth/discord/callback`: Processes the OAuth2 callback, retrieves user information, and stores it in the browser's local storage.
 	 *
 	 * ### Query Parameters:
 	 * - **code**: *(required for `/auth/discord/callback`)*
-	 *   The OAuth2 authorization code returned by Discord after user authentication.
+	 *   The OAuth2 authorization code returned by discord after user authentication.
 	 *   - *Example*: `code=abcdef123456`
 	 *
 	 * @async
@@ -47,8 +47,8 @@ module.exports = {
 		var queryParams = querystring.parse(urlSplit[1] || "");
 
 		if (pathname === "/auth/discord") {
-			var authURL = `https://discord.com/oauth2/authorize?client_id=${globalThis.Config.discord.clientId}&redirect_uri=${encodeURIComponent(globalThis.Config.discord.redirectUri)}&response_type=code&scope=identify`;
-			log.info("Redirecting to Discord Authorization URL...");
+			var authURL = `https://discord.com/oauth2/authorize?client_id=${globalThis.config.discord.clientId}&redirect_uri=${encodeURIComponent(globalThis.config.discord.redirectUri)}&response_type=code&scope=identify`;
+			log.info("Redirecting to discord Authorization URL...");
 			res.writeHead(302, { Location: authURL });
 			return res.end();
 		}
@@ -63,11 +63,11 @@ module.exports = {
 			try {
 				log.info(`Received code: ${code}`);
 				var tokenData = querystring.stringify({
-					client_id: globalThis.Config.discord.clientId,
-					client_secret: globalThis.Config.discord.clientSecret,
+					client_id: globalThis.config.discord.clientId,
+					client_secret: globalThis.config.discord.clientSecret,
 					grant_type: "authorization_code",
 					code: code,
-					redirect_uri: globalThis.Config.discord.redirectUri,
+					redirect_uri: globalThis.config.discord.redirectUri,
 				});
 
 				var tokenResponse = await makeRequest("discord.com", "/api/oauth2/token", "POST", { "Content-Type": "application/x-www-form-urlencoded" }, tokenData);
@@ -75,7 +75,7 @@ module.exports = {
 				log.info(`Token Response: ${JSON.stringify(tokenResponse)}`);
 				if (!tokenResponse.access_token) {
 					res.writeHead(500, { "Content-Type": "text/html" });
-					return res.end("<h1>Error: Failed to retrieve access token from Discord.</h1>");
+					return res.end("<h1>Error: Failed to retrieve access token from discord.</h1>");
 				}
 
 				var userResponse = await makeRequest("discord.com", "/api/users/@me", "GET", { Authorization: `Bearer ${tokenResponse.access_token}` });
@@ -89,9 +89,9 @@ module.exports = {
                     </script>
 `);
 			} catch (err) {
-				log.info(`Error during Discord OAuth2 process: ${err.message}`);
+				log.info(`Error during discord OAuth2 process: ${err.message}`);
 				res.writeHead(500, { "Content-Type": "text/html" });
-				return res.end("<h1>Error: Something went wrong during the Discord authentication process.</h1>");
+				return res.end("<h1>Error: Something went wrong during the discord authentication process.</h1>");
 			}
 		}
 

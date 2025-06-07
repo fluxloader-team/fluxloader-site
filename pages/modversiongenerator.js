@@ -1,15 +1,15 @@
 /**
- * @file mod_version_generator.js
+ * @file modversiongenerator.js
  * @description Generates mod version `.zip` files with various metadata for the modding platform.
  * This module handles the creation of multiple versions, including tags, semantic versioning, and metadata generation.
  * This module is for validating and testing the modding platform with realistic sample data.
  */
 
 var JSZip = require("jszip");
-var Utils = require("./../utils");
+var Utils = require("../utils");
 var crypto = require("crypto");
-var log = new Utils.log.log("Sandustry.web.pages.generateMod", "./sandustry.web.main.txt", true);
-var Mongo = require("./../Shared/DB");
+var log = new Utils.Log("sandustry.web.pages.generateMod", "./sandustry.web.main.txt", true);
+var Mongo = require("../shared/db");
 
 /**
  * @namespace generateMod

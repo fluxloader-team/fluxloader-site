@@ -1,16 +1,16 @@
 /**
- * @file UpdateMods.js
+ * @file updatemods.js
  * @description A timer to make sure ModDB data is using the latest mod version data from the ModVersions collection.
  * This timer ensures that mod metadata in the Mods collection stays synchronized with the latest version information.
  */
 
-var Utils = require("./../utils");
-var log = new Utils.log.log("Sandustry.Timer.ModData", "./sandustry.Timer.main.txt", true);
-var Mongo = require("./../Shared/DB");
+var Utils = require("../utils");
+var mongo = require("../shared/db");
+var log = new Utils.Log("sandustry.timer.moddata", "./sandustry.timer.main.txt", true);
 
 /**
  * Namespace for Sandustry timer tasks.
- * @namespace UpdateMods
+ * @namespace updatemods
  * @memberof module:timers
  */
 /**
@@ -22,7 +22,7 @@ var Mongo = require("./../Shared/DB");
  *
  * @async
  * @function run
- * @memberof module:timers.UpdateMods
+ * @memberof module:timers.updatemods
  *
  * @returns {Promise<void>} Resolves when the timer task has completed updating all mods.
  *
@@ -30,9 +30,9 @@ var Mongo = require("./../Shared/DB");
  *
  * @example
  * // Example of how this timer might be scheduled
- * const UpdateMods = require('./Timers/UpdateMods');
+ * const updatemods = require('./timers/updatemods');
  * setInterval(() => {
- *   UpdateMods.run().catch(err => console.error('Error in UpdateMods timer:', err));
+ *   updatemods.run().catch(err => console.error('Error in updatemods timer:', err));
  * }, 86400000); // Run once per day
  */
 module.exports = {
@@ -41,13 +41,13 @@ module.exports = {
 		var page = 1;
 		var MorePages = true;
 		while (MorePages) {
-			var Mods = await Mongo.GetMod.Data.Search(JSON.stringify({ "modData.name": { $regex: "", $options: "i" } }), null, false, { number: page, size: 100 }, { _id: 1, modID: 1, modData: 1 });
-			if (Mods.length === 0) {
+			var Mods = await mongo.GetMod.Data.Search(JSON.stringify({ "modData.name": { $regex: "", $options: "i" } }), null, false, { number: page, size: 100 }, { _id: 1, modID: 1, modData: 1 });
+			if (!Mods || Mods.length === 0) {
 				MorePages = false;
 			} else {
 				//log.info(`Found ${Mods.length} mods`);
 				var modIDs = Mods.map((mod) => mod.modID);
-				var modDataList = await Mongo.GetMod.Versions.Multiple(modIDs);
+				var modDataList = await mongo.GetMod.Versions.Multiple(modIDs);
 				var modDataMap = Object.fromEntries(modDataList.map((mod) => [mod.modID, mod.modData]));
 				//log.info(`${JSON.stringify(modDataMap)}`)
 				for (var mod of Mods) {
@@ -55,14 +55,14 @@ module.exports = {
 
 					if (mod.modData.version !== modData.version) {
 						mod.modData.version = modData.version;
-						await Mongo.GetMod.Data.Update(mod.modID, mod);
+						await mongo.GetMod.Data.Update(mod.modID, mod);
 
 						var action = {
 							discordID: "Timer",
 							action: `Updated mod ${mod.modID} to version ${modData.version}`,
 							time: new Date(),
 						};
-						await Mongo.GetAction.Add(action);
+						await mongo.GetAction.Add(action);
 					}
 					modData = null;
 					mod = null;

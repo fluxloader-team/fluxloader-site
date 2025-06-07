@@ -1,5 +1,3 @@
-var log = require("./log");
+var Log = require("./log");
 
-module.exports = {
-	log: log,
-};
+module.exports =  { Log };

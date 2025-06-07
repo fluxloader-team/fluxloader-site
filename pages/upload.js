@@ -17,6 +17,7 @@ module.exports = {
 	 * @memberof module:web.upload
 	 */
 	paths: ["/upload"],
+
 	/**
 	 * Handles GET requests for the upload page.
 	 *
@@ -38,6 +39,6 @@ module.exports = {
 
 	run: function (req, res) {
 		res.writeHead(201, { "Content-Type": "text/html" });
-		res.end(ejs.render(globalThis.Templates["base.ejs"], { data: [globalThis.Templates["basicheaders.html"], globalThis.Templates["upload.html"]] }));
+		res.end(ejs.render(globalThis.templates["base.ejs"], { data: [globalThis.templates["basicheaders.html"], globalThis.templates["upload.html"]] }));
 	},
 };

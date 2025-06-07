@@ -1,7 +1,7 @@
 /**
- * @file DiscordBot.js
- * @description The main module for handling Discord bot functionality, including commands, events, and integration with the Discord API.
- * This is the central module for all Discord-related namespaces in the application.
+ * @file discordbot.js
+ * @description The main module for handling discord bot functionality, including commands, events, and integration with the discord API.
+ * This is the central module for all discord-related namespaces in the application.
  */
 
 /**
@@ -10,14 +10,14 @@
  */
 
 /**
- * Namespace for Discord bot events handling.
+ * Namespace for discord bot events handling.
  * @namespace Events
  * @memberof module:discord
  */
 
 /**
- * Namespace for Discord bot command handling.
- * @namespace Commands
+ * Namespace for discord bot command handling.
+ * @namespace commands
  * @memberof module:discord
  */
 
@@ -27,7 +27,7 @@ var fs = require("fs");
 var Utils = require("./utils");
 var path = require("path");
 
-var log = new Utils.log.log("Sandustry.bot.main", "./sandustry.bot.main.txt", true);
+var log = new Utils.Log("sandustry.bot.main", "./sandustry.bot.main.txt", true);
 
 process.on("uncaughtException", function (err) {
 	log.info(`Caught exception: ${err.stack}`);
@@ -40,7 +40,7 @@ process.on("uncaughtException", function (err) {
  * @property {Object} eventName - Placeholder for an event.
  * @property {Function} eventName.run - The function to execute for the event.
  */
-globalThis.BotEvents = {
+globalThis.botEvents = {
 	eventName: {
 		run: function (event) {},
 	},
@@ -78,25 +78,25 @@ function computeRepoHash(directory = "./") {
 
 /**
  * Reloads event listeners for the bot.
- * This function dynamically loads event files from the `./Discord/Events` directory and registers them with the bot client.
+ * This function dynamically loads event files from the `./discord/Events` directory and registers them with the bot client.
  *
  * @function reloadEvents
  * @memberof module:discord
  */
 function reloadEvents() {
 	log.info("Reloading events...");
-	globalThis.BotEvents = {};
+	globalThis.botEvents = {};
 
-	fs.readdirSync("./Discord/Events").forEach((file) => {
-		if (require.resolve("./Discord/Events/" + file)) {
-			delete require.cache[require.resolve("./Discord/Events/" + file)];
+	fs.readdirSync("./discord/Events").forEach((file) => {
+		if (require.resolve("./discord/Events/" + file)) {
+			delete require.cache[require.resolve("./discord/Events/" + file)];
 		}
-		BotEvents[file.split(".")[0]] = require("./Discord/Events/" + file);
+		BotEvents[file.split(".")[0]] = require("./discord/Events/" + file);
 	});
 	log.info("Events loaded");
 	Object.keys(BotEvents).forEach((key) => {
-		Discord.client.removeAllListeners(Events[key]);
-		Discord.client.on(Events[key], (event) => {
+		discord.client.removeAllListeners(Events[key]);
+		discord.client.on(Events[key], (event) => {
 			BotEvents[key].run(event);
 		});
 		log.info(`Event listener registered for: ${key}`);
@@ -106,16 +106,16 @@ function reloadEvents() {
 
 /**
  * Dynamically reloads command modules.
- * This function scans the `./Discord/Commands` directory and loads valid commands into the bot's global `BotCommands` collection.
+ * This function scans the `./discord/commands` directory and loads valid commands into the bot's global `botCommands` collection.
  *
- * @function reloadCommands
+ * @function reloadcommands
  * @memberof module:discord
  */
-function reloadCommands() {
+function reloadcommands() {
 	log.info("Reloading commands...");
 
-	globalThis.BotCommands = new Collection();
-	var commandsPath = path.resolve(__dirname, "./Discord/Commands");
+	globalThis.botCommands = new Collection();
+	var commandsPath = path.resolve(__dirname, "./discord/commands");
 
 	fs.readdirSync(commandsPath).forEach((file) => {
 		var filePath = path.join(commandsPath, file);
@@ -125,34 +125,34 @@ function reloadCommands() {
 		var command = require(filePath);
 
 		if (command.data && command.execute) {
-			BotCommands.set(command.data.name, command);
+			botCommands.set(command.data.name, command);
 			log.info(`Command "${command.data.name}" successfully loaded.`);
 		} else {
 			log.info(`Skipping file "${file}" as it's not a valid command.`);
 		}
 	});
 
-	log.info(`Available Commands: ${[...BotCommands.keys()].join(", ")}`);
-	log.info("Commands reloaded successfully.");
+	log.info(`Available commands: ${[...botCommands.keys()].join(", ")}`);
+	log.info("commands reloaded successfully.");
 }
 
 /**
- * Registers all commands with the Discord API.
- * This function sends the bot's command data to Discord, making it available for use in specific guilds.
+ * Registers all commands with the discord API.
+ * This function sends the bot's command data to discord, making it available for use in specific guilds.
  *
  * @async
- * @function registerCommands
+ * @function registercommands
  * @memberof module:discord
  */
-globalThis.registerCommands = async function () {
+globalThis.registercommands = async function () {
 	log.info("Registering application commands...");
-	log.info("Commands stored in BotCommands Collection:");
-	BotCommands.forEach((cmd, key) => {
+	log.info("commands stored in botCommands Collection:");
+	botCommands.forEach((cmd, key) => {
 		log.info(`Command Key: ${key}, Command Details: ${JSON.stringify(cmd)}`);
 	});
 
 	var commands = [];
-	BotCommands.forEach((cmd, key) => {
+	botCommands.forEach((cmd, key) => {
 		log.info(`Processing command: ${key}`);
 		if (!cmd.data || !(cmd.data.toJSON instanceof Function)) {
 			log.info(`Error: Command "${key}" does not provide a valid 'data.toJSON()'. Skipping it.`);
@@ -169,14 +169,14 @@ globalThis.registerCommands = async function () {
 		}
 	});
 
-	log.info(`Final Commands to be registered: ${JSON.stringify(commands)}`);
+	log.info(`Final commands to be registered: ${JSON.stringify(commands)}`);
 
-	var rest = new REST({ version: "10" }).setToken(globalThis.Config.discord.token);
+	var rest = new REST({ version: "10" }).setToken(globalThis.config.discord.token);
 	try {
-		await rest.put(Routes.applicationGuildCommands(globalThis.Discord.client.user.id, "1359169971611111736"), { body: commands });
-		log.info("Commands registered to Discord successfully.");
+		await rest.put(Routes.applicationGuildcommands(globalThis.discord.client.user.id, "1359169971611111736"), { body: commands });
+		log.info("commands registered to discord successfully.");
 	} catch (error) {
-		log.info(`Error registering commands to Discord: ${error.message}`);
+		log.info(`Error registering commands to discord: ${error.message}`);
 	}
 };
 
@@ -187,7 +187,7 @@ globalThis.registerCommands = async function () {
  */
 module.exports = {
 	/**
-	 * Initializes the Discord client and logs the bot in using the token retrieved from the config.
+	 * Initializes the discord client and logs the bot in using the token retrieved from the config.
 	 *
 	 * @async
 	 * @function init
@@ -195,13 +195,13 @@ module.exports = {
 	 */
 	init: function () {
 		log.info("Initializing bot...");
-		globalThis.Discord = {
+		globalThis.discord = {
 			client: new Client({ intents: Object.values(GatewayIntentBits) }),
 		};
-		globalThis.BotCommands = new Collection();
+		globalThis.botCommands = new Collection();
 	},
 	/**
-	 * Starts the Discord bot
+	 * Starts the discord bot
 	 *
 	 * @async
 	 * @function start
@@ -210,24 +210,24 @@ module.exports = {
 	start: function () {
 		log.info("Starting bot...");
 		reloadEvents();
-		reloadCommands();
+		reloadcommands();
 		var lastRepoHash = computeRepoHash();
-		globalThis.Discord.client.login(globalThis.Config.discord.token);
+		globalThis.discord.client.login(globalThis.config.discord.token);
 		log.info("Bot started");
-		async function Timers() {
+		async function timers() {
 			var newRepoHash = computeRepoHash();
 			log.info(newRepoHash);
 			if (newRepoHash !== lastRepoHash) {
-				log.info("Changes detected in the repository. Reloading Events and Commands...");
+				log.info("Changes detected in the repository. Reloading Events and commands...");
 				lastRepoHash = newRepoHash;
 
 				reloadEvents();
-				reloadCommands();
+				reloadcommands();
 			} else {
 				log.info("No changes detected.");
 			}
-			setTimeout(Timers, 10000);
+			setTimeout(timers, 10000);
 		}
-		Timers();
+		timers();
 	},
 };
