@@ -2,46 +2,47 @@
 // Log system
 // ---------------------------------
 // Custom Log system
+
 /**
  * @author FluxLoaderApp <support@fluxloader.app>
  */
 
 // requires
+
 var colors = require("colors");
 var fs = require("fs");
 
-//code
+// code
 
 /**
- * @param {string} [Name] - Log name
+ * @param {string} [name] - Log name
  * @param {string} [Path] - Path to log file
  * @param {boolean} [date] - Add date to log
  * @param {number} [SaveInterval] - Interval to save
  */
-class log {
-	CurrentLog = [];
-	Name = "";
-	Path = "";
+class Log {
+	currentLogs = [];
+	name = "";
+	path = "";
 	date = false;
-	SaveInterval = 0;
-	SaveLoopInterval = {};
-	loglevel = "debug"; //debug info
-	constructor(Name = "", Path = "./log.txt", date = false, SaveInterval = 10000) {
-		this.Name = Name;
-		this.Path = Path;
+	saveIntervalDuration = 0;
+	saveLoopInterval = {};
+	logLevel = "debug";
+
+	constructor(name = "", path = "./log.txt", date = false, saveIntervalDuration = 10000) {
+		this.name = name;
+		this.path = path;
 		this.date = date;
-		this.SaveInterval = SaveInterval;
+		this.saveIntervalDuration = saveIntervalDuration;
 		this.startSave();
 	}
-	logLevel(level) {
-		this.loglevel = level;
-	}
+
 	startSave() {
-		this.SaveLoopInterval = setInterval(() => {
-			if (this.CurrentLog.length == 0) {
+		this.saveLoopInterval = setInterval(() => {
+			if (this.currentLogs.length == 0) {
 			} else {
-				if (globalThis.Config.discord.serverLog) {
-					var botlog = this.CurrentLog;
+				if (globalThis.config.discord.serverLog) {
+					var botlog = this.currentLogs;
 					var logstosend = [];
 					botlog.forEach((log) => {
 						if (
@@ -50,7 +51,7 @@ class log {
 `).length >
 							1800
 						) {
-							globalThis.Discord.client.channels.cache.get(globalThis.Config.discord.serverLogChannel).send(
+							globalThis.discord.client.channels.cache.get(globalThis.config.discord.serverLogChannel).send(
 								`Log @ ${Date.now()}
 ` +
 									"```ansi" +
@@ -66,7 +67,7 @@ class log {
 						}
 					});
 					if (logstosend.length > 0) {
-						globalThis.Discord.client.channels.cache.get(globalThis.Config.discord.serverLogChannel).send(
+						globalThis.discord.client.channels.cache.get(globalThis.config.discord.serverLogChannel).send(
 							`Log @ ${Date.now()}
 ` +
 								"```ansi" +
@@ -79,67 +80,72 @@ class log {
 					}
 				}
 				try {
-					var tmpPath = this.Path.replace("web/", "web/" + new Date().toLocaleDateString().replace(/\//g, "_") + "/");
-					if (!fs.existsSync(tmpPath.replace(/\/[A-z]*\.txt/g, ""))) {
-						fs.mkdirSync(tmpPath.replace(/\/[A-z]*\.txt/g, ""));
+					if (!fs.existsSync(this.path)) {
+						fs.writeFileSync(this.path, "");
 					}
 					fs.appendFileSync(
-						this.Path.replace("web/", "web/" + new Date().toLocaleDateString().replace(/\//g, "_") + "/"),
-						this.CurrentLog.join(`
-`),
-						"utf-8"
+						this.path,
+						this.currentLogs.join(`
+`) +
+							`
+`
 					);
 				} catch (e) {}
 
-				this.CurrentLog = [];
+				this.currentLogs = [];
 			}
-		}, this.SaveInterval);
+		}, this.saveIntervalDuration);
 	}
+
 	stopSave() {
-		clearInterval(this.SaveLoopInterval);
+		clearInterval(this.saveLoopInterval);
 	}
+
 	/**
 	 * @param {string} [Input] - What to log
 	 */
 	info(Input = "") {
-		var ThisLog = "";
-
+		var logMessage = "";
 		if (this.date == true) {
-			ThisLog = `${colors.green(this.Name + " | " + Date.now())} : ${Input}`;
+			logMessage = `${colors.green(this.name + " | " + Date.now())} : ${Input}`;
 		} else {
-			ThisLog = `${colors.green(this.Name)} : ${Input}`;
+			logMessage = `${colors.green(this.name)} : ${Input}`;
 		}
-		this.CurrentLog.push(ThisLog);
-		console.log(ThisLog);
+		this.currentLogs.push(logMessage);
+		console.log(logMessage);
 	}
+
+	/**
+	 * @param {string} [Input] - What to log
+	 */
 	debug(Input = "") {
-		if (this.loglevel == "debug") {
-			var ThisLog = "";
-
+		if (this.logLevel == "debug") {
+			var logMessage = "";
 			if (this.date == true) {
-				ThisLog = `${colors.yellow(this.Name + " | " + Date.now())} : ${Input}`;
+				logMessage = `${colors.yellow(this.name + " | " + Date.now())} : ${Input}`;
 			} else {
-				ThisLog = `${colors.yellow(this.Name)} : ${Input}`;
+				logMessage = `${colors.yellow(this.name)} : ${Input}`;
 			}
-			this.CurrentLog.push(ThisLog);
-			console.log(ThisLog);
+			this.currentLogs.push(logMessage);
+			console.log(logMessage);
 		}
 	}
-	error(Input = "") {
-		var ThisLog = "";
 
+	/**
+	 * @param {string} [Input] - What to log
+	 */
+	error(Input = "") {
+		var logMessage = "";
 		if (this.date == true) {
-			ThisLog = `${colors.red(this.Name + " | " + Date.now())} : ${Input}`;
+			logMessage = `${colors.red(this.name + " | " + Date.now())} : ${Input}`;
 		} else {
-			ThisLog = `${colors.red(this.Name)} : ${Input}`;
+			logMessage = `${colors.red(this.name)} : ${Input}`;
 		}
-		this.CurrentLog.push(ThisLog);
-		console.log(ThisLog);
+		this.currentLogs.push(logMessage);
+		console.log(logMessage);
 	}
 }
 
-//exports
+// exports
 
-module.exports = {
-	log: log,
-};
+module.exports = Log;

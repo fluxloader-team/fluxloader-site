@@ -1,17 +1,16 @@
 /**
  * @file getsiteactions.js
- * @description Implements the `/getsiteactions` slash command for the Discord bot. This command retrieves site actions.
+ * @description Implements the `/getsiteactions` slash command for the discord bot. This command retrieves site actions.
  */
 
 var { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-var colors = require("colors");
 var Utils = require("./../../utils");
-var log = new Utils.log.log("Sandustry.bot.command.getsiteactions", "./sandustry.bot.main.txt", true);
-var Mongo = require("./../../Shared/DB");
+var log = new Utils.Log("sandustry.bot.command.getsiteactions", "./sandustry.bot.main.txt", true);
+var Mongo = require("./../../shared/db");
 /**
- * Namespace for Discord bot commands.
+ * Namespace for discord bot commands.
  * @namespace getSiteActions
- * @memberof module:discord.Commands
+ * @memberof module:discord.commands
  */
 /**
  * Slash command definition and execution logic for `/getsiteactions`.
@@ -19,7 +18,7 @@ var Mongo = require("./../../Shared/DB");
  * @type {Object}
  * @property data - The slash command structure for `/getsiteactions`.
  * @property {Function} execute - The logic to process the command when invoked.
- * @memberof module:discord.Commands.getModInfo
+ * @memberof module:discord.commands.GetModInfo
  */
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -32,7 +31,7 @@ module.exports = {
 	 *
 	 * @async
 	 * @function execute
-	 * @memberof module:discord.Commands.getModInfo
+	 * @memberof module:discord.commands.GetModInfo
 	 * @param interaction - The interaction object representing the command invocation.
 	 *
 	 * @returns {Promise<void>} Resolves when the command's logic is complete and a reply has been sent.

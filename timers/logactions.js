@@ -1,18 +1,14 @@
 /**
- * @file LogActions.js
+ * @file logactions.js
  * @description logs unlogged actions to the discord
  */
 
-// Using Mongo module from DB.js instead of direct MongoDB access
-var colors = require("colors");
-var Utils = require("./../utils");
-const Mongo = require("../Shared/DB");
-var log = new Utils.log.log("Sandustry.Timer.ActionLog", "./sandustry.Timer.main.txt", true);
-var validationTime = globalThis.Config.ModSettings.validationTime;
+// Using Mongo module from db.js instead of direct MongoDB access
+const Mongo = require("../shared/db");
 
 /**
  * Namespace for Sandustry bot timer tasks.
- * @namespace LogActions
+ * @namespace logactions
  * @memberof module:timers
  */
 
@@ -20,7 +16,7 @@ var validationTime = globalThis.Config.ModSettings.validationTime;
  *
  * @async
  * @function run
- * @memberof module:timers.LogActions
+ * @memberof module:timers.logactions
  *
  * @returns {Promise<void>} Resolves when the timer task has completed processing.
  *
@@ -34,7 +30,7 @@ module.exports = {
 		for (var action of unloggedActions) {
 			action.logged = true;
 			await Mongo.GetAction.Update(action);
-			await globalThis.Discord.client.channels.cache.get(globalThis.Config.discord.serverActionsChannel).send(`Site Action: ${action.action} by ${action.discordID}`);
+			await globalThis.discord.client.channels.cache.Get(globalThis.config.discord.serverActionsChannel).send(`Site Action: ${action.action} by ${action.discordID}`);
 		}
 	},
 };

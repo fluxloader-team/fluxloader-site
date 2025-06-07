@@ -6,8 +6,10 @@
 var Utils = require("./../utils");
 var fs = require("fs");
 var path = require("path");
+var https = require("https");
+var verifyDiscordUser = require("./../shared/verifydiscorduser");
 
-const log = new Utils.log.log("Sandustry.web.pages.config", "./sandustry.web.main.txt", true);
+const log = new Utils.Log("sandustry.web.pages.config", "./sandustry.web.main.txt", true);
 
 /**
  * @namespace config
@@ -44,21 +46,21 @@ module.exports = {
 				req.on("end", async () => {
 					try {
 						var data = JSON.parse(body);
-						var DiscordUserData = data.discordUser;
+						var discordUserData = data.discordUser;
 
 						// Verify the user is authenticated and has admin permissions
-						var Mongo = require("./../Shared/DB");
-						var UserData = await Mongo.GetUser.One(DiscordUserData.id);
+						var Mongo = require("./../shared/db");
+						var UserData = await Mongo.GetUser.One(discordUserData.id);
 						if (!UserData) {
 							res.writeHead(403, { "Content-Type": "application/json" });
 							res.end(JSON.stringify({ error: "User not found" }));
 							return;
 						}
 
-						var isValidUser = await verifyDiscordUser(DiscordUserData.id, DiscordUserData.tokenResponse.access_token);
+						var isValidUser = await verifyDiscordUser(discordUserData.id, discordUserData.tokenResponse.access_token);
 						if (!isValidUser) {
 							res.writeHead(403, { "Content-Type": "application/json" });
-							res.end(JSON.stringify({ error: "Invalid Discord user" }));
+							res.end(JSON.stringify({ error: "Invalid discord user" }));
 							return;
 						}
 
@@ -76,7 +78,7 @@ module.exports = {
 
 							// Log the action
 							var actionEntry = {
-								discordID: DiscordUserData.id,
+								discordID: discordUserData.id,
 								action: `Viewed config.json`,
 								time: new Date(),
 								logged: false,
@@ -104,7 +106,7 @@ module.exports = {
 
 							// Log the action
 							var actionEntry = {
-								discordID: DiscordUserData.id,
+								discordID: discordUserData.id,
 								action: `Updated config.json`,
 								time: new Date(),
 								logged: false,
@@ -134,48 +136,3 @@ module.exports = {
 		}
 	},
 };
-
-function verifyDiscordUser(userId, accessToken) {
-	return new Promise((resolve, reject) => {
-		var options = {
-			hostname: "discord.com",
-			path: "/api/users/@me",
-			method: "GET",
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
-			},
-		};
-
-		var req = require("https").request(options, (res) => {
-			let data = "";
-
-			res.on("data", (chunk) => {
-				data += chunk.toString();
-			});
-
-			res.on("end", () => {
-				try {
-					var userResponse = JSON.parse(data);
-
-					// Check if the user ID matches the ID from the token response
-					if (res.statusCode === 200 && userResponse.id === userId) {
-						resolve(true);
-					} else {
-						console.warn("User ID mismatch or token is invalid:", userResponse);
-						resolve(false);
-					}
-				} catch (err) {
-					console.error("Error parsing user verification response:", err);
-					resolve(false);
-				}
-			});
-		});
-
-		req.on("error", (err) => {
-			console.error("Error verifying Discord user:", err);
-			resolve(false);
-		});
-
-		req.end();
-	});
-}

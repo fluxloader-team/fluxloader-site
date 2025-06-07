@@ -9,7 +9,7 @@ var fs = require("fs");
 var { exec } = require("child_process");
 var Utils = require("./utils");
 var path = require("path");
-var Discord = require("./DiscordBot.js");
+var discord = require("./discordbot.js");
 
 /**
  * Functions related to the web server and its routes.
@@ -23,7 +23,7 @@ var Discord = require("./DiscordBot.js");
 
 /**
  * Timed tasks and scheduled functionality.
- * @module Timers
+ * @module timers
  */
 
 /**
@@ -32,47 +32,45 @@ var Discord = require("./DiscordBot.js");
  */
 
 const CONFIG_PATH = path.join(__dirname, "config.json");
+
 /**
  * A global configuration object that stores application-wide settings, loaded from `config.json` or defaults if not found.
- * This object is used across the application for configuring behavior, such as Discord bot settings, MongoDB connection details, and other core features.
+ * This object is used across the application for configuring behavior, such as discord bot settings, MongoDB connection details, and other core features.
  *
  * @global
  * @namespace Config
- * @property {Object} discord - Discord bot-related configuration.
- * @property {string} discord.clientId - The client ID for the Discord application.
- * @property {string} discord.clientSecret - The client secret for the Discord application.
- * @property {string} discord.redirectUri - The callback URL for Discord OAuth authentication.
- * @property {string} discord.token - The bot token used to authenticate with Discord.
- * @property {boolean} discord.runbot - Whether the Discord bot should run on application startup.
- * @property {boolean} discord.serverLog - Whether the Discord bot should log server activities.
- * @property {string} discord.serverLogChannel - The ID of the Discord channel where server logs will be sent.
- *
+ * @property {Object} discord - discord bot-related configuration.
+ * @property {string} discord.clientId - The client ID for the discord application.
+ * @property {string} discord.clientSecret - The client secret for the discord application.
+ * @property {string} discord.redirectUri - The callback URL for discord OAuth authentication.
+ * @property {string} discord.token - The bot token used to authenticate with discord.
+ * @property {boolean} discord.runbot - Whether the discord bot should run on application startup.
+ * @property {boolean} discord.serverLog - Whether the discord bot should log server activities.
+ * @property {string} discord.serverLogChannel - The ID of the discord channel where server logs will be sent.
  * @property {Object} mongodb - MongoDB-related configuration.
  * @property {string} mongodb.uri - The connection URI for the MongoDB database.
- *
  * @property {Object} git - Git-related configuration.
  * @property {boolean} git.pull - Whether the application should attempt to pull changes from the Git repository on startup.
- *
  * @property {Object} ModSettings - Settings specific to mod validation.
  * @property {number} ModSettings.validationTime - Time (in seconds) required for a mod to be considered valid.
  *
  * @example
- * // Accessing values from globalThis.Config
- * console.log(globalThis.Config.discord.clientId); // Outputs the Discord Client ID
- * console.log(globalThis.Config.mongodb.uri); // Outputs the MongoDB URI
+ * // Accessing values from globalThis.config
+ * console.log(globalThis.config.discord.clientId); // Outputs the discord Client ID
+ * console.log(globalThis.config.mongodb.uri); // Outputs the MongoDB URI
  *
  * @example
- * // Example of modifying globalThis.Config at runtime
- * globalThis.Config.git.pull = false; // Disable automatic git pull
+ * // Example of modifying globalThis.config at runtime
+ * globalThis.config.git.pull = false; // Disable automatic git pull
  */
-globalThis.Config = {};
+globalThis.config = {};
 
 /**
  * Default configuration for the application. This is written to `config.json` if no file exists.
  * @type {Object}
  * @memberof module:main
  */
-var defaultConfig = {
+const DEFAULT_CONFIG = {
 	discord: {
 		clientId: "CLIENT_ID",
 		clientSecret: "CLIENT_SECRET",
@@ -94,10 +92,10 @@ var defaultConfig = {
 	},
 };
 
-globalThis.Config = defaultConfig;
-
 var lastRepoHash = "";
-const log = new Utils.log.log("Sandustry.web.main", "./sandustry.web.main.txt", true);
+
+globalThis.config = DEFAULT_CONFIG;
+const log = new Utils.Log("sandustry.web.main", "./sandustry.web.main.txt", true);
 
 process.on("uncaughtException", function (err) {
 	log.info(`Caught exception: ${err.stack}`);
@@ -105,18 +103,18 @@ process.on("uncaughtException", function (err) {
 
 if (!fs.existsSync(CONFIG_PATH)) {
 	log.info("Config file not found, generating default config.json...");
-	fs.writeFileSync(CONFIG_PATH, JSON.stringify(defaultConfig, null, 2), "utf-8");
+	fs.writeFileSync(CONFIG_PATH, JSON.stringify(DEFAULT_CONFIG, null, 2), "utf-8");
 	log.info("Default config.json generated.");
 	process.exit(0);
 }
 
-globalThis.Config = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf-8"));
+globalThis.config = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf-8"));
 
 /**
  * Global object to hold templates loaded into memory.
  * @memberof module:web
  */
-globalThis.Templates = { filename: "content" };
+globalThis.templates = { filename: "content" };
 
 /**
  * Global object to store all dynamically loaded web pages.
@@ -135,13 +133,13 @@ var pages = {
  * @memberof module:web
  * @function LoadTemplates
  */
-var LoadTemplates = function () {
+function loadTemplates() {
 	log.info("Loading templates");
 	fs.readdirSync("./templates").forEach((file) => {
-		Templates[file] = fs.readFileSync("./templates/" + file, "utf8");
+		templates[file] = fs.readFileSync("./templates/" + file, "utf8");
 	});
 	log.info("Templates loaded");
-};
+}
 
 /**
  * Function to load dynamically defined pages from the `pages` directory.
@@ -149,7 +147,7 @@ var LoadTemplates = function () {
  * @memberof module:web
  * @function LoadPages
  */
-var LoadPages = function () {
+function loadPages() {
 	log.info("Loading pages");
 	fs.readdirSync("./pages").forEach((file) => {
 		if (require.resolve("./pages/" + file)) {
@@ -161,31 +159,31 @@ var LoadPages = function () {
 		});
 	});
 	log.info("pages loaded");
-};
+}
 
 /**
  * Global array to store all loaded timer tasks.
  * @type {Array}
- * @memberof module:Timers
+ * @memberof module:timers
  */
-globalThis.Timers = [];
+globalThis.timers = [];
 
 /**
- * Function to dynamically load all timer tasks from the `Timers` directory and store them globally.
+ * Function to dynamically load all timer tasks from the `timers` directory and store them globally.
  *
  * @memberof module:timers
- * @function LoadTimers
+ * @function Loadtimers
  */
-var LoadTimers = function () {
-	log.info("Loading Timers");
-	Timers = [];
-	fs.readdirSync("./Timers").forEach((file) => {
-		if (require.resolve("./Timers/" + file)) {
-			delete require.cache[require.resolve("./Timers/" + file)];
+function loadTimers() {
+	log.info("Loading timers");
+	timers = [];
+	fs.readdirSync("./timers").forEach((file) => {
+		if (require.resolve("./timers/" + file)) {
+			delete require.cache[require.resolve("./timers/" + file)];
 		}
-		Timers.push(require("./Timers/" + file));
+		timers.push(require("./timers/" + file));
 	});
-};
+}
 
 /**
  * Computes a hash of the files within the specified directory to track changes in the repository.
@@ -217,81 +215,66 @@ function computeRepoHash(directory = "./") {
 }
 
 /**
- * Performs a `git pull` to update the repository, then reloads templates, pages, and Timers if changes are detected.
+ * Performs a `git pull` to update the repository, then reloads templates, pages, and timers if changes are detected.
  *
  * @function performUpdate
  * @memberof module:main
  */
 async function performUpdate() {
-	if (globalThis.Config.git.pull) {
-		exec("git pull", (error, stdout, stderr) => {
-			if (error) {
-				log.info(`Error running git pull: ${error}`);
-				return;
-			}
-			log.info(stdout);
-
-			const newRepoHash = computeRepoHash();
-			log.info(newRepoHash);
-			if (newRepoHash !== lastRepoHash) {
-				log.info("Changes detected in the repository. Reloading templates and pages...");
-				lastRepoHash = newRepoHash;
-
-				LoadTemplates();
-				LoadPages();
-				LoadTimers();
-			} else {
-				log.info("No changes detected.");
-			}
-		});
-	} else {
+	const updateIfHashChanged = () => {
 		const newRepoHash = computeRepoHash();
 		log.info(newRepoHash);
 		if (newRepoHash !== lastRepoHash) {
 			log.info("Changes detected in the repository. Reloading templates and pages...");
 			lastRepoHash = newRepoHash;
-
-			LoadTemplates();
-			LoadPages();
-			LoadTimers();
+			loadTemplates();
+			loadPages();
+			loadTimers();
 		} else {
 			log.info("No changes detected.");
 		}
+	};
+	if (globalThis.config.git.pull) {
+		exec("git pull", (error, stdout, stderr) => {
+			updateIfHashChanged();
+		});
+	} else {
+		updateIfHashChanged();
 	}
-	for (const timer of Timers) {
+	for (const timer of timers) {
 		await timer.run();
 	}
 	setTimeout(performUpdate, 10000);
 }
 
-LoadTemplates();
-LoadPages();
-LoadTimers();
 lastRepoHash = computeRepoHash();
 log.info(lastRepoHash);
+loadTemplates();
+loadPages();
+loadTimers();
 
-var WebRequestHandler = function (req, res) {
+function webRequestHandler(req, res) {
 	var url = req.url;
 	var urlSplit = url.split("?");
 	var urlName = urlSplit[0];
-	var template = pages[urlName];
-	if (template) {
-		template.run(req, res);
+	var page = pages[urlName];
+	if (page) {
+		page.run(req, res);
 	} else {
 		res.writeHead(404, { "Content-Type": "text/html" });
 		res.end("404");
 	}
-};
+}
 
 setTimeout(performUpdate, 10000);
 
-if (globalThis.Config.discord.runbot) {
+if (globalThis.config.discord.runbot) {
 	try {
-		Discord.init();
-		Discord.start();
+		discord.init();
+		discord.start();
 	} catch (error) {
-		log.info(`Error initializing or starting Discord bot: ${error.stack}`);
+		log.info(`Error initializing or starting discord bot: ${error.stack}`);
 	}
 }
 
-var WebServer = http.createServer(WebRequestHandler).listen(20221);
+http.createServer(webRequestHandler).listen(20221);

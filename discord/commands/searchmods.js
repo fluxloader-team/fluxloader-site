@@ -1,17 +1,16 @@
 /**
  * @file searchmods.js
- * @description Implements the `/searchmods` slash command for the Discord bot. This command allows users to search for mods by name or tags and receive detailed results.
+ * @description Implements the `/searchmods` slash command for the discord bot. This command allows users to search for mods by name or tags and receive detailed results.
  */
 
 var { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-var colors = require("colors");
 var Utils = require("./../../utils"); // Adjust this accordingly
-var log = new Utils.log.log("Sandustry.bot.command.SearchMods", "./sandustry.bot.main.txt", true);
-var Mongo = require("./../../Shared/DB");
+var log = new Utils.Log("sandustry.bot.command.SearchMods", "./sandustry.bot.main.txt", true);
+var Mongo = require("./../../shared/db");
 /**
- * Namespace for Discord bot commands.
+ * Namespace for discord bot commands.
  * @namespace searchMods
- * @memberof module:discord.Commands
+ * @memberof module:discord.commands
  */
 /**
  * Slash command definition and execution logic for `/searchmods`.
@@ -22,7 +21,7 @@ var Mongo = require("./../../Shared/DB");
  * @type {Object}
  * @property data - The slash command structure for `/searchmods`.
  * @property {Function} execute - The logic to process the command when invoked.
- * @memberof module:discord.Commands.searchMods
+ * @memberof module:discord.commands.searchMods
  */
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -36,7 +35,7 @@ module.exports = {
 	 *
 	 * @async
 	 * @function execute
-	 * @memberof module:discord.Commands.searchMods
+	 * @memberof module:discord.commands.searchMods
 	 * @param interaction - The interaction object representing the command invocation.
 	 *
 	 * @returns {Promise<void>} Resolves when the command's logic is complete and a reply has been sent.
@@ -44,7 +43,7 @@ module.exports = {
 	 * @throws {Error} Logs an error and sends an error response to the user if something goes wrong during command execution.
 	 *
 	 * @example
-	 * // Example usage in Discord
+	 * // Example usage in discord
 	 * /searchmods query:<search-term> verifiedonly:<true|false> page:<page-number>
 	 */
 	async execute(interaction) {

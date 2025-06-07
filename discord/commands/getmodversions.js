@@ -1,17 +1,16 @@
 /**
  * @file getmodversions.js
- * @description Implements the `/getmodversions` slash command for the Discord bot. This command allows users to fetch and view a list of versions for a specified mod.
+ * @description Implements the `/getmodversions` slash command for the discord bot. This command allows users to fetch and view a list of versions for a specified mod.
  */
 
 var { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-var colors = require("colors");
 var Utils = require("./../../utils");
-var log = new Utils.log.log("Sandustry.bot.command.GetModVersions", "./sandustry.bot.main.txt", true);
-var Mongo = require("./../../Shared/DB");
+var log = new Utils.Log("sandustry.bot.command.GetModVersions", "./sandustry.bot.main.txt", true);
+var Mongo = require("./../../shared/db");
 /**
- * Namespace for Discord bot commands.
- * @namespace getModVersions
- * @memberof module:discord.Commands
+ * Namespace for discord bot commands.
+ * @namespace GetModVersions
+ * @memberof module:discord.commands
  */
 /**
  * Slash command definition and execution logic for `/getmodversions`.
@@ -21,7 +20,7 @@ var Mongo = require("./../../Shared/DB");
  * @type {Object}
  * @property data - The slash command structure for `/getmodversions`.
  * @property {Function} execute - The logic to process the command when invoked.
- * @memberof module:discord.Commands.getModVersions
+ * @memberof module:discord.commands.GetModVersions
  */
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -33,7 +32,7 @@ module.exports = {
 	 *
 	 * @async
 	 * @function execute
-	 * @memberof module:discord.Commands.getModVersions
+	 * @memberof module:discord.commands.GetModVersions
 	 * @param interaction - The interaction object representing the command invocation.
 	 *
 	 * @returns {Promise<void>} Resolves when the command's logic is complete and a reply has been sent.
@@ -41,7 +40,7 @@ module.exports = {
 	 * @throws {Error} Logs an error and sends an error response to the user if something goes wrong during command execution.
 	 *
 	 * @example
-	 * // Example usage in Discord
+	 * // Example usage in discord
 	 * /getmodversions modid:<mod-id>
 	 */
 	async execute(interaction) {

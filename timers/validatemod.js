@@ -1,17 +1,17 @@
 /**
- * @file ValidateMod.js
+ * @file validatemod.js
  * @description A timer script used to automatically validate unverified mods after they have been in the database for a configurable amount of time.
  * This implementation supports the auto-approval workflow for mods that have passed the waiting period without moderation action.
  */
 
-var Utils = require("./../utils");
-const Mongo = require("../Shared/DB");
-var log = new Utils.log.log("Sandustry.Timer.Validate", "./sandustry.Timer.main.txt", true);
-var validationTime = globalThis.Config.ModSettings.validationTime;
+var Utils = require("../utils");
+const mongo = require("../shared/db");
+var log = new Utils.Log("sandustry.timer.Validate", "./sandustry.timer.main.txt", true);
+var validationTime = globalThis.config.ModSettings.validationTime;
 
 /**
  * Namespace for Sandustry timer tasks related to mod validation.
- * @namespace ValidateMod
+ * @namespace validatemod
  * @memberof module:timers
  */
 
@@ -27,7 +27,7 @@ var validationTime = globalThis.Config.ModSettings.validationTime;
  *
  * @async
  * @function run
- * @memberof module:timers.ValidateMod
+ * @memberof module:timers.validatemod
  *
  * @returns {Promise<void>} Resolves when the timer task has completed processing all unverified mods.
  *
@@ -35,24 +35,23 @@ var validationTime = globalThis.Config.ModSettings.validationTime;
  *
  * @example
  * // Example of scheduling the timer
- * const validateMod = require('./Timers/ValidateMod');
+ * const validatemod = require('./timers/validatemod');
  * setInterval(() => {
- *     validateMod.run().catch(err => console.error('Error in ValidateMod timer:', err));
+ *     validatemod.run().catch(err => console.error('Error in validatemod timer:', err));
  * }, 3600000); // Run every hour
  */
 module.exports = {
 	async run() {
 		try {
 			// Get all unverified mods
-			var unverifiedMods = await Mongo.GetMod.Data.FindUnverified();
-
+			var unverifiedMods = await mongo.GetMod.Data.FindUnverified();
 			if (unverifiedMods.length > 0) {
 				log.info(`Found ${unverifiedMods.length} unverified mod(s) to check.`);
 				var now = new Date();
 
 				for (var mod of unverifiedMods) {
 					// Get the oldest version of the mod
-					var modVersion = await Mongo.GetMod.Versions.Oldest(mod.modID);
+					var modVersion = await mongo.GetMod.Versions.Oldest(mod.modID);
 
 					if (!modVersion) {
 						//log.info(`No version found for modID: ${mod.modID}. Skipping...`);
@@ -65,7 +64,7 @@ module.exports = {
 					if (elapsedTime > validationTime) {
 						// Update the mod to be verified
 						mod.verified = true;
-						await Mongo.GetMod.Data.Update(mod.modID, mod);
+						await mongo.GetMod.Data.Update(mod.modID, mod);
 
 						// Log the action
 						var action = {
@@ -74,7 +73,7 @@ module.exports = {
 							time: new Date(),
 							logged: false,
 						};
-						await Mongo.GetAction.Add(action);
+						await mongo.GetAction.Add(action);
 						//log.info(`ModID: ${mod.modID} verified successfully.`);
 					} else {
 						// log.info(`ModID: ${mod.modID} not yet eligible for verification. Validating at ${uploadTime + elapsedTime}`);

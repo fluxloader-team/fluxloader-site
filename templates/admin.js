@@ -1041,7 +1041,7 @@ globalThis.DisplayUser = async function (discordID) {
 
 	userDisplay.innerHTML = `<div class="displayInner">
         <h3 id="userDisplayName">${user.discordUsername}</h3>
-        <p>Discord ID: <span id="userDiscordID">${user.discordID}</span></p>
+        <p>discord ID: <span id="userdiscordID">${user.discordID}</span></p>
         <p>Joined: ${new Date(user.joinedAt).toLocaleString()}</p>
         <p>Status: 
             <span id="userBanStatus" class="badge ${user.banned ? "bg-danger" : "bg-success"}">${user.banned ? "Banned" : "Active"}</span>
@@ -1065,7 +1065,7 @@ globalThis.DisplayUser = async function (discordID) {
 			},
 			body: JSON.stringify({
 				discordUser: discordUser,
-				action: "getUserDetails",
+				action: "GetUserDetails",
 				userID: discordID,
 			}),
 		});
@@ -1429,7 +1429,7 @@ globalThis.UpdateBannedUsersList = function (bannedUsers) {
         <thead>
             <tr>
                 <th>Username</th>
-                <th>Discord ID</th>
+                <th>discord ID</th>
                 <th>Joined At</th>
                 <th>Actions</th>
             </tr>
