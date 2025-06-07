@@ -7,7 +7,7 @@
 
 var Utils = require("./../utils");
 var { decompress } = require("@mongodb-js/zstd");
-var Mongo = require("../shared/DB");
+var Mongo = require("../shared/db");
 
 var log = new Utils.Log("sandustry.web.pages.search", "./sandustry.web.main.txt", true);
 
