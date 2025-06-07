@@ -32,6 +32,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
 	<script>
 		var discordUser = JSON.parse(localStorage.getItem("discordUser"));
+
 		if (discordUser) {
 			console.log("Discord User:", discordUser);
 			var headerContainer = document.getElementById("headerContainer");
@@ -105,8 +106,11 @@
 
 			return JSON.stringify(query);
 		};
+
 		var modList = document.getElementById("modList");
+
 		globalThis.pageGet = 1;
+
 		modList.addEventListener("scroll", () => {
 			var isAtBottom = modList.scrollHeight - modList.scrollTop === modList.clientHeight;
 			if (isAtBottom) {
@@ -190,6 +194,7 @@
 				modList.innerHTML = `<div class="alert alert-danger">Error performing search. Please try again.</div>`;
 			}
 		};
+
 		document.addEventListener("DOMContentLoaded", async () => {
 			if (globalThis.Searching === true) {
 				return;
@@ -234,6 +239,7 @@
 				modList.innerHTML = `<div class="alert alert-danger">Error loading mods. Please refresh the page to try again.</div>`;
 			}
 		});
+
 		globalThis.DownloadMod = async function (modID) {
 			var mod = globalThis.Mods[modID];
 			var response = await fetch(`/api/mods?modid=${mod.modID}&option=download`);
@@ -247,6 +253,7 @@
 			link.click();
 			document.body.removeChild(link);
 		};
+
 		globalThis.UpdateModDisplayActions = async function (modID) {
 			var mod = globalThis.Mods[modID];
 			var modDisplayActions = document.getElementById("modDisplayActions");
@@ -258,6 +265,7 @@
 <option selected>Change Version</option>
 </select>`;
 		};
+
 		globalThis.DisplayMod = async function (modID) {
 			var mod = globalThis.Mods[modID];
 			var modDisplay = document.getElementById("modDisplay");
@@ -296,7 +304,9 @@
 				await globalThis.DisplayModApi(globalThis.ModCache[result.mod.modID]);
 			}
 		};
+
 		globalThis.ModCache = {};
+
 		globalThis.DisplayModApi = async function (mod) {
 			document.getElementById("modDisplayModName").innerHTML = `${mod.modData.name}<a> </a><span class="badge text-bg-info">${mod.modData.version}</span><a> </a><span class="badge text-bg-warning">${mod.modData.author}</span>`;
 			document.getElementById("modDisplayshortDescription").innerHTML = `${mod.modData.shortDescription}`;
@@ -309,6 +319,7 @@
 			console.log("Response:", result);
 			await globalThis.UpdateVersionsList(mod.modID, result.versions);
 		};
+
 		globalThis.GetModVersion = async function (modID, version) {
 			var response = await fetch(`/api/mods?modid=${modID}&option=info&version=${version}`);
 			var result = await response.json();
@@ -316,6 +327,7 @@
 			globalThis.ModCache[result.mod.modID] = result.mod;
 			await globalThis.DisplayModApi(globalThis.ModCache[result.mod.modID]);
 		};
+
 		globalThis.UpdateVersionsList = async function (modID, versions) {
 			var versionSelection = document.getElementById("versionSelection");
 			console.log("Versions: " + JSON.stringify(versions));
@@ -326,6 +338,7 @@
 				versionSelection.appendChild(versionOption);
 			});
 		};
+
 		function UpdateModList(onPage = 1) {
 			var modList = document.getElementById("modList");
 			var modItems = "";

@@ -117,6 +117,7 @@ globalThis.Config = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf-8"));
  * @memberof module:web
  */
 globalThis.Templates = { filename: "content" };
+
 /**
  * Global object to store all dynamically loaded web pages.
  * @type {Object}
@@ -161,6 +162,7 @@ var LoadPages = function () {
 	});
 	log.info("pages loaded");
 };
+
 /**
  * Global array to store all loaded timer tasks.
  * @type {Array}
@@ -267,6 +269,7 @@ LoadPages();
 LoadTimers();
 lastRepoHash = computeRepoHash();
 log.info(lastRepoHash);
+
 var WebRequestHandler = function (req, res) {
 	var url = req.url;
 	var urlSplit = url.split("?");
@@ -279,6 +282,7 @@ var WebRequestHandler = function (req, res) {
 		res.end("404");
 	}
 };
+
 setTimeout(performUpdate, 10000);
 
 if (globalThis.Config.discord.runbot) {

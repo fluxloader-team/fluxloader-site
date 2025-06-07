@@ -67,22 +67,16 @@ module.exports = {
 				switch (uploadResult) {
 					case "Invalid payload":
 						throw new Error('Invalid payload. "filename" and "filedata" are required.');
-						break;
 					case "Invalid discordInfo":
 						throw new Error('Invalid discordInfo. "id" and "username" are required.');
-						break;
 					case "Discord user validation failed":
 						throw new Error("Discord user validation failed. The provided user cannot be verified.");
-						break;
 					case "Missing modID in modinfo.json. A unique modID is required.":
 						throw new Error("Missing modID in modinfo.json. A unique modID is required.");
-						break;
 					case "A mod with this modID already exists and belongs to another user. Please use a different modID.":
 						throw new Error("A mod with this modID already exists and belongs to another user. Please use a different modID.");
-						break;
 					case "User is banned":
 						throw new Error("Your account has been banned from uploading mods.");
-						break;
 					default:
 						// Check if uploadResult is a string (likely an error message)
 						if (typeof uploadResult === "string" && uploadResult !== filename) {

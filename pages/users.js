@@ -34,6 +34,7 @@ module.exports = {
 		// Only allow POST requests with proper authentication
 		if (req.method === "POST") {
 			var body = "";
+
 			req.on("data", (chunk) => {
 				body += chunk;
 			});
