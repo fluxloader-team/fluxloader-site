@@ -8,14 +8,15 @@ globalThis.BaseStyle = `
 		padding: 0;
         overflow: hidden;
 	}
-	.pagecontainer {
+	.pageContainer {
 		height: 100vh;
 		width: 100vw;
 		display: flex;
 		flex-direction: column;
 	}
 	.headerContainer {
-		background-color: #222222;
+		background-color: var(--color-bg-dark2);
+		padding: 20px;
 		color: white;
 		display: flex;
 		justify-content: space-between;
@@ -47,11 +48,11 @@ globalThis.UpdatePageStyle(`
     .adminpageColumn{
         display: flex;
         flex-direction: column;
-        border: 10px solid #222222;
         overflow-x: hidden;
         overflow-y: scroll;
         scrollbar-width: none;
         height: calc(100% );
+		background-color: var(--color-bg-light);
     }`);
 
 globalThis.adminPageData = document.getElementById("adminPageData");

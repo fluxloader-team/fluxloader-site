@@ -7,7 +7,7 @@ var Utils = require("./../utils");
 var fs = require("fs");
 var path = require("path");
 var https = require("https");
-var verifyDiscordUser = require("./../shared/verifydiscorduser");
+var { verifyDiscordUser } = require("./../shared/verifydiscorduser");
 
 const log = new Utils.Log("sandustry.web.pages.config", "./sandustry.web.main.txt", true);
 

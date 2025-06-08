@@ -5,7 +5,7 @@
 
 var Utils = require("./../utils");
 var Mongo = require("./../shared/db");
-var verifyDiscordUser = require("./../shared/verifydiscorduser");
+var { verifyDiscordUser } = require("./../shared/verifydiscorduser");
 
 const log = new Utils.Log("sandustry.web.pages.actions", "./sandustry.web.main.txt", true);
 
