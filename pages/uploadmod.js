@@ -40,12 +40,8 @@ module.exports = {
 			try {
 				var payload = await JSON.parse(body);
 				var { filename } = payload;
-				payload.discordInfo = {
-					id: "randomdiscordid",
-					username: "randomdiscordusername",
-				};
 
-				var uploadResult = await Mongo.GetMod.Data.Upload(payload, true);
+				var uploadResult = await Mongo.GetMod.Data.Upload(payload);
 
 				// Check if this is an update to an existing mod
 				if (typeof uploadResult === "string" && uploadResult.startsWith("UPDATE_EXISTING_MOD:")) {

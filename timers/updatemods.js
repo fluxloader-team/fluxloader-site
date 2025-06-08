@@ -52,6 +52,14 @@ module.exports = {
 				//log.info(`${JSON.stringify(modDataMap)}`)
 				for (var mod of Mods) {
 					var modData = modDataMap[mod.modID];
+					if (!modData || !modData.version) {
+						log.error(`No mod version found in modData: ${modData}`);
+						continue;
+					}
+					if (!mod.modData || !mod.modData.version) {
+						log.error(`No mod version found in mod.modData: ${mod.modData}`);
+						continue;
+					}
 
 					if (mod.modData.version !== modData.version) {
 						mod.modData.version = modData.version;

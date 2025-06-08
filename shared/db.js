@@ -479,7 +479,7 @@ var GetMod = {
 			return endresult;
 		},
 	},
-	
+
 	/**
 	 * Functions related to Mod Data.
 	 * @namespace Data
@@ -571,6 +571,7 @@ var GetMod = {
 			});
 			return endresult;
 		},
+
 		/**
 		 * Finds unverified mods with optional limit and projection.
 		 *
@@ -590,6 +591,7 @@ var GetMod = {
 			});
 			return endresult;
 		},
+
 		/**
 		 * Retrieves the data of a specific mod.
 		 * @async
@@ -750,6 +752,7 @@ var GetMod = {
 			});
 			return endresult;
 		},
+
 		/**
 		 * Updates a mod entry in the database.
 		 *
@@ -780,11 +783,12 @@ var GetMod = {
 			var endresult = await handleClient(async (client) => {
 				var db = client.db("SandustryMods");
 				var modsCollection = db.collection("Mods");
-				var restult = await modsCollection.updateOne({ modID: modID }, { $set: entry });
-				return restult;
+				var result = await modsCollection.updateOne({ modID: modID }, { $set: entry });
+				return result;
 			});
 			return endresult;
 		},
+
 		/**
 		 * Fetches a random mod from the database.
 		 *
