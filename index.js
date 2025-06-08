@@ -203,8 +203,18 @@ function computeRepoHash(directory = "./") {
 			var fileStat = fs.statSync(fullPath);
 
 			if (fileStat.isDirectory()) {
+				// Ignore node_modules and .git directories
+				if (file === "node_modules" || file === ".git") {
+					return;
+				}
+
 				hashDirectory(fullPath);
 			} else if (fileStat.isFile()) {
+				// Ignore .txt
+				if (file.endsWith(".txt")) {
+					return;
+				}
+
 				folderHash.update(fs.readFileSync(fullPath));
 			}
 		});
@@ -213,7 +223,6 @@ function computeRepoHash(directory = "./") {
 	hashDirectory(directory);
 	return folderHash.digest("hex");
 }
-
 /**
  * Performs a `git pull` to update the repository, then reloads templates, pages, and timers if changes are detected.
  *

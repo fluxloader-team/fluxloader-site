@@ -65,8 +65,18 @@ function computeRepoHash(directory = "./") {
 			var fileStat = fs.statSync(fullPath);
 
 			if (fileStat.isDirectory()) {
+				// Ignore node_modules and .git directories
+				if (file === "node_modules" || file === ".git") {
+					return;
+				}
+
 				hashDirectory(fullPath);
 			} else if (fileStat.isFile()) {
+				// Ignore .txt
+				if (file.endsWith(".txt")) {
+					return;
+				}
+
 				folderHash.update(fs.readFileSync(fullPath));
 			}
 		});
