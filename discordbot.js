@@ -234,7 +234,7 @@ module.exports = {
 				reloadEvents();
 				reloadcommands();
 			} else {
-				log.info("No changes detected.");
+				log.info("No changes detected (discordbot.js).");
 			}
 			setTimeout(timers, 10000);
 		}

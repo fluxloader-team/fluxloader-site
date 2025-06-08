@@ -240,7 +240,7 @@ async function performUpdate() {
 			loadPages();
 			loadTimers();
 		} else {
-			log.info("No changes detected.");
+			log.info("No changes detected (index.js).");
 		}
 	};
 	if (globalThis.config.git.pull) {
