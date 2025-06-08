@@ -8,8 +8,9 @@
 var JSZip = require("jszip");
 var Utils = require("../utils");
 var crypto = require("crypto");
-var log = new Utils.Log("sandustry.web.pages.generateMod", "./sandustry.web.main.txt", true);
 var Mongo = require("../shared/db");
+
+var  log = new Utils.Log("sandustry.web.pages.generatemod", "./sandustry.web.main.txt", true);
 
 /**
  * @namespace generateMod

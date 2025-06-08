@@ -658,9 +658,6 @@ var GetMod = {
 					}
 				}
 
-				console.log("db.js");
-				console.log(filedata);
-
 				var zipBuffer = Buffer.from(filedata, "base64");
 				var compressedZipBuffer = await compress(zipBuffer, 10);
 
@@ -678,6 +675,7 @@ var GetMod = {
 				var modInfoFile = await content.file(modInfoPath);
 				var modInfoContent = await modInfoFile.async("text");
 				var modInfo = await JSON.parse(modInfoContent);
+
 				Object.keys(modInfo).forEach((key) => {
 					if (typeof modInfo[key] === "string") {
 						modInfo[key] = sanitizeHTML(modInfo[key]);
@@ -705,9 +703,13 @@ var GetMod = {
 					if (existingMod.Author.discordID !== discordInfo.id) {
 						return "A mod with this modID already exists and belongs to another user. Please use a different modID.";
 					} else {
+						if (existingMod.modData.version === modData.version) {
+							return "Mod with this modID and version already exists. Please update the version number.";
+						}
 						return "UPDATE_EXISTING_MOD:" + modID;
 					}
 				}
+
 				var modEntry = existingMod;
 				var uploadTime = new Date();
 
