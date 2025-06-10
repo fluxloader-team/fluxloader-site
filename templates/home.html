@@ -301,7 +301,7 @@
 				var response = await fetch(`/api/mods?modid=${mod.modID}&option=info`);
 				var result = await response.json();
 				console.log("Response:", result.mod);
-				globalThis.ModCache[result.mod.modID] = result.mod.modID;
+				globalThis.ModCache[result.mod.modID] = result.mod;
 				await globalThis.DisplayModApi(globalThis.ModCache[result.mod.modID]);
 			}
 		};
