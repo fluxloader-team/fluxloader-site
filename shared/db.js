@@ -284,6 +284,7 @@ var GetMod = {
 			});
 			return endresult;
 		},
+
 		/**
 		 * Retrieves the oldest version of a mod.
 		 *
@@ -309,6 +310,7 @@ var GetMod = {
 			});
 			return endresult;
 		},
+
 		/**
 		 * Retrieves the data of a specific mod version.
 		 * @async
@@ -336,6 +338,7 @@ var GetMod = {
 			});
 			return endresult;
 		},
+
 		/**
 		 * Retrieves the latest version of multiple mods by their IDs.
 		 *
@@ -387,6 +390,7 @@ var GetMod = {
 			});
 			return endresult;
 		},
+
 		/**
 		 * Retrieves a list of version numbers for a specific `modID`.
 		 * @async
@@ -440,6 +444,7 @@ var GetMod = {
 
 			return endresult;
 		},
+
 		/**
 		 * Deletes a specific version of a mod from the database.
 		 * If the mod has only one remaining version and that version is deleted, the mod itself is also removed from the `Mods` collection.
@@ -612,6 +617,7 @@ var GetMod = {
 			});
 			return endresult;
 		},
+
 		/**
 		 * Uploads a mod to the db and automatically adds versions to existing mods if a mod entry exists
 		 * @async
@@ -682,10 +688,65 @@ var GetMod = {
 					}
 				});
 
-				// Check if modID is defined in modinfo.json
-				if (!modInfo.modID) {
-					return "Missing modID in modinfo.json. A unique modID is required.";
-				}
+				// HARDCODED FOR NOW
+				const modInfoSchema = {
+					modID: {
+						type: "string",
+						pattern: "^[a-zA-Z0-9_.-]+$",
+					},
+					name: {
+						type: "string",
+					},
+					version: {
+						type: "semver",
+					},
+					author: {
+						type: "string",
+					},
+					fluxloaderVersion: {
+						type: "semver",
+						default: "",
+					},
+					shortDescription: {
+						type: "string",
+						default: "",
+					},
+					description: {
+						type: "string",
+						default: "",
+					},
+					dependencies: {
+						type: "object",
+						default: {},
+					},
+					tags: {
+						type: "array",
+						default: [],
+					},
+					electronEntrypoint: {
+						type: "string",
+						default: "",
+					},
+					gameEntrypoint: {
+						type: "string",
+						default: "",
+					},
+					workerEntrypoint: {
+						type: "string",
+						default: "",
+					},
+					scriptPath: {
+						type: "string",
+						default: "",
+					},
+					configSchema: {
+						type: "object",
+						default: {},
+					},
+				};
+
+				const res = Utils.SchemaValidation.validate(modInfo, modInfoSchema);
+				if (!res.success) return `modinfo.json invalid: ${res.source} : ${res.error}`;
 
 				var modData = {
 					...modInfo,

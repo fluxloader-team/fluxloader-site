@@ -40,6 +40,9 @@ module.exports = {
 		req.on("data", (chunk) => (body += chunk.toString()));
 
 		const checkError = (uploadResult) => {
+			if (uploadResult.includes("modinfo.json invalid:")) {
+				throw new Error(uploadResult);
+			}
 			switch (uploadResult) {
 				// Error message case
 				case "Invalid payload":

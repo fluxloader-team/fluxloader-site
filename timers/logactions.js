@@ -30,7 +30,9 @@ module.exports = {
 		for (var action of unloggedActions) {
 			action.logged = true;
 			await Mongo.GetAction.Update(action);
-			await globalThis.discord.client.channels.cache.get(globalThis.config.discord.serverActionsChannel).send(`Site Action: ${action.action} by ${action.discordID}`);
+			if (globalThis.discord) {
+				await globalThis.discord.client.channels.cache.get(globalThis.config.discord.serverActionsChannel).send(`Site Action: ${action.action} by ${action.discordID}`);
+			}
 		}
 	},
 };
