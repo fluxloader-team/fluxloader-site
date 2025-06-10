@@ -233,12 +233,12 @@ class ActionEntry {
  * @param {function(MongoClient): Promise<any>} [runClient] - Async function to run with the connected client.
  * @returns {Promise<any>} The result of the operation.
  */
-async function handleClient(runClient = async function (client = new MongoClient(mongoUri)) {}) {
+async function handleClient(runClient) {
 	var client = new MongoClient(mongoUri);
 	var result = null;
 	try {
 		await client.connect();
-		result = await runClient(client);
+		if (runClient) result = await runClient(client);
 		await client.close();
 		return result;
 	} catch (err) {
@@ -279,8 +279,8 @@ var GetMod = {
 			var endresult = await handleClient(async (client) => {
 				var db = await client.db("SandustryMods");
 				var modVersionsCollection = await db.collection("ModVersions");
-				var restult = await modVersionsCollection.find({ modID: modID }).sort(sort).project(project);
-				return restult.toArray();
+				var result = await modVersionsCollection.find({ modID: modID }).sort(sort).project(project);
+				return result.toArray();
 			});
 			return endresult;
 		},
@@ -404,8 +404,8 @@ var GetMod = {
 			var endresult = await handleClient(async (client) => {
 				var db = await client.db("SandustryMods");
 				var modVersionsCollection = await db.collection("ModVersions");
-				var restult = await modVersionsCollection.find({ modID: modID }, { projection: { "modData.version": 1, _id: 0 } }).sort(sort);
-				return restult.toArray();
+				var result = await modVersionsCollection.find({ modID: modID }, { projection: { "modData.version": 1, _id: 0 } }).sort(sort);
+				return result.toArray();
 			});
 			return endresult.map((entry) => entry.modData.version || "Unknown");
 		},
@@ -474,12 +474,12 @@ var GetMod = {
 				var db = client.db("SandustryMods");
 				var modVersionsCollection = await db.collection("ModVersions");
 				var Versions = await modVersionsCollection.find({ modID: modID });
-				var restult = await modVersionsCollection.deleteOne({ modID: modID, "modData.version": version });
+				var result = await modVersionsCollection.deleteOne({ modID: modID, "modData.version": version });
 				if ((await Versions.toArray()).length === 1) {
 					var modsCollection = db.collection("Mods");
 					await modsCollection.deleteOne({ modID: modID });
 				}
-				return restult;
+				return result;
 			});
 			return endresult;
 		},
@@ -611,8 +611,10 @@ var GetMod = {
 			var endresult = await handleClient(async (client) => {
 				var db = client.db("SandustryMods");
 				var modsCollection = db.collection("Mods");
-				var restult = await modsCollection.find({ modID: modID }).sort(sort).project(project).limit(1);
-				var returnresult = await await restult.toArray()[0];
+				log.info(`Searching for modID: ${modID} with project: ${JSON.stringify(project)}`);
+				var result = await modsCollection.find({ modID: modID }).sort(sort).project(project).limit(1);
+				const res = await result.toArray();
+				var returnresult = await res[0];
 				return returnresult;
 			});
 			return endresult;
@@ -925,10 +927,10 @@ var GetMod = {
 		var endresult = await handleClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var modsCollection = db.collection("Mods");
-			var restult = await modsCollection.deleteOne({ modID: modID });
+			var result = await modsCollection.deleteOne({ modID: modID });
 			var modVersionsCollection = await db.collection("ModVersions");
-			var restult2 = await modVersionsCollection.deleteMany({ modID: modID });
-			return { modDB: restult, VersionsDB: restult2 };
+			var result2 = await modVersionsCollection.deleteMany({ modID: modID });
+			return { modDB: result, VersionsDB: result2 };
 		});
 		return endresult;
 	},
@@ -966,8 +968,8 @@ var GetUser = {
 		var endresult = await handleClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var userCollection = db.collection("Users");
-			var restult = await userCollection.findOne({ discordID: discordID });
-			return restult;
+			var result = await userCollection.findOne({ discordID: discordID });
+			return result;
 		});
 		return endresult;
 	},
@@ -1009,8 +1011,8 @@ var GetUser = {
 				var result = userExists[0];
 				return result;
 			} else {
-				var restult = await userCollection.insertOne(userData);
-				return restult;
+				var result = await userCollection.insertOne(userData);
+				return result;
 			}
 		});
 		return endresult;
@@ -1045,8 +1047,8 @@ var GetUser = {
 		var endresult = await handleClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var userCollection = db.collection("Users");
-			var restult = await userCollection.updateOne({ discordID: discordID }, { $set: { banned: true } });
-			return restult;
+			var result = await userCollection.updateOne({ discordID: discordID }, { $set: { banned: true } });
+			return result;
 		});
 		return endresult;
 	},
@@ -1080,8 +1082,8 @@ var GetUser = {
 		var endresult = await handleClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var userCollection = db.collection("Users");
-			var restult = await userCollection.updateOne({ discordID: discordID }, { $set: { banned: false } });
-			return restult;
+			var result = await userCollection.updateOne({ discordID: discordID }, { $set: { banned: false } });
+			return result;
 		});
 		return endresult;
 	},
@@ -1124,8 +1126,8 @@ var GetUser = {
 			var db = client.db("SandustryMods");
 			var userCollection = db.collection("Users");
 			var operation = add ? { $push: { permissions: permission } } : { $pull: { permissions: permission } };
-			var restult = await userCollection.updateOne({ discordID: discordID }, operation);
-			return restult;
+			var result = await userCollection.updateOne({ discordID: discordID }, operation);
+			return result;
 		});
 		return endresult;
 	},
@@ -1158,8 +1160,8 @@ var GetUser = {
 						$or: [{ discordID: { $regex: search, $options: "i" } }, { discordUsername: { $regex: search, $options: "i" } }],
 				  }
 				: {};
-			var restult = await userCollection.find(query).limit(limit).toArray();
-			return restult;
+			var result = await userCollection.find(query).limit(limit).toArray();
+			return result;
 		});
 		return endresult;
 	},
@@ -1191,8 +1193,8 @@ var GetUser = {
 		var endresult = await handleClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var userCollection = db.collection("Users");
-			var restult = await userCollection.find(query).limit(limit).toArray();
-			return restult;
+			var result = await userCollection.find(query).limit(limit).toArray();
+			return result;
 		});
 		return endresult;
 	},
@@ -1223,8 +1225,8 @@ var GetAction = {
 		var endresult = await handleClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var actionCollection = db.collection("Actions");
-			var restult = await actionCollection.insertOne(action);
-			return restult;
+			var result = await actionCollection.insertOne(action);
+			return result;
 		});
 		return endresult;
 	},
@@ -1259,13 +1261,13 @@ var GetAction = {
 		var endresult = await handleClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var actionCollection = db.collection("Actions");
-			var restult = await actionCollection
+			var result = await actionCollection
 				.find(query)
 				.skip((page.number - 1) * page.size)
 				.limit(page.size)
 				.sort({ time: -1 })
 				.toArray();
-			return restult;
+			return result;
 		});
 		return endresult;
 	},
@@ -1293,8 +1295,8 @@ var GetAction = {
 		var endresult = await handleClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var actionCollection = db.collection("Actions");
-			var restult = await actionCollection.updateOne({ _id: action._id }, { $set: action });
-			return restult;
+			var result = await actionCollection.updateOne({ _id: action._id }, { $set: action });
+			return result;
 		});
 		return endresult;
 	},
