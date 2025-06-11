@@ -333,7 +333,6 @@ var GetMod = {
 					result = modVersionsCollection.find({ modID: modID, "modData.version": version }).sort(sort).project(project);
 				}
 				var returnresult = await result.toArray();
-				console.log(returnresult);
 				return returnresult[0];
 			});
 			return endresult;

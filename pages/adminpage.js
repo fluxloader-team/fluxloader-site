@@ -1,12 +1,12 @@
 /**
- * @file admin.js
- * @description Loads the admin api
+ * @file adminpage.js
+ * @description Returns the final admin page if permitted
  */
 
-var Utils = require("./../utils");
+var Utils = require("../utils");
 const https = require("https");
-var Mongo = require("./../shared/db");
-var { verifyDiscordUser } = require("./../shared/verifydiscorduser");
+var Mongo = require("../shared/db");
+var { verifyDiscordUser } = require("../shared/verifydiscorduser");
 
 var log = new Utils.Log("sandustry.web.pages.admin", "./sandustry.web.main.txt", true);
 
@@ -55,14 +55,13 @@ module.exports = {
 							banned: false,
 						});
 					}
-					console.log(verifyDiscordUser);
 					var isValidUser = await verifyDiscordUser(discordUserData.id, discordUserData.tokenResponse.access_token);
 					if (!isValidUser) {
 						res.end(JSON.stringify({ error: "Invalid discord user" }));
 						return;
 					}
 					if (UserData.permissions.includes("admin")) {
-						res.end(JSON.stringify({ data: globalThis.templates["adminpage.html"], run: globalThis.templates["admin.js"] }));
+						res.end(JSON.stringify({ data: globalThis.templates["adminpage.html"], run: globalThis.templates["adminpage.js"] }));
 						return;
 					} else {
 						res.end(JSON.stringify({ error: "User does not have admin permissions" }));

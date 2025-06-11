@@ -258,34 +258,35 @@
 		globalThis.UpdateModDisplayActions = async function (modID) {
 			var mod = globalThis.Mods[modID];
 			var modDisplayActions = document.getElementById("modDisplayActions");
-			modDisplayActions.innerHTML = `<div class="btn-group" role="group" style="padding-left: 15px;margin-top:5px; height: 40px;">
-<button class="btn btn-primary" onclick='globalThis.DownloadMod("${modID}")'>Download</button>
-<button class="btn btn-success" onclick="navigator.clipboard.writeText('${modID}')">Copy ID</button>
-</div>
-<select class="form-select" id="versionSelection" style="padding-left: 15px;margin-top:5px; height: 40px;width: 230px" onchange='globalThis.GetModVersion("${modID}",this.value)'>
-<option selected>Change Version</option>
-</select>`;
+			modDisplayActions.innerHTML = `
+				<div class="btn-group" role="group" style="padding-left: 15px;margin-top:5px; height: 40px;">
+					<button class="btn btn-primary" onclick='globalThis.DownloadMod("${modID}")'>Download</button>
+					<button class="btn btn-success" onclick="navigator.clipboard.writeText('${modID}')">Copy ID</button>
+				</div>
+				<select class="form-select" id="versionSelection" style="padding-left: 15px;margin-top:5px; height: 40px;width: 230px" onchange='globalThis.GetModVersion("${modID}",this.value)'>
+					<option selected>Change Version</option>
+				</select>`;
 		};
 
 		globalThis.DisplayMod = async function (modID) {
 			var mod = globalThis.Mods[modID];
 			var modDisplay = document.getElementById("modDisplay");
-			modDisplay.innerHTML = `<div class="displayInner">
-<h3 id="modDisplayModName">${mod.modData.name}<a> </a><span class="badge text-bg-info">${mod.modData.version}</span><a> </a><span class="badge text-bg-warning">${mod.modData.author}</span></h3>
-<h6 id="modDisplayshortDescription">${mod.modData.shortDescription}</h6>
-<h6 id="modDisplayTags"><span class="badge text-bg-primary">${mod.modData.tags.join('</span><a> </a><span class="badge text-bg-primary">')}</span></h6>
-<br>
-<h5>Dependencies</h5>
-<div id="dependencies">
-
-</div>
-<br>
-<h5>Mod Readme file</h5>
-<hr>
-<p id="modDisplayDescription">
-</p>
-<h6></h6>
-</div>`;
+			modDisplay.innerHTML = `
+				<div class="displayInner">
+					<h3 id="modDisplayModName">${mod.modData.name}
+						<span class="badge text-bg-info">${mod.modData.version}</span><a> </a><span class="badge text-bg-warning">${mod.modData.author}</span>
+					</h3>
+					<h6 id="modDisplayshortDescription">${mod.modData.shortDescription}</h6>
+					<h6 id="modDisplayTags"><span class="badge text-bg-primary">${mod.modData.tags.join('</span><a> </a><span class="badge text-bg-primary">')}</span></h6>
+					<br>
+					<h5>Dependencies</h5>
+					<div id="dependencies"></div>
+					<br>
+					<h5>Mod Readme file</h5>
+					<hr>
+					<p id="modDisplayDescription"></p>
+					<h6></h6>
+				</div>`;
 			var dependenciesList = document.getElementById("dependencies");
 			var dependencies = "";
 			if (mod.modData.dependencies) {

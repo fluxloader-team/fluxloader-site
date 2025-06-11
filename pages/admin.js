@@ -1,6 +1,6 @@
 /**
  * @file admin.js
- * @description Loads the admin page without any data
+ * @description Loads the first admin without any data
  */
 
 var ejs = require("ejs");
