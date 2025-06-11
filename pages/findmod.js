@@ -446,7 +446,7 @@ module.exports = {
 							var decompressedBuffer = await decompress(compressedBuffer);
 							res.writeHead(200, {
 								"Content-Type": "application/zip",
-								"Content-Disposition": `attachment; filename=${modData.modData.name}.zip`,
+								"Content-Disposition": `attachment; filename=${modData.modID}.zip`,
 							});
 							res.end(decompressedBuffer);
 						} catch (error) {
