@@ -696,7 +696,7 @@ var GetMod = {
 				log.info(`Found ${fileNames.length} total files in the zip: ${fileNames.join(", ")}`);
 				log.info(`Found ${topLevelDirs.size} top-level directories: ${Array.from(topLevelDirs).join(", ")}`);
 
-				// If all files are in 1 common directory then make a new zip with them all moved up 1 level 
+				// If all files are in 1 common directory then make a new zip with them all moved up 1 level
 				if (!someWithoutDirs && topLevelDirs.size == 1) {
 					var newContent = new JSZip();
 					for ([path, file] of Object.entries(content.files)) {
@@ -773,6 +773,10 @@ var GetMod = {
 					tags: {
 						type: "array",
 						default: [],
+						elements: {
+							type: "string",
+							pattern: "^[a-z]+$",
+						},
 					},
 					electronEntrypoint: {
 						type: "string",
