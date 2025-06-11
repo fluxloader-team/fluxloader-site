@@ -227,6 +227,17 @@ class ActionEntry {
 }
 
 /**
+ * A singleton instance of the MongoDB client used for database operations.
+ *
+ * This variable ensures that only one MongoClient connection is maintained globally
+ * throughout the application's lifecycle, preventing redundant connections.
+ *
+ * @type {MongoClient|null}
+ * @private
+ */
+var globalClient = null;
+
+/**
  * Handles operations using a MongoDB client.
  * @async
  * @function
@@ -234,17 +245,17 @@ class ActionEntry {
  * @returns {Promise<any>} The result of the operation.
  */
 async function handleClient(runClient) {
-	var client = new MongoClient(mongoUri);
-	var result = null;
+	if (!globalClient) {
+		globalClient = new MongoClient(mongoUri);
+		await globalClient.connect();
+	}
 	try {
-		await client.connect();
-		if (runClient) result = await runClient(client);
-		await client.close();
-		return result;
+		if (runClient) {
+			return await runClient(globalClient);
+		}
 	} catch (err) {
 		log.info(`${err}`);
-	} finally {
-		//await client.close();
+		throw err;
 	}
 }
 
