@@ -611,10 +611,9 @@ var GetMod = {
 				var db = client.db("SandustryMods");
 				var modsCollection = db.collection("Mods");
 				log.info(`Searching for modID: ${modID} with project: ${JSON.stringify(project)}`);
-				var result = await modsCollection.find({ modID: modID }).sort(sort).project(project).limit(1);
+				var result = modsCollection.find({ modID: modID }).sort(sort).project(project).limit(1);
 				const res = await result.toArray();
-				var returnresult = await res[0];
-				return returnresult;
+				return res[0];
 			});
 			return endresult;
 		},
