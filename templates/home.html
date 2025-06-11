@@ -249,7 +249,7 @@
 			var link = document.createElement("a");
 			link.href = url;
 			link.style.display = "none";
-			link.setAttribute("download", `${mod.modData.name}.zip`);
+			link.setAttribute("download", `${mod.modData.modID}.zip`);
 			document.body.appendChild(link);
 			link.click();
 			document.body.removeChild(link);

@@ -835,7 +835,7 @@ globalThis.DownloadMod = async function (modID) {
 			link.style.display = "none";
 
 			// Use mod name if available, otherwise use mod ID
-			var fileName = mod.modData && mod.modData.name ? `${mod.modData.name}.zip` : `mod-${mod.modID}.zip`;
+			var fileName = `${mod.modID}.zip`;
 			link.setAttribute("download", fileName);
 
 			document.body.appendChild(link);

@@ -633,7 +633,6 @@ var GetMod = {
 				var db = client.db("SandustryMods");
 				var modsCollection = db.collection("Mods");
 				var versionsCollection = db.collection("ModVersions");
-				var modID = crypto.randomUUID();
 				var { filename, filedata, discordInfo } = payload;
 				if (!filename || !filedata) {
 					return "Invalid payload";
@@ -665,30 +664,71 @@ var GetMod = {
 					}
 				}
 
+				// Read as base64, read contents with JSZip, read files from JSZip
 				var zipBuffer = Buffer.from(filedata, "base64");
-				var compressedZipBuffer = await compress(zipBuffer, 10);
-
 				var content = await JSZip.loadAsync(zipBuffer);
 				var fileNames = Object.keys(content.files);
 
+				// Check if all of the files are nested 1 level inside a folder
+				let topLevelDirs = new Set();
+				let someWithoutDirs = false;
+				for (const path of fileNames) {
+					let standardized = path.replace(/\\/g, "/");
+					let split = standardized.split("/");
+					if (split.length > 1) {
+						topLevelDirs.add(split[0]);
+					} else {
+						someWithoutDirs = true;
+						break;
+					}
+				}
+
+				log.info(`Found ${fileNames.length} total files in the zip: ${fileNames.join(", ")}`);
+				log.info(`Found ${topLevelDirs.size} top-level directories: ${Array.from(topLevelDirs).join(", ")}`);
+
+				// If all files are in 1 common directory then make a new zip with them all moved up 1 level 
+				if (!someWithoutDirs && topLevelDirs.size == 1) {
+					var newContent = new JSZip();
+					for ([path, file] of Object.entries(content.files)) {
+						let standardized = path.replace(/\\/g, "/");
+						let split = standardized.split("/");
+						let newPath = split.slice(1).join("/");
+						log.info(`Converting path ${path} to ${newPath}`);
+						newContent.file(newPath, file.async("nodebuffer"));
+					}
+
+					// Compress the new content
+					zipBuffer = await newContent.generateAsync({ type: "nodebuffer", compression: "DEFLATE" });
+					content = newContent;
+
+					// Update fileNames to reflect the new structure
+					fileNames = Object.keys(content.files);
+				}
+
+				// Overwrite the "description" field with the README.md if it exists
 				var readmePath = fileNames.find((path) => path.endsWith("README.md"));
 				var description = "";
 				if (readmePath) {
-					var readmeFile = await content.file(readmePath);
+					var readmeFile = content.file(readmePath);
 					description = await readmeFile.async("text");
 				}
 
+				// Read the modinfo.json file
 				var modInfoPath = fileNames.find((path) => path.endsWith("modinfo.json"));
-				var modInfoFile = await content.file(modInfoPath);
+				if (!modInfoPath) return `modinfo.json invalid: doesn't exist`;
+				var modInfoFile = content.file(modInfoPath);
 				var modInfoContent = await modInfoFile.async("text");
 				var modInfo = await JSON.parse(modInfoContent);
 
+				// Sanitize modinfo.json properties
+				// I'm unsure about this, you may have HTML in your "description" field
 				Object.keys(modInfo).forEach((key) => {
 					if (typeof modInfo[key] === "string") {
 						modInfo[key] = sanitizeHTML(modInfo[key]);
 					}
 				});
 
+				// Validate the modinfo.json against the schema
 				// HARDCODED FOR NOW
 				const modInfoSchema = {
 					modID: {
@@ -745,20 +785,18 @@ var GetMod = {
 						default: {},
 					},
 				};
-
 				const res = Utils.SchemaValidation.validate(modInfo, modInfoSchema);
 				if (!res.success) return `modinfo.json invalid: ${res.source} : ${res.error}`;
 
+				// Produce the final modData row with the modified description
+				const modID = modInfo.modID;
 				var modData = {
 					...modInfo,
 					description: description,
 				};
 
-				// Use the modID from modinfo.json instead of a random one
-				modID = modInfo.modID;
-
 				// Check if a mod with this ID exists
-				var existingMod = await modsCollection.findOne({ modID: modID });
+				var existingMod = await modsCollection.findOne({ modID });
 
 				// If mod exists, check ownership (unless bypassUpdateCheck is true)
 				if (existingMod && !bypassUpdateCheck) {
@@ -772,10 +810,9 @@ var GetMod = {
 					}
 				}
 
+				// Create a new mod entry
 				var modEntry = existingMod;
 				var uploadTime = new Date();
-
-				// Create a new mod entry
 				if (modEntry == null) {
 					modEntry = {
 						modID: modID,
@@ -798,6 +835,9 @@ var GetMod = {
 					await modsCollection.replaceOne({ modID: modID }, modEntry);
 				}
 
+				// Compress it back down for use in the version entry
+				var compressedZipBuffer = await compress(zipBuffer, 10);
+
 				// Create a new mod version entry
 				var modVersionEntry = {
 					modID: modEntry.modID,
@@ -814,6 +854,7 @@ var GetMod = {
 				GetAction.Add(action);
 				return modID;
 			});
+
 			return endresult;
 		},
 
