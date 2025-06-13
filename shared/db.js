@@ -1,13 +1,17 @@
 var { MongoClient } = require("mongodb");
 var Utils = require("../utils");
-const crypto = require("crypto");
 const https = require("https");
 const { compress } = require("@mongodb-js/zstd");
 var JSZip = require("jszip");
 const sanitizeHTML = require("sanitize-html");
+const fs = require("fs");
 
 var log = new Utils.Log("sandustry.shared.DB", "./sandustry.shared.txt", true);
 var mongoUri = globalThis.config.mongodb.uri;
+
+// Read in schema.mod-info.json - this is a requirement for db.js to work
+var modInfoSchema = fs.readFileSync("shared/schema.mod-info.json", "utf8");
+modInfoSchema = JSON.parse(modInfoSchema);
 
 /**
  * Represents an entry for a mod in the mod db.
@@ -740,65 +744,7 @@ var GetMod = {
 
 				// Validate the modinfo.json against the schema
 				// HARDCODED FOR NOW
-				const modInfoSchema = {
-					modID: {
-						type: "string",
-						pattern: "^[a-zA-Z0-9_.-]+$",
-					},
-					name: {
-						type: "string",
-					},
-					version: {
-						type: "semver",
-					},
-					author: {
-						type: "string",
-					},
-					fluxloaderVersion: {
-						type: "semver",
-						default: "",
-					},
-					shortDescription: {
-						type: "string",
-						default: "",
-					},
-					description: {
-						type: "string",
-						default: "",
-					},
-					dependencies: {
-						type: "object",
-						default: {},
-					},
-					tags: {
-						type: "array",
-						default: [],
-						elements: {
-							type: "string",
-							pattern: "^[a-z]+$",
-						},
-					},
-					electronEntrypoint: {
-						type: "string",
-						default: "",
-					},
-					gameEntrypoint: {
-						type: "string",
-						default: "",
-					},
-					workerEntrypoint: {
-						type: "string",
-						default: "",
-					},
-					scriptPath: {
-						type: "string",
-						default: "",
-					},
-					configSchema: {
-						type: "object",
-						default: {},
-					},
-				};
+
 				const res = Utils.SchemaValidation.validate(modInfo, modInfoSchema);
 				if (!res.success) return `modinfo.json invalid: ${res.source} : ${res.error}`;
 
