@@ -1,9 +1,12 @@
 <div class="pageContainer">
 	<div class="headerContainer" id="headerContainer">
 		<a class="btn btn-secondary headerButton" style="margin-left: 15px" href="/">Mod List</a>
-		<a href="/auth/discord" class="btn btn-primary" style="margin-right: 15px" id="discordLogin">
-			<img src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg" alt="discord Logo" style="width: 100px; height: 20px; margin-right: 5px" />
-		</a>
+		<div id="rightContainer">
+			<a class="btn btn-primary" href="https://git.rendezvous.dev/sandustry/modloader/-/releases/permalink/latest/"><i class="fa-solid fa-download"></i> Fluxloader</a>
+			<a href="/auth/discord" class="btn btn-primary" style="margin-right: 15px" id="discordLogin">
+				<img src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg" alt="discord Logo" style="width: 100px; height: 20px; margin-right: 5px" />
+			</a>
+		</div>
 	</div>
 	<div class="modUploadForm">
 		<div class="row mb-3">
@@ -26,8 +29,8 @@
 		var discordUser = JSON.parse(localStorage.getItem("discordUser"));
 		if (discordUser) {
 			console.log("discord User:", discordUser);
-			var headerContainer = document.getElementById("headerContainer");
-			headerContainer.removeChild(document.getElementById("discordLogin"));
+			var rightContainer = document.getElementById("rightContainer");
+			rightContainer.removeChild(document.getElementById("discordLogin"));
 
 			var discordDropdown = document.createElement("div");
 			discordDropdown.className = "dropdown";
@@ -44,7 +47,7 @@
                 </ul>
             `;
 
-			headerContainer.appendChild(discordDropdown);
+			rightContainer.appendChild(discordDropdown);
 
 			var logoutButton = document.getElementById("logoutButton");
 			logoutButton.addEventListener("click", function () {

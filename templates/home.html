@@ -5,9 +5,12 @@
 			<input type="text" class="form-control" id="searchInput" placeholder="Search by name, author, or #tag1 #tag2 for multiple tags" onchange="globalThis.PerformSearch()" />
 			<button class="btn btn-outline-secondary" type="button" onclick="globalThis.PerformSearch()">Search</button>
 		</div>
-		<a href="/auth/discord" class="btn btn-primary" style="margin-right: 15px" id="discordLogin">
-			<img src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg" alt="discord Logo" style="width: 100px; height: 20px; margin-right: 5px" />
-		</a>
+		<div id="rightContainer">
+			<a class="btn btn-primary" href="https://git.rendezvous.dev/sandustry/modloader/-/releases/permalink/latest/"><i class="fa-solid fa-download"></i> Fluxloader</a>
+			<a href="/auth/discord" class="btn btn-primary" style="margin-right: 15px" id="discordLogin">
+				<img src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg" alt="discord Logo" style="width: 100px; height: 20px; margin-right: 5px" />
+			</a>
+		</div>
 	</div>
 	<div class="modDisplayHolder">
 		<div class="modList" id="modList">
@@ -35,8 +38,8 @@
 
 		if (discordUser) {
 			console.log("discord User:", discordUser);
-			var headerContainer = document.getElementById("headerContainer");
-			headerContainer.removeChild(document.getElementById("discordLogin"));
+			var rightContainer = document.getElementById("rightContainer");
+			rightContainer.removeChild(document.getElementById("discordLogin"));
 
 			var discordDropdown = document.createElement("div");
 			discordDropdown.className = "dropdown";
@@ -53,7 +56,7 @@
                 </ul>
             `;
 
-			headerContainer.appendChild(discordDropdown);
+			rightContainer.appendChild(discordDropdown);
 
 			var logoutButton = document.getElementById("logoutButton");
 			logoutButton.addEventListener("click", function () {
