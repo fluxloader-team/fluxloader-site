@@ -1094,8 +1094,8 @@ globalThis.DisplayUserStats = async function (userData) {
 		stats.modVersions.forEach((version) => {
 			modVersionsHtml += `<tr>
                 <td>${version.modName}</td>
-                <td>${version.version}</td>
-                <td>${new Date(version.uploadTime).toLocaleString()}</td>
+                <td>${version.version.modData.version}</td>
+                <td>${new Date(version.version.uploadTime).toLocaleString()}</td>
             </tr>`;
 		});
 	}
