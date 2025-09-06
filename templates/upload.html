@@ -266,7 +266,7 @@
 
 				// Load the README.md file
 				var readmePath = fileNames.find((path) => path.endsWith("README.md"));
-				var description = "";
+				var description;
 				if (readmePath) {
 					var readmeFile = await content.file(readmePath);
 					description = await readmeFile.async("text");
