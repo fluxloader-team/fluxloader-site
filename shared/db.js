@@ -721,7 +721,7 @@ var GetMod = {
 
 				// Overwrite the "description" field with the README.md if it exists
 				var readmePath = fileNames.find((path) => path.endsWith("README.md"));
-				var description = "";
+				var description = sanitizeHTML(modInfo.description || "");
 				if (readmePath) {
 					var readmeFile = content.file(readmePath);
 					description = sanitizeHTML(await readmeFile.async("text"));
