@@ -724,7 +724,7 @@ var GetMod = {
 				var description = "";
 				if (readmePath) {
 					var readmeFile = content.file(readmePath);
-					description = await readmeFile.async("text");
+					description = sanitizeHTML(await readmeFile.async("text"));
 				}
 
 				// Read the modinfo.json file
