@@ -1,5 +1,3 @@
-console.log("admin page loading");
-
 globalThis.styleContainer = document.getElementById("styleContainer");
 globalThis.adminPageContent = document.getElementById("adminPageContent");
 globalThis.SearchQuery = "";
@@ -11,267 +9,117 @@ globalThis.CurrentPage = 1;
 globalThis.PageSize = 50;
 globalThis.TotalAdminPages = 1;
 
-globalThis.BaseStyle = `
-     body,
-	html {
-		margin: 0;
-		padding: 0;
-        overflow: hidden;
-	}
-	.pageContainer {
-		height: 100vh;
-		width: 100vw;
-		display: flex;
-		flex-direction: column;
-	}
-	.headerContainer {
-		background-color: var(--color-bg-dark2);
-		padding: 20px;
-		color0: white;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		width: 100%;
-		height: 50px;
-	}
-`;
-
 globalThis.UpdatePageStyle = function (style) {
-	globalThis.PageStyle = `
-    ${BaseStyle}
-    ${style}
-`;
+	globalThis.PageStyle = `${style}`;
 	styleContainer.textContent = PageStyle;
 };
 
 globalThis.AdminPages = {
 	Selection: {
 		content: `
-    <div class="adminpageColumn" style="width: 100%;gap:10px">
-        <button class="btn btn-primary" onclick="AdminPages.ModManagement.action()">Mod Management</button>
-        <button class="btn btn-primary" onclick="AdminPages.UserManagement.action()">User Management</button>
-        <button class="btn btn-primary" onclick="AdminPages.SiteActions.action()">Site Actions</button>
-        <button class="btn btn-primary" onclick="AdminPages.Bans.action()">Bans</button>
-        <button class="btn btn-primary" onclick="AdminPages.Config.action()">Config</button>
-    </div>
-        `,
+			<div class="adminpageColumn" style="width: 100%;gap:10px">
+				<button class="btn btn-primary" onclick="AdminPages.ModManagement.action()">Mod Management</button>
+				<button class="btn btn-primary" onclick="AdminPages.UserManagement.action()">User Management</button>
+				<button class="btn btn-primary" onclick="AdminPages.SiteActions.action()">Site Actions</button>
+				<button class="btn btn-primary" onclick="AdminPages.Bans.action()">Bans</button>
+				<button class="btn btn-primary" onclick="AdminPages.Config.action()">Config</button>
+			</div>
+			`,
 		action: function () {
 			adminPageContent.innerHTML = AdminPages.Selection.content;
 		},
 	},
 	UserManagement: {
 		content: `
-    <div class="adminpageColumn" style="width: 500px;">
-        <div id="Searchholder">
-            <input type="text" id="userSearchInput" placeholder="Search Users" style="width: 370px;" onchange="globalThis.PerformUserSearch()"/>
-            <select id="userSearchType" onchange="globalThis.PerformUserSearch()">
-                <option value="all">All</option>
-                <option value="admin">Admins</option>
-                <option value="banned">Banned</option>
-            </select>
-        </div>
-        <div id="userList">
+			<div class="adminpageColumn" style="width: 500px;">
+				<div id="Searchholder">
+					<input type="text" id="userSearchInput" placeholder="Search Users" style="width: 370px;" onchange="globalThis.PerformUserSearch()"/>
+					<select id="userSearchType" onchange="globalThis.PerformUserSearch()">
+						<option value="all">All</option>
+						<option value="admin">Admins</option>
+						<option value="banned">Banned</option>
+					</select>
+				</div>
+				<div id="userList">
 
-        </div>
-    </div>
-    <div class="adminpageColumn" style="width: calc(100% - 500px);height: calc(100% - 90px)">
-    <div class="userDisplay">
-            <div class="userDisplayData" id="userDisplay">
-                <div class="d-flex justify-content-center">
-                    <div class="spinner-border" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="userDisplayActions" id="userDisplayActions">
-
-    </div>
-        `,
+				</div>
+			</div>
+			<div class="adminpageColumn" style="width: calc(100% - 500px);height: calc(100% - 90px)">
+			<div class="userDisplay">
+					<div class="userDisplayData" id="userDisplay">
+						<div class="d-flex justify-content-center">
+							<div class="spinner-border" role="status">
+								<span class="visually-hidden">Loading...</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="userDisplayActions" id="userDisplayActions">
+			</div>
+        	`,
 		action: async function () {
+			adminPageContent.classList = "adminpage adminpage-user-management";
 			adminPageContent.innerHTML = AdminPages.UserManagement.content;
-			globalThis.UpdatePageStyle(`
-    .fullpage{
-        width:100%;
-        height:100%;
-    }
-    .adminpage{
-        display: flex;
-        flex-direction: row;
-        width:100%;
-        height:calc(100% - 45px);
-    }
-    .adminpageColumn{
-        display: flex;
-        flex-direction: column;
-        border: 10px solid #222222;
-        overflow-x: hidden;
-        overflow-y: scroll;
-        scrollbar-width: none;
-        height: calc(100% );
-    }
-    .userList {
-        width: 50%;
-        height: calc(100% - 45px);
-        display: flex;
-        flex-direction: column;
-        padding: 10px;
-        border: 10px solid #222222;
-        overflow-x: hidden;
-        overflow-y: scroll;
-        scrollbar-width: none;
-    }
-    .userListItem{
-        border-bottom: 3px solid #2c2c2c;
-    }
-    .userListItem:hover{
-        background-color: #494949;
-    }
-    .userDisplay {
-        width: calc(100%);
-        height: calc(100%);
-        overflow-x: hidden;
-        overflow-y: scroll;
-        scrollbar-width: none;
-    }
-    .userDisplayData {
-        padding: 10px;
-        scrollbar-width: none;
-        width: 100%;
-        height: calc(100% - 50px);
-        display: flex;
-        flex-direction: column;
-        overflow-x: hidden;
-    }
-    .userDisplayActions{
-        background-color: #222222;
-        position: absolute;
-        bottom: 0;
-        right: 0;
-        width: calc(100% - 500px);
-        height: 155px;
-        display: flex;
-        flex-direction: row;
-        gap: 10px;
-    }`);
 			await globalThis.PerformUserSearch();
 		},
 	},
 	SiteActions: {
 		content: `
-    <div class="adminpageColumn" style="width: 100%;">
-        <h3>Site Actions</h3>
-        <div id="actionsList">
-            <div class="d-flex justify-content-center">
-                <div class="spinner-border" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            </div>
-        </div>
-        <nav aria-label="Actions pagination">
-            <ul class="pagination" id="actionsPagination">
-            </ul>
-        </nav>
-    </div>
-        `,
+			<div class="adminpageColumn" style="width: 100%;">
+				<h3>Site Actions</h3>
+				<div id="actionsList">
+					<div class="d-flex justify-content-center">
+						<div class="spinner-border" role="status">
+							<span class="visually-hidden">Loading...</span>
+						</div>
+					</div>
+				</div>
+				<nav aria-label="Actions pagination">
+					<ul class="pagination" id="actionsPagination">
+					</ul>
+				</nav>
+			</div>
+			`,
 		action: async function () {
+			adminPageContent.classList = "adminpage adminpage-site-actions";
 			adminPageContent.innerHTML = AdminPages.SiteActions.content;
-			globalThis.UpdatePageStyle(`
-    .fullpage{
-        width:100%;
-        height:100%;
-    }
-    .adminpage{
-        display: flex;
-        flex-direction: column;
-        width:100%;
-        height:calc(100% - 45px);
-        overflow-y: auto;
-    }
-    .adminpageColumn{
-        display: flex;
-        flex-direction: column;
-        border: 10px solid #222222;
-        padding: 20px;
-        height: 100%;
-    }
-    .pagination {
-        margin-top: 20px;
-        justify-content: center;
-    }`);
 			await globalThis.LoadActions();
 		},
 	},
 	Bans: {
 		content: `
-    <div class="adminpageColumn" style="width: 100%;">
-        <h3>Banned Users</h3>
-        <div id="bannedUsersList">
-            <div class="d-flex justify-content-center">
-                <div class="spinner-border" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            </div>
-        </div>
-    </div>
-        `,
+			<div class="adminpageColumn" style="width: 100%;">
+				<h3>Banned Users</h3>
+				<div id="bannedUsersList">
+					<div class="d-flex justify-content-center">
+						<div class="spinner-border" role="status">
+							<span class="visually-hidden">Loading...</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			`,
 		action: async function () {
+			adminPageContent.classList = "adminpage adminpage-bans";
 			adminPageContent.innerHTML = AdminPages.Bans.content;
-			globalThis.UpdatePageStyle(`
-    .fullpage{
-        width:100%;
-        height:100%;
-    }
-    .adminpage{
-        display: flex;
-        flex-direction: column;
-        width:100%;
-        height:calc(100% - 45px);
-        overflow-y: auto;
-    }
-    .adminpageColumn{
-        display: flex;
-        flex-direction: column;
-        border: 10px solid #222222;
-        padding: 20px;
-        height: 100%;
-    }`);
 			await globalThis.LoadBannedUsers();
 		},
 	},
 	Config: {
 		content: `
-    <div class="adminpageColumn" style="width: 100%;">
-        <h3>Config Editor</h3>
-        <div id="configEditor" style="width: 100%; height: 500px; border: 1px solid #ccc;"></div>
-        <div style="margin-top: 20px;">
-            <button class="btn btn-primary" onclick="globalThis.SaveConfig()">Save Config</button>
-            <button class="btn btn-secondary" onclick="globalThis.LoadConfig()">Reload Config</button>
-        </div>
-    </div>
-        `,
+			<div class="adminpageColumn" style="width: 100%;">
+				<h3>Config Editor</h3>
+				<div id="configEditor" style="width: 100%; height: 500px; border: 1px solid #ccc;"></div>
+				<div style="margin-top: 20px;">
+					<button class="btn btn-primary" onclick="globalThis.SaveConfig()">Save Config</button>
+					<button class="btn btn-secondary" onclick="globalThis.LoadConfig()">Reload Config</button>
+				</div>
+			</div>
+			`,
 		action: async function () {
+			adminPageContent.classList = "adminpage adminpage-config";
 			adminPageContent.innerHTML = AdminPages.Config.content;
-			globalThis.UpdatePageStyle(`
-    .fullpage{
-        width:100%;
-        height:100%;
-    }
-    .adminpage{
-        display: flex;
-        flex-direction: column;
-        width:100%;
-        height:calc(100% - 45px);
-        overflow-y: auto;
-    }
-    .adminpageColumn{
-        display: flex;
-        flex-direction: column;
-        border: 10px solid #222222;
-        padding: 20px;
-        height: 100%;
-    }`);
 
 			// Initialize Monaco Editor
 			require.config({ paths: { vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs" } });
@@ -289,101 +137,33 @@ globalThis.AdminPages = {
 	},
 	ModManagement: {
 		content: `
-    <div class="adminpageColumn" style="width: 500px;">
-        <div id="Searchholder">
-            <input type="text" id="searchInput" placeholder="Search Mods" style="width: 370px;" onchange="globalThis.PerformSearch()"/>
-            <select id="searchtype" onchange="globalThis.PerformSearch()">
-                <option value="all">All</option>
-                <option value="verified">Verified</option>
-                <option value="unverified">Unverified</option>
-            </select>
-        </div>
-        <div id="modList">
-
-        </div>
-    </div>
-    <div class="adminpageColumn" style="width: calc(100% - 500px);height: calc(100% - 90px)">
-    <div class="modDisplay">
-			<div class="modDisplayData" id="modDisplay">
-				<div class="d-flex justify-content-center">
-					<div class="spinner-border" role="status">
-						<span class="visually-hidden">Loading...</span>
+			<div class="adminpageColumn" style="width: 500px;">
+				<div id="Searchholder">
+					<input type="text" id="searchInput" placeholder="Search Mods" style="width: 370px;" onchange="globalThis.PerformSearch()"/>
+					<select id="searchtype" onchange="globalThis.PerformSearch()">
+						<option value="all">All</option>
+						<option value="verified">Verified</option>
+						<option value="unverified">Unverified</option>
+					</select>
+				</div>
+				<div id="modList"></div>
+			</div>
+			<div class="adminpageColumn" style="width: calc(100% - 500px);height: calc(100% - 90px)">
+			<div class="modDisplay">
+					<div class="modDisplayData" id="modDisplay">
+						<div class="d-flex justify-content-center">
+							<div class="spinner-border" role="status">
+								<span class="visually-hidden">Loading...</span>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-    </div>
-    <div class="modDisplayActions" id="modDisplayActions">
-
-    </div>
-        `,
+			<div class="modDisplayActions" id="modDisplayActions"></div>
+        	`,
 		action: async function () {
+			adminPageContent.classList = "adminpage adminpage-mods";
 			adminPageContent.innerHTML = AdminPages.ModManagement.content;
-			globalThis.UpdatePageStyle(`
-    .fullpage{
-        width:100%;
-        height:100%;
-    }
-    .adminpage{
-        display: flex;
-        flex-direction: row;
-        width:100%;
-        height:calc(100% - 45px);
-    }
-    .adminpageColumn{
-        display: flex;
-        flex-direction: column;
-        border: 10px solid #222222;
-        overflow-x: hidden;
-        overflow-y: scroll;
-        scrollbar-width: none;
-        height: calc(100% );
-    }
-	.modList {
-		width: 50%;
-		height: calc(100% - 45px);
-		display: flex;
-		flex-direction: column;
-        padding: 10px;
-        border: 10px solid #222222;
-        overflow-x: hidden;
-        overflow-y: scroll;
-        scrollbar-width: none;
-	}
-    .modListItem{
-        border-bottom: 3px solid #2c2c2c;
-    }
-    .modListItem:hover{
-        background-color: #494949;
-    }
-	.modDisplay {
-		width: calc(100%);
-		height: calc(100%);
-        overflow-x: hidden;
-        overflow-y: scroll;
-        scrollbar-width: none;
-	}
-    .modDisplayData {
-        padding: 10px;
-        scrollbar-width: none;
-        width: 100%;
-        height: calc(100% - 50px);
-        display: flex;
-        flex-direction: column;
-        overflow-x: hidden;
-    }
-    .modDisplayActions{
-        background-color: #222222;
-        position: absolute;
-        bottom: 0;
-        right: 0;
-        width: calc(100% - 500px);
-        height: 155px;
-        display: flex;
-        flex-direction: row;
-        gap: 10px;
-    }`);
-			var verifiedOnly = "";
 			switch (document.getElementById("searchtype").value) {
 				case "verified":
 					verifiedOnly = "true";
@@ -416,6 +196,8 @@ globalThis.AdminPages = {
 		},
 	},
 };
+
+// ------------------------------------------ Manage Mod ------------------------------------------
 
 globalThis.UpdateModList = function () {
 	var modList = document.getElementById("modList");
@@ -1535,26 +1317,23 @@ globalThis.SaveConfig = async function () {
 
 // ------------------------------------------ Initialization ------------------------------------------
 
-
-globalThis.AdminPages.Selection.action();
+console.log("admin page loaded");
 
 globalThis.UpdatePageStyle(`
-    .fullpage{
-        width:100%;
-        height:100%;
-    }
-    .adminpage{
-        display: flex;
-        flex-direction: row;
-        width:100%;
-        height:calc(100%);
-    }
-    .adminpageColumn{
-        display: flex;
-        flex-direction: column;
-        overflow-x: hidden;
-        overflow-y: scroll;
-        scrollbar-width: none;
-        height: calc(100% );
+	.adminpage{
+		display: flex;
+		flex-direction: row;
+		width:100%;
+		height:calc(100%);
+	}
+	.adminpageColumn{
+		display: flex;
+		flex-direction: column;
+		overflow-x: hidden;
+		overflow-y: scroll;
+		scrollbar-width: none;
+		height: calc(100% );
 		background-color: var(--color-bg-light);
-    }`);
+	}`);
+
+globalThis.AdminPages.Selection.action();
