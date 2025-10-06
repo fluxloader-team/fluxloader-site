@@ -1,25 +1,6 @@
-// ---------------------------------
-// Log system
-// ---------------------------------
-// Custom Log system
-
-/**
- * @author FluxLoaderApp <support@fluxloader.app>
- */
-
-// requires
-
 var colors = require("colors");
 var fs = require("fs");
 
-// code
-
-/**
- * @param {string} [name] - Log name
- * @param {string} [Path] - Path to log file
- * @param {boolean} [date] - Add date to log
- * @param {number} [SaveInterval] - Interval to save
- */
 class Log {
 	currentLogs = [];
 	name = "";
@@ -101,9 +82,6 @@ class Log {
 		clearInterval(this.saveLoopInterval);
 	}
 
-	/**
-	 * @param {string} [Input] - What to log
-	 */
 	info(Input = "") {
 		var logMessage = "";
 		if (this.date == true) {
@@ -115,9 +93,6 @@ class Log {
 		console.log(logMessage);
 	}
 
-	/**
-	 * @param {string} [Input] - What to log
-	 */
 	debug(Input = "") {
 		if (this.logLevel == "debug") {
 			var logMessage = "";
@@ -131,9 +106,6 @@ class Log {
 		}
 	}
 
-	/**
-	 * @param {string} [Input] - What to log
-	 */
 	error(Input = "") {
 		var logMessage = "";
 		if (this.date == true) {
@@ -145,7 +117,5 @@ class Log {
 		console.log(logMessage);
 	}
 }
-
-// exports
 
 module.exports = Log;

@@ -5,9 +5,9 @@
  * It serves as the primary interface between the frontend and the mod database.
  */
 
-var Utils = require("../../utils");
+var Utils = require("../../common/utils.js");
 var { decompress } = require("@mongodb-js/zstd");
-var Mongo = require("../../shared/db");
+var Mongo = require("../../common/db");
 
 var log = new Utils.Log("sandustry.web.pages.search", "./sandustry.web.main.txt", true);
 

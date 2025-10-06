@@ -4,7 +4,7 @@
  * It performs necessary setup tasks, such as command registration, and logs the status for monitoring purposes.
  */
 
-var Utils = require("../../utils");
+var Utils = require("../../common/utils.js");
 
 const log = new Utils.Log("sandustry.bot.event.clientready", "./sandustry.bot.main.txt", true);
 process.on("uncaughtException", function (err) {

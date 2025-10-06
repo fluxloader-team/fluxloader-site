@@ -6,7 +6,7 @@
 
 var querystring = require("querystring");
 var https = require("https");
-var Utils = require("../../utils");
+var Utils = require("../../common/utils.js");
 
 var log = new Utils.Log("sandustry.web.pages.discord", "./sandustry.web.main.txt", true);
 

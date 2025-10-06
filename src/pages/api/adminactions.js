@@ -3,9 +3,9 @@
  * @description Handles admin actions like verifying mods, denying mods, and banning authors
  */
 
-var Utils = require("../../utils");
-var Mongo = require("../../shared/db");
-var { verifyDiscordUser } = require("../../shared/verifydiscorduser");
+var Utils = require("../../common/utils.js");
+var Mongo = require("../../common/db");
+var { verifyDiscordUser } = require("../../common/verifydiscorduser");
 
 const log = new Utils.Log("sandustry.web.pages.adminactions", "./sandustry.web.main.txt", true);
 

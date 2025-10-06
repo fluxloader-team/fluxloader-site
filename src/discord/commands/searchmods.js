@@ -4,9 +4,9 @@
  */
 
 var { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-var Utils = require("./../../utils"); // Adjust this accordingly
+var Utils = require("./../../common/utils.js"); // Adjust this accordingly
 var log = new Utils.Log("sandustry.bot.command.SearchMods", "./sandustry.bot.main.txt", true);
-var Mongo = require("./../../shared/db");
+var Mongo = require("./../../common/db");
 /**
  * Namespace for discord bot commands.
  * @namespace searchMods

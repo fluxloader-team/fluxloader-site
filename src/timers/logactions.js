@@ -1,28 +1,5 @@
-/**
- * @file logactions.js
- * @description logs unlogged actions to the discord
- */
+const Mongo = require("../common/db");
 
-// Using Mongo module from db.js instead of direct MongoDB access
-const Mongo = require("../shared/db");
-
-/**
- * Namespace for Sandustry bot timer tasks.
- * @namespace logactions
- * @memberof module:timers
- */
-
-/**
- *
- * @async
- * @function run
- * @memberof module:timers.logactions
- *
- * @returns {Promise<void>} Resolves when the timer task has completed processing.
- *
- * @throws {Error} Logs an error if any issues occur during database connection or mod validation.
- *
- */
 module.exports = {
 	async run() {
 		var unloggedActions = await Mongo.GetAction.Get({ logged: false });

@@ -3,11 +3,11 @@
  * @description Handles config-related API endpoints
  */
 
-var Utils = require("../../utils");
+var Utils = require("../../common/utils.js");
 var fs = require("fs");
 var path = require("path");
 var https = require("https");
-var { verifyDiscordUser } = require("../../shared/verifydiscorduser");
+var { verifyDiscordUser } = require("../../common/verifydiscorduser");
 
 const log = new Utils.Log("sandustry.web.pages.config", "./sandustry.web.main.txt", true);
 
@@ -49,7 +49,7 @@ module.exports = {
 						var discordUserData = data.discordUser;
 
 						// Verify the user is authenticated and has admin permissions
-						var Mongo = require("../../shared/db");
+						var Mongo = require("../../common/db");
 						var UserData = await Mongo.GetUser.One(discordUserData.id);
 						if (!UserData) {
 							res.writeHead(403, { "Content-Type": "application/json" });

@@ -2,7 +2,7 @@ var http = require("http");
 var crypto = require("crypto");
 var fs = require("fs");
 var { exec } = require("child_process");
-var Utils = require("./utils");
+var Utils = require("./common/utils.js");
 var path = require("path");
 var discord = require("./discord/discordbot.js");
 
@@ -31,7 +31,7 @@ const DEFAULT_CONFIG = {
 
 globalThis.config = DEFAULT_CONFIG;
 globalThis.pages = { "/": { run: function (req, res) {} } };
-globalThis.templates = { filename: "content" };
+globalThis.components = { filename: "content" };
 globalThis.timers = [];
 
 var log = new Utils.Log("sandustry.web.main", "./sandustry.web.main.txt", true);
@@ -79,19 +79,19 @@ function computeRepoHash(directory = "./") {
 	return folderHash.digest("hex");
 }
 
-function loadTemplates() {
-	log.info("Loading templates...");
+function loadComponents() {
+	log.info("Loading components...");
 	let names = [];
 
-	fs.readdirSync("./templates", { withFileTypes: true, recursive: true }).forEach((entry) => {
+	fs.readdirSync("./components", { withFileTypes: true, recursive: true }).forEach((entry) => {
 		if (entry.isDirectory()) return;
 		names.push(entry.name);
 
 		const filePath = path.resolve(entry.path, entry.name);
-		templates[entry.name] = fs.readFileSync(filePath, "utf8");
+		components[entry.name] = fs.readFileSync(filePath, "utf8");
 	});
 
-	log.info(`Templates loaded: [ ${names.join(", ")} ]`);
+	log.info(`components loaded: [ ${names.join(", ")} ]`);
 }
 
 function loadPages() {
@@ -138,9 +138,9 @@ async function performReloadCheck() {
 		log.info(newRepoHash);
 
 		if (newRepoHash !== lastRepoHash) {
-			log.info("Changes detected in the repository. Reloading templates and pages...");
+			log.info("Changes detected in the repository. Reloading components and pages...");
 			lastRepoHash = newRepoHash;
-			loadTemplates();
+			loadComponents();
 			loadPages();
 			loadTimers();
 		} else {
@@ -169,10 +169,21 @@ function handleWebRequests(req, res) {
 	var urlName = urlSplit[0];
 	var page = pages[urlName];
 	if (page) {
+	log.debug(`Received request for page: ${url}`);
 		page.run(req, res);
 	} else {
-		res.writeHead(404, { "Content-Type": "text/html" });
-		res.end("404");
+		var component = components[urlName.replace("/", "")];
+		if (component) {
+			const type = { ".html": "text/html", ".css": "text/css", ".js": "application/javascript" }[path.extname(urlName)] || "text/html";
+			log.debug(`Received request for component: ${url} (Content-Type: ${type})`);
+			res.writeHead(200, { "Content-Type": type });
+			res.end(component);
+			return;
+		} else {
+			log.debug(`Page not found: ${url}`);
+			res.writeHead(404, { "Content-Type": "text/html" });
+			res.end("404");
+		}
 	}
 }
 
@@ -190,7 +201,7 @@ function main() {
 	lastRepoHash = computeRepoHash();
 	log.info(lastRepoHash);
 
-	loadTemplates();
+	loadComponents();
 	loadPages();
 	loadTimers();
 

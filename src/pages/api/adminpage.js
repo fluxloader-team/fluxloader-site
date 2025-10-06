@@ -3,10 +3,10 @@
  * @description Returns the final admin page if permitted
  */
 
-var Utils = require("../../utils");
+var Utils = require("../../common/utils.js");
 const https = require("https");
-var Mongo = require("../../shared/db");
-var { verifyDiscordUser } = require("../../shared/verifydiscorduser");
+var Mongo = require("../../common/db");
+var { verifyDiscordUser } = require("../../common/verifydiscorduser");
 
 var log = new Utils.Log("sandustry.web.pages.admin", "./sandustry.web.main.txt", true);
 
@@ -16,24 +16,11 @@ var log = new Utils.Log("sandustry.web.pages.admin", "./sandustry.web.main.txt",
  */
 
 module.exports = {
-	/**
-	 * The paths that use this module.
-	 * @type {Array<string>}
-	 * @memberof module:api.admin
-	 */
 	paths: ["/api/admin/page"],
-	/**
-	 * Handles HTTP requests for the admin api.
-	 *
-	 * @function run
-	 * @memberof web.admin
-	 * @param {IncomingMessage} req - The HTTP request object.
-	 * @param {ServerResponse} res - The HTTP response object.
-	 *
-	 * @returns {Promise<void>} Sends the error response.
-	 */
+
 	run: function (req, res) {
 		// Check if the method is POST
+		console.log(`Received request for /api/admin/page with method: ${req.method}`);
 		if (req.method === "POST") {
 			var body = "";
 			req.on("data", (chunk) => {
@@ -61,8 +48,8 @@ module.exports = {
 						return;
 					}
 					if (UserData.permissions.includes("admin")) {
-						res.end(JSON.stringify({ data: globalThis.templates["adminpage.html"], run: globalThis.templates["adminpage.js"] }));
-						return;
+						cosole.log("User has admin permissions, serving admin page.");
+						res.end(JSON.stringify({ data: globalThis.components["adminpage.html"], run: globalThis.components["adminpage.js"] }));
 					} else {
 						res.end(JSON.stringify({ error: "User does not have admin permissions" }));
 					}

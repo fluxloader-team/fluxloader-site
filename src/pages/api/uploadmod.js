@@ -4,8 +4,8 @@
  * This file manages POST requests to upload a mod, validate the payload and user, and interact with the database.
  */
 
-var Mongo = require("../../shared/db");
-var Utils = require("../../utils");
+var Mongo = require("../../common/db");
+var Utils = require("../../common/utils.js");
 
 var log = new Utils.Log("sandustry.web.pages.uploadmod", "./sandustry.web.main.txt", true);
 

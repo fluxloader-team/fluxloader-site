@@ -4,7 +4,7 @@
  * Validates and executes the appropriate command from the global command collection.
  */
 
-var Utils = require("../../utils");
+var Utils = require("../../common/utils.js");
 
 var log = new Utils.Log("sandustry.bot.event.interactioncreate", "./sandustry.bot.main.txt", true);
 process.on("uncaughtException", function (err) {

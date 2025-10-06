@@ -1,7 +1,7 @@
 var { Client, Events, GatewayIntentBits, REST, Routes, Collection } = require("discord.js");
 var crypto = require("crypto");
 var fs = require("fs");
-var Utils = require("../utils");
+var Utils = require("../common/utils.js");
 var path = require("path");
 
 var log = new Utils.Log("sandustry.bot.main", "./sandustry.bot.main.txt", true);
