@@ -10,12 +10,8 @@ module.exports = {
 				},
 			};
 
-			console.log("Verifying Discord user with ID:", userId);
-
 			var req = require("https").request(options, (res) => {
 				let data = "";
-
-				console.log(`Status Code: ${res.statusCode}`);
 
 				res.on("data", (chunk) => {
 					data += chunk.toString();

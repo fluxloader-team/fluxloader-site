@@ -1,5 +1,15 @@
-console.log("admin page loaded");
-var styleContainer = document.getElementById("styleContainer");
+console.log("admin page loading");
+
+globalThis.styleContainer = document.getElementById("styleContainer");
+globalThis.adminPageContent = document.getElementById("adminPageContent");
+globalThis.SearchQuery = "";
+globalThis.ModCache = {};
+globalThis.Users = {};
+globalThis.UserCache = {};
+globalThis.Actions = [];
+globalThis.CurrentPage = 1;
+globalThis.PageSize = 50;
+globalThis.TotalAdminPages = 1;
 
 globalThis.BaseStyle = `
      body,
@@ -17,7 +27,7 @@ globalThis.BaseStyle = `
 	.headerContainer {
 		background-color: var(--color-bg-dark2);
 		padding: 20px;
-		color: white;
+		color0: white;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
@@ -34,42 +44,19 @@ globalThis.UpdatePageStyle = function (style) {
 	styleContainer.textContent = PageStyle;
 };
 
-globalThis.UpdatePageStyle(`
-    .fullpage{
-        width:100%;
-        height:100%;
-    }
-    .adminpage{
-        display: flex;
-        flex-direction: row;
-        width:100%;
-        height:calc(100%);
-    }
-    .adminpageColumn{
-        display: flex;
-        flex-direction: column;
-        overflow-x: hidden;
-        overflow-y: scroll;
-        scrollbar-width: none;
-        height: calc(100% );
-		background-color: var(--color-bg-light);
-    }`);
-
-globalThis.adminPageData = document.getElementById("adminPageData");
-
-globalThis.Pages = {
+globalThis.AdminPages = {
 	Selection: {
 		content: `
     <div class="adminpageColumn" style="width: 100%;gap:10px">
-        <button class="btn btn-primary" onclick="Pages.ModManagement.action()">Mod Management</button>
-        <button class="btn btn-primary" onclick="Pages.UserManagement.action()">User Management</button>
-        <button class="btn btn-primary" onclick="Pages.SiteActions.action()">Site Actions</button>
-        <button class="btn btn-primary" onclick="Pages.Bans.action()">Bans</button>
-        <button class="btn btn-primary" onclick="Pages.Config.action()">Config</button>
+        <button class="btn btn-primary" onclick="AdminPages.ModManagement.action()">Mod Management</button>
+        <button class="btn btn-primary" onclick="AdminPages.UserManagement.action()">User Management</button>
+        <button class="btn btn-primary" onclick="AdminPages.SiteActions.action()">Site Actions</button>
+        <button class="btn btn-primary" onclick="AdminPages.Bans.action()">Bans</button>
+        <button class="btn btn-primary" onclick="AdminPages.Config.action()">Config</button>
     </div>
         `,
 		action: function () {
-			adminPageData.innerHTML = Pages.Selection.content;
+			adminPageContent.innerHTML = AdminPages.Selection.content;
 		},
 	},
 	UserManagement: {
@@ -103,7 +90,7 @@ globalThis.Pages = {
     </div>
         `,
 		action: async function () {
-			adminPageData.innerHTML = Pages.UserManagement.content;
+			adminPageContent.innerHTML = AdminPages.UserManagement.content;
 			globalThis.UpdatePageStyle(`
     .fullpage{
         width:100%;
@@ -189,7 +176,7 @@ globalThis.Pages = {
     </div>
         `,
 		action: async function () {
-			adminPageData.innerHTML = Pages.SiteActions.content;
+			adminPageContent.innerHTML = AdminPages.SiteActions.content;
 			globalThis.UpdatePageStyle(`
     .fullpage{
         width:100%;
@@ -230,7 +217,7 @@ globalThis.Pages = {
     </div>
         `,
 		action: async function () {
-			adminPageData.innerHTML = Pages.Bans.content;
+			adminPageContent.innerHTML = AdminPages.Bans.content;
 			globalThis.UpdatePageStyle(`
     .fullpage{
         width:100%;
@@ -265,7 +252,7 @@ globalThis.Pages = {
     </div>
         `,
 		action: async function () {
-			adminPageData.innerHTML = Pages.Config.content;
+			adminPageContent.innerHTML = AdminPages.Config.content;
 			globalThis.UpdatePageStyle(`
     .fullpage{
         width:100%;
@@ -331,7 +318,7 @@ globalThis.Pages = {
     </div>
         `,
 		action: async function () {
-			adminPageData.innerHTML = Pages.ModManagement.content;
+			adminPageContent.innerHTML = AdminPages.ModManagement.content;
 			globalThis.UpdatePageStyle(`
     .fullpage{
         width:100%;
@@ -429,10 +416,6 @@ globalThis.Pages = {
 		},
 	},
 };
-
-globalThis.Pages.Selection.action();
-
-globalThis.SearchQuery = "";
 
 globalThis.UpdateModList = function () {
 	var modList = document.getElementById("modList");
@@ -598,7 +581,6 @@ globalThis.DisplayMod = async function (modID) {
 	}
 };
 
-globalThis.ModCache = {};
 globalThis.DisplayModApi = async function (mod) {
 	try {
 		// Check if mod and modData exist
@@ -797,7 +779,8 @@ globalThis.UpdateModDisplayActions = async function (modID) {
 	}
 };
 
-// Download mod function
+// ------------------------------------------ Download Mod ------------------------------------------
+
 globalThis.DownloadMod = async function (modID) {
 	try {
 		// Check if modID is valid
@@ -851,7 +834,8 @@ globalThis.DownloadMod = async function (modID) {
 	}
 };
 
-// Admin action functions
+// ------------------------------------------ Admin Action ------------------------------------------
+
 globalThis.VerifyMod = async function (modID) {
 	if (!confirm("Are you sure you want to verify this mod?")) {
 		return;
@@ -952,9 +936,7 @@ globalThis.BanAuthor = async function (authorID) {
 	}
 };
 
-// User Management Functions
-globalThis.Users = {};
-globalThis.UserCache = {};
+// ------------------------------------------ User Management ------------------------------------------
 
 globalThis.PerformUserSearch = async function () {
 	var searchInput = document.getElementById("userSearchInput");
@@ -1286,11 +1268,7 @@ globalThis.RemoveAdmin = async function (discordID) {
 	}
 };
 
-// Site Actions Functions
-globalThis.Actions = [];
-globalThis.CurrentPage = 1;
-globalThis.PageSize = 50;
-globalThis.TotalPages = 1;
+// ------------------------------------------ Site Actions ------------------------------------------
 
 globalThis.LoadActions = async function (page = 1) {
 	globalThis.CurrentPage = page;
@@ -1317,7 +1295,7 @@ globalThis.LoadActions = async function (page = 1) {
 		}
 
 		globalThis.Actions = result.actions;
-		globalThis.TotalPages = result.pagination.totalPages;
+		globalThis.TotalAdminPages = result.pagination.totalAdminPages;
 
 		UpdateActionsList();
 	} catch (error) {
@@ -1360,21 +1338,22 @@ globalThis.UpdateActionsList = function () {
     </li>`;
 
 	// Page numbers
-	for (let i = Math.max(1, globalThis.CurrentPage - 2); i <= Math.min(globalThis.TotalPages, globalThis.CurrentPage + 2); i++) {
+	for (let i = Math.max(1, globalThis.CurrentPage - 2); i <= Math.min(globalThis.TotalAdminPages, globalThis.CurrentPage + 2); i++) {
 		paginationHtml += `<li class="page-item ${i === globalThis.CurrentPage ? "active" : ""}">
             <a class="page-link" href="#" onclick="globalThis.LoadActions(${i}); return false;">${i}</a>
         </li>`;
 	}
 
 	// Next button
-	paginationHtml += `<li class="page-item ${globalThis.CurrentPage === globalThis.TotalPages ? "disabled" : ""}">
+	paginationHtml += `<li class="page-item ${globalThis.CurrentPage === globalThis.TotalAdminPages ? "disabled" : ""}">
         <a class="page-link" href="#" onclick="globalThis.LoadActions(${globalThis.CurrentPage + 1}); return false;">Next</a>
     </li>`;
 
 	pagination.innerHTML = paginationHtml;
 };
 
-// Banned Users Functions
+// ------------------------------------------Banned Users ------------------------------------------
+
 globalThis.LoadBannedUsers = async function () {
 	try {
 		var discordUser = JSON.parse(localStorage.getItem("discordUser"));
@@ -1475,7 +1454,8 @@ globalThis.UnbanUserFromList = async function (discordID) {
 	}
 };
 
-// Config Functions
+// ------------------------------------------ Config ------------------------------------------
+
 globalThis.LoadConfig = async function () {
 	try {
 		var discordUser = JSON.parse(localStorage.getItem("discordUser"));
@@ -1552,3 +1532,29 @@ globalThis.SaveConfig = async function () {
 		alert("An error occurred while saving the config: " + error.message);
 	}
 };
+
+// ------------------------------------------ Initialization ------------------------------------------
+
+
+globalThis.AdminPages.Selection.action();
+
+globalThis.UpdatePageStyle(`
+    .fullpage{
+        width:100%;
+        height:100%;
+    }
+    .adminpage{
+        display: flex;
+        flex-direction: row;
+        width:100%;
+        height:calc(100%);
+    }
+    .adminpageColumn{
+        display: flex;
+        flex-direction: column;
+        overflow-x: hidden;
+        overflow-y: scroll;
+        scrollbar-width: none;
+        height: calc(100% );
+		background-color: var(--color-bg-light);
+    }`);

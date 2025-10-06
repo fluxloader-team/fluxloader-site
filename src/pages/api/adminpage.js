@@ -1,19 +1,9 @@
-/**
- * @file adminpage.js
- * @description Returns the final admin page if permitted
- */
-
 var Utils = require("../../common/utils.js");
 const https = require("https");
 var Mongo = require("../../common/db");
 var { verifyDiscordUser } = require("../../common/verifydiscorduser");
 
 var log = new Utils.Log("sandustry.web.pages.admin", "./sandustry.web.main.txt", true);
-
-/**
- * @namespace admin
- * @memberof module:api
- */
 
 module.exports = {
 	paths: ["/api/admin/page"],
@@ -48,8 +38,7 @@ module.exports = {
 						return;
 					}
 					if (UserData.permissions.includes("admin")) {
-						cosole.log("User has admin permissions, serving admin page.");
-						res.end(JSON.stringify({ data: globalThis.components["adminpage.html"], run: globalThis.components["adminpage.js"] }));
+						res.end(JSON.stringify({ run: globalThis.components["adminpage.js"] }));
 					} else {
 						res.end(JSON.stringify({ error: "User does not have admin permissions" }));
 					}

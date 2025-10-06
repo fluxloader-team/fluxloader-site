@@ -12,13 +12,14 @@
 		<div class="pageContainer">
 			<div class="headerContainer" id="headerContainer">
 				<a class="btn btn-secondary headerButton" style="margin-left: 15px" href="/">Mod List</a>
-				<a class="btn btn-secondary headerButton" style="margin-left: 15px" onclick="globalThis.Pages.Selection.action();">Selection menu</a>
+				<a class="btn btn-secondary headerButton" style="margin-left: 15px" onclick="globalThis.AdminPages.Selection.action();">Selection menu</a>
 				<a href="/auth/discord" class="btn btn-primary" style="margin-right: 15px" id="discordLogin">
 					<img src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg" alt="discord Logo" title="Login with Discord" style="width: 100px; height: 20px; margin-right: 5px" />
 				</a>
 			</div>
 
-			<div id="adminPage" class="fullpage"></div>
+			<style id="styleContainer"></style>
+			<div id="adminPageContent" class="adminpage fullpage"></div>
 
 			<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 			<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
@@ -60,7 +61,7 @@
 
 				document.addEventListener("DOMContentLoaded", async () => {
 					var response = await fetch("/api/admin/page", {
-						method: "POST", // HTTP method
+						method: "POST",
 						headers: {
 							"Content-Type": "application/json",
 						},
@@ -72,9 +73,6 @@
 					if (result.error) {
 						window.location.href = "/";
 					} else {
-						console.log("Admin page data:", result);
-						var adminPage = document.getElementById("adminPage");
-						adminPage.innerHTML = result.data;
 						Function(result.run)();
 					}
 				});
