@@ -1,4 +1,3 @@
-globalThis.styleContainer = document.getElementById("styleContainer");
 globalThis.adminPageContent = document.getElementById("adminPageContent");
 globalThis.SearchQuery = "";
 globalThis.ModCache = {};
@@ -8,11 +7,6 @@ globalThis.Actions = [];
 globalThis.CurrentPage = 1;
 globalThis.PageSize = 50;
 globalThis.TotalAdminPages = 1;
-
-globalThis.UpdatePageStyle = function (style) {
-	globalThis.PageStyle = `${style}`;
-	styleContainer.textContent = PageStyle;
-};
 
 globalThis.AdminPages = {
 	Selection: {
@@ -1318,22 +1312,5 @@ globalThis.SaveConfig = async function () {
 // ------------------------------------------ Initialization ------------------------------------------
 
 console.log("admin page loaded");
-
-globalThis.UpdatePageStyle(`
-	.adminpage{
-		display: flex;
-		flex-direction: row;
-		width:100%;
-		height:calc(100%);
-	}
-	.adminpageColumn{
-		display: flex;
-		flex-direction: column;
-		overflow-x: hidden;
-		overflow-y: scroll;
-		scrollbar-width: none;
-		height: calc(100% );
-		background-color: var(--color-bg-light);
-	}`);
 
 globalThis.AdminPages.Selection.action();

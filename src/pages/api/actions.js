@@ -1,36 +1,12 @@
-/**
- * @file actions.js
- * @description Handles action-related API endpoints
- */
-
 var Utils = require("../../common/utils.js");
 var Mongo = require("../../common/db");
 var { verifyDiscordUser } = require("../../common/verifydiscorduser");
 
 const log = new Utils.Log("sandustry.web.pages.actions", "./sandustry.web.main.txt", true);
 
-/**
- * @namespace actions
- * @memberof module:api
- */
 module.exports = {
-	/**
-	 * The paths that use this module.
-	 * @type {Array<string>}
-	 * @memberof module:api.actions
-	 */
 	paths: ["/api/actions"],
 
-	/**
-	 * Handles HTTP requests for action data.
-	 *
-	 * @function run
-	 * @memberof api.actions
-	 * @param {IncomingMessage} req - The HTTP request object.
-	 * @param {ServerResponse} res - The HTTP response object.
-	 *
-	 * @returns {Promise<void>} Sends the response.
-	 */
 	run: async function (req, res) {
 		// Only allow POST requests with proper authentication
 		if (req.method === "POST") {

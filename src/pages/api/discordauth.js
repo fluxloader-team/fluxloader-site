@@ -1,46 +1,49 @@
-/**
- * @file discordauth.js
- * @description Handles discord OAuth2 authentication and callback processing for the application.
- * Supports user redirection to the discord authorization URL and processes the callback to retrieve user information.
- */
-
 var querystring = require("querystring");
 var https = require("https");
 var Utils = require("../../common/utils.js");
 
 var log = new Utils.Log("sandustry.web.pages.discord", "./sandustry.web.main.txt", true);
 
-/**
- * Namespace for discord authentication functionality in the API.
- * @namespace discordAuth
- * @memberof module:web
- */
+function makeRequest(host, path, method, headers, postData) {
+	return new Promise((resolve, reject) => {
+		var options = {
+			host: host,
+			path: path,
+			method: method,
+			headers: headers,
+		};
+
+		var req = https.request(options, (res) => {
+			var data = "";
+
+			res.on("data", (chunk) => {
+				data += chunk;
+			});
+
+			res.on("end", () => {
+				try {
+					resolve(JSON.parse(data));
+				} catch (err) {
+					reject(new Error("Failed to parse JSON response: " + data));
+				}
+			});
+		});
+
+		req.on("error", (err) => {
+			reject(err);
+		});
+
+		if (postData) {
+			req.write(postData);
+		}
+
+		req.end();
+	});
+}
+
 module.exports = {
-	/**
-	 * The paths that use this module.
-	 * @type {Array<string>}
-	 * @memberof module:web.discordAuth
-	 */
 	paths: ["/auth/discord", "/auth/discord/callback"],
-	/**
-	 * Handles discord OAuth2 authentication and callback.
-	 *
-	 * - `/auth/discord`: Redirects the client to discord's OAuth2 authorization URL.
-	 * - `/auth/discord/callback`: Processes the OAuth2 callback, retrieves user information, and stores it in the browser's local storage.
-	 *
-	 * ### Query Parameters:
-	 * - **code**: *(required for `/auth/discord/callback`)*
-	 *   The OAuth2 authorization code returned by discord after user authentication.
-	 *   - *Example*: `code=abcdef123456`
-	 *
-	 * @async
-	 * @function run
-	 * @memberof api.discordAuth
-	 * @param {IncomingMessage} req - The HTTP request object.
-	 * @param {ServerResponse} res - The HTTP response object.
-	 *
-	 * @throws {Error} If query parameters are missing, invalid, or an error occurs during API requests.
-	 */
+
 	run: async function (req, res) {
 		var urlSplit = req.url.split("?");
 		var pathname = urlSplit[0];
@@ -99,40 +102,3 @@ module.exports = {
 		return res.end("<h1>404: Not Found</h1>");
 	},
 };
-
-function makeRequest(host, path, method, headers, postData) {
-	return new Promise((resolve, reject) => {
-		var options = {
-			host: host,
-			path: path,
-			method: method,
-			headers: headers,
-		};
-
-		var req = https.request(options, (res) => {
-			var data = "";
-
-			res.on("data", (chunk) => {
-				data += chunk;
-			});
-
-			res.on("end", () => {
-				try {
-					resolve(JSON.parse(data));
-				} catch (err) {
-					reject(new Error("Failed to parse JSON response: " + data));
-				}
-			});
-		});
-
-		req.on("error", (err) => {
-			reject(err);
-		});
-
-		if (postData) {
-			req.write(postData);
-		}
-
-		req.end();
-	});
-}

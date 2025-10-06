@@ -1,36 +1,12 @@
-/**
- * @file users.js
- * @description Handles user-related API endpoints
- */
-
 var Utils = require("../../common/utils.js");
 var Mongo = require("../../common/db");
 var { verifyDiscordUser } = require("../../common/verifydiscorduser");
 
 const log = new Utils.Log("sandustry.web.pages.users", "./sandustry.web.main.txt", true);
 
-/**
- * @namespace users
- * @memberof module:api
- */
 module.exports = {
-	/**
-	 * The paths that use this module.
-	 * @type {Array<string>}
-	 * @memberof module:api.users
-	 */
 	paths: ["/api/users"],
 
-	/**
-	 * Handles HTTP requests for user data.
-	 *
-	 * @function run
-	 * @memberof api.users
-	 * @param {IncomingMessage} req - The HTTP request object.
-	 * @param {ServerResponse} res - The HTTP response object.
-	 *
-	 * @returns {Promise<void>} Sends the response.
-	 */
 	run: async function (req, res) {
 		// Only allow POST requests with proper authentication
 		if (req.method !== "POST") {

@@ -1,34 +1,11 @@
-/**
- * @file uploadmod.js
- * @description Handles the mod upload API endpoint for mod list site.
- * This file manages POST requests to upload a mod, validate the payload and user, and interact with the database.
- */
-
 var Mongo = require("../../common/db");
 var Utils = require("../../common/utils.js");
 
 var log = new Utils.Log("sandustry.web.pages.uploadmod", "./sandustry.web.main.txt", true);
 
-/**
- * @namespace uploadmod
- * @memberof module:api
- */
 module.exports = {
-	/**
-	 * The Paths that use this module
-	 * @type {Array<string>}
-	 * @memberof module:api.uploadmod
-	 */
 	paths: ["/api/uploadmod"],
 
-	/**
-	 * Handles client requests to the upload mod API.
-	 *
-	 * @function run
-	 * @memberof module:api.uploadmod
-	 * @param {IncomingMessage} req - The HTTP request object.
-	 * @param {ServerResponse} res - The HTTP response object.
-	 */
 	run: function (req, res) {
 		if (req.method !== "POST") {
 			res.writeHead(404, { "Content-Type": "text/html" });

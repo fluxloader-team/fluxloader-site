@@ -1,5 +1,3 @@
-var ejs = require("ejs");
-
 module.exports = {
 	paths: ["", "/", "/home"],
 

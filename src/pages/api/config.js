@@ -1,8 +1,3 @@
-/**
- * @file config.js
- * @description Handles config-related API endpoints
- */
-
 var Utils = require("../../common/utils.js");
 var fs = require("fs");
 var path = require("path");
@@ -11,28 +6,9 @@ var { verifyDiscordUser } = require("../../common/verifydiscorduser");
 
 const log = new Utils.Log("sandustry.web.pages.config", "./sandustry.web.main.txt", true);
 
-/**
- * @namespace config
- * @memberof module:api
- */
-
 module.exports = {
-	/**
-	 * The paths that use this module.
-	 * @type {Array<string>}
-	 * @memberof module:api.config
-	 */
 	paths: ["/api/config"],
-	/**
-	 * Handles HTTP requests for config data.
-	 *
-	 * @function run
-	 * @memberof api.config
-	 * @param {IncomingMessage} req - The HTTP request object.
-	 * @param {ServerResponse} res - The HTTP response object.
-	 *
-	 * @returns {Promise<void>} Sends the response.
-	 */
+
 	run: async function (req, res) {
 		// Only allow POST requests with proper authentication
 		try {

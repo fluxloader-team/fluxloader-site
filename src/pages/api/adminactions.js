@@ -1,39 +1,12 @@
-/**
- * @file adminactions.js
- * @description Handles admin actions like verifying mods, denying mods, and banning authors
- */
-
 var Utils = require("../../common/utils.js");
 var Mongo = require("../../common/db");
 var { verifyDiscordUser } = require("../../common/verifydiscorduser");
 
 const log = new Utils.Log("sandustry.web.pages.adminactions", "./sandustry.web.main.txt", true);
 
-// Using Mongo.handleClient from db.js instead of local implementation
-
-/**
- * @namespace adminactions
- * @memberof module:api
- */
-
 module.exports = {
-	/**
-	 * The paths that use this module.
-	 * @type {Array<string>}
-	 * @memberof module:api.adminactions
-	 */
 	paths: ["/api/admin/actions"],
 
-	/**
-	 * Handles HTTP requests for admin actions.
-	 *
-	 * @function run
-	 * @memberof api.adminactions
-	 * @param {IncomingMessage} req - The HTTP request object.
-	 * @param {ServerResponse} res - The HTTP response object.
-	 *
-	 * @returns {Promise<void>} Sends the response.
-	 */
 	run: function (req, res) {
 		// Check if the method is POST
 		if (req.method !== "POST") {
