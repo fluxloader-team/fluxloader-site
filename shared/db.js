@@ -719,6 +719,13 @@ var GetMod = {
 					fileNames = Object.keys(content.files);
 				}
 
+				// Read the modinfo.json file
+				var modInfoPath = fileNames.find((path) => path.endsWith("modinfo.json"));
+				if (!modInfoPath) return `modinfo.json invalid: doesn't exist`;
+				var modInfoFile = content.file(modInfoPath);
+				var modInfoContent = await modInfoFile.async("text");
+				var modInfo = await JSON.parse(modInfoContent);
+
 				// Overwrite the "description" field with the README.md if it exists
 				var readmePath = fileNames.find((path) => path.endsWith("README.md"));
 				var description = sanitizeHTML(modInfo.description || "");
@@ -726,13 +733,6 @@ var GetMod = {
 					var readmeFile = content.file(readmePath);
 					description = sanitizeHTML(await readmeFile.async("text"));
 				}
-
-				// Read the modinfo.json file
-				var modInfoPath = fileNames.find((path) => path.endsWith("modinfo.json"));
-				if (!modInfoPath) return `modinfo.json invalid: doesn't exist`;
-				var modInfoFile = content.file(modInfoPath);
-				var modInfoContent = await modInfoFile.async("text");
-				var modInfo = await JSON.parse(modInfoContent);
 
 				// Sanitize modinfo.json properties
 				// I'm unsure about this, you may have HTML in your "description" field
