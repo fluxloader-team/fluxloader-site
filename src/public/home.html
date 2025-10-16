@@ -13,8 +13,8 @@
 			<div class="headerContainer" id="headerContainer">
 				<a class="btn btn-secondary headerButton" style="margin-left: 15px" href="/">Mod List</a>
 				<div class="input-group mb-3" style="width: 50%; padding-top: 15px">
-					<input type="text" class="form-control" id="searchInput" placeholder="Search by name, author, or #tag1 #tag2 for multiple tags" onchange="globalThis.PerformSearch()" />
-					<button class="btn btn-outline-secondary" type="button" onclick="globalThis.PerformSearch()">Search</button>
+					<input type="text" class="form-control" id="searchInput" placeholder="Search by name, author, or #tag1 #tag2 for multiple tags" onchange="globalThis.performSearch()" />
+					<button class="btn btn-outline-secondary" type="button" onclick="globalThis.performSearch()">Search</button>
 				</div>
 				<div id="rightContainer" style="display: flex; align-items: center; gap: 5px">
 					<a class="btn btn-primary" target="_blank" href="https://github.com/fluxloader-team/fluxloader/releases/latest/" title="Download the App"><i class="fa-solid fa-download"></i> Fluxloader</a>
@@ -76,9 +76,9 @@
 					});
 				}
 
-				globalThis.Mods = {};
-				globalThis.SearchQuery = "";
-				globalThis.Searching = false;
+				globalThis.mods = {};
+				globalThis.searchQuery = "";
+				globalThis.searching = false;
 
 				globalThis.buildSearchQuery = function (searchText) {
 					if (!searchText || searchText.trim() === "") {
@@ -128,20 +128,20 @@
 				modList.addEventListener("scroll", () => {
 					var isAtBottom = modList.scrollHeight - modList.scrollTop === modList.clientHeight;
 					if (isAtBottom) {
-						globalThis.PerformSearch(globalThis.pageGet++);
+						globalThis.performSearch(globalThis.pageGet++);
 					}
 				});
 
-				globalThis.PerformSearch = async function (pageToget = 1, perPage = 5000) {
-					if (globalThis.Searching === true) {
+				globalThis.performSearch = async function (pageToget = 1, perPage = 5000) {
+					if (globalThis.searching === true) {
 						return;
 					}
-					globalThis.Searching = true;
-					console.log("Performing search for:", globalThis.SearchQuery);
+					globalThis.searching = true;
+					console.log("Performing search for:", globalThis.searchQuery);
 					try {
 						var searchInput = document.getElementById("searchInput");
 						var searchText = searchInput.value;
-						globalThis.SearchQuery = searchText;
+						globalThis.searchQuery = searchText;
 
 						var queryJson = globalThis.buildSearchQuery(searchText);
 						var encodedQuery = encodeURIComponent(queryJson);
@@ -160,7 +160,7 @@
 						var response = await fetch(`/api/mods?search=${encodedQuery}&verified=null&size=${perPage}&page=${pageToget}`);
 						var result = await response.json();
 						if (pageToget === 1) {
-							globalThis.Mods = {};
+							globalThis.mods = {};
 						}
 						if (result.error) {
 							console.error("Search error:", result.error);
@@ -173,7 +173,7 @@
 							</tr>
 							`;
 							}
-							globalThis.Searching = false;
+							globalThis.searching = false;
 							return;
 						}
 
@@ -187,12 +187,12 @@
 							</tr>
 							`;
 							}
-							globalThis.Searching = false;
+							globalThis.searching = false;
 							return;
 						}
 
 						result.mods.forEach((mod) => {
-							globalThis.Mods[mod.modID] = mod;
+							globalThis.mods[mod.modID] = mod;
 						});
 
 						if (searchText.trim() === "") {
@@ -201,7 +201,7 @@
 							console.log(`Found ${result.mods.length} mods in search`);
 						}
 
-						UpdateModList(pageToget);
+						updateModList(pageToget);
 					} catch (error) {
 						console.error("Search failed:", error);
 						var modList = document.getElementById("modList");
@@ -210,7 +210,7 @@
 				};
 
 				document.addEventListener("DOMContentLoaded", async () => {
-					if (globalThis.Searching === true) {
+					if (globalThis.searching === true) {
 						return;
 					}
 					globalThis.searching = true;
@@ -219,7 +219,7 @@
 						var response = await fetch(`/api/mods?search=${encodedQuery}&verified=null&size=5000&page=1`);
 						var result = await response.json();
 
-						globalThis.Mods = {};
+						globalThis.mods = {};
 
 						if (result.error) {
 							console.error("Error loading initial mods:", result.error);
@@ -235,16 +235,16 @@
 						}
 
 						result.mods.forEach((mod) => {
-							globalThis.Mods[mod.modID] = mod;
+							globalThis.mods[mod.modID] = mod;
 						});
 
 						console.log(`Loaded ${result.mods.length} mods`);
-						UpdateModList();
+						updateModList();
 
 						document.getElementById("searchInput").addEventListener("keypress", function (event) {
 							if (event.key === "Enter") {
 								event.preventDefault();
-								globalThis.PerformSearch();
+								globalThis.performSearch();
 							}
 						});
 					} catch (error) {
@@ -254,8 +254,8 @@
 					}
 				});
 
-				globalThis.DownloadMod = async function (modID) {
-					var mod = globalThis.Mods[modID];
+				globalThis.downloadMod = async function (modID) {
+					var mod = globalThis.mods[modID];
 					console.log(`Downloading mod: ${JSON.stringify(mod)}`);
 					var response = await fetch(`/api/mods?modid=${mod.modID}&option=download`);
 					var result = await response.blob();
@@ -269,12 +269,12 @@
 					document.body.removeChild(link);
 				};
 
-				globalThis.UpdateModDisplayActions = async function (modID) {
-					var mod = globalThis.Mods[modID];
+				globalThis.updateModDisplayActions = async function (modID) {
+					var mod = globalThis.mods[modID];
 					var modDisplayActions = document.getElementById("modDisplayActions");
 					modDisplayActions.innerHTML = `
 						<div class="btn-group" role="group" style="padding-left: 15px;margin-top:5px; height: 40px;">
-							<button class="btn btn-primary" onclick='globalThis.DownloadMod("${modID}")'>Download</button>
+							<button class="btn btn-primary" onclick='globalThis.downloadMod("${modID}")'>Download</button>
 							<button class="btn btn-success" onclick="navigator.clipboard.writeText('${modID}')">Copy ID</button>
 						</div>
 						<select class="form-select" id="versionSelection" style="padding-left: 15px;margin-top:5px; height: 40px;width: 230px" onchange='globalThis.getModVersion("${modID}",this.value)'>
@@ -282,8 +282,8 @@
 						</select>`;
 				};
 
-				globalThis.DisplayMod = async function (modID) {
-					var mod = globalThis.Mods[modID];
+				globalThis.displayMod = async function (modID) {
+					var mod = globalThis.mods[modID];
 					var modDisplay = document.getElementById("modDisplay");
 					modDisplay.innerHTML = `
 						<div class="displayInner">
@@ -310,20 +310,20 @@
 					}
 					dependenciesList.innerHTML = `<table><tr><th style="width: 250px">Name</th><th style="width: 250px">Version</th></tr> ${dependencies}`;
 					dependenciesList.innerHTML += "</table>";
-					if (globalThis.ModCache[mod.modID]) {
-						await globalThis.DisplayModApi(globalThis.ModCache[mod.modID]);
+					if (globalThis.modCache[mod.modID]) {
+						await globalThis.displayModAPI(globalThis.modCache[mod.modID]);
 					} else {
 						var response = await fetch(`/api/mods?modid=${mod.modID}&option=info`);
 						var result = await response.json();
 						console.log("Response:", result.mod);
-						globalThis.ModCache[result.mod.modID] = result.mod;
-						await globalThis.DisplayModApi(globalThis.ModCache[result.mod.modID]);
+						globalThis.modCache[result.mod.modID] = result.mod;
+						await globalThis.displayModAPI(globalThis.modCache[result.mod.modID]);
 					}
 				};
 
-				globalThis.ModCache = {};
+				globalThis.modCache = {};
 
-				globalThis.DisplayModApi = async function (mod) {
+				globalThis.displayModAPI = async function (mod) {
 					document.getElementById(
 						"modDisplayModName"
 					).innerHTML = `${mod.modData.name}<a> </a><span class="badge text-bg-info">${mod.modData.version}</span><a> </a><span class="badge text-bg-warning">${mod.modData.author}</span>`;
@@ -331,22 +331,22 @@
 					document.getElementById("modDisplayTags").innerHTML = `<span class="badge text-bg-primary">${mod.modData.tags.join('</span><a> </a><span class="badge text-bg-primary">')}</span>`;
 					document.getElementById("modDisplayDescription").innerHTML = `${marked.parse(mod.modData.description)}`;
 
-					await globalThis.UpdateModDisplayActions(mod.modID);
+					await globalThis.updateModDisplayActions(mod.modID);
 					var response = await fetch(`/api/mods?modid=${mod.modID}&option=versions`);
 					var result = await response.json();
 					console.log("Response:", result);
-					await globalThis.UpdateVersionsList(mod.modID, result.versions);
+					await globalThis.updateVersionsList(mod.modID, result.versions);
 				};
 
 				globalThis.getModVersion = async function (modID, version) {
 					var response = await fetch(`/api/mods?modid=${modID}&option=info&version=${version}`);
 					var result = await response.json();
 					console.log("Response:", result.mod);
-					globalThis.ModCache[result.mod.modID] = result.mod;
-					await globalThis.DisplayModApi(globalThis.ModCache[result.mod.modID]);
+					globalThis.modCache[result.mod.modID] = result.mod;
+					await globalThis.displayModAPI(globalThis.modCache[result.mod.modID]);
 				};
 
-				globalThis.UpdateVersionsList = async function (modID, versions) {
+				globalThis.updateVersionsList = async function (modID, versions) {
 					var versionSelection = document.getElementById("versionSelection");
 					console.log("Versions: " + JSON.stringify(versions));
 					versions.forEach((version) => {
@@ -357,10 +357,10 @@
 					});
 				};
 
-				function UpdateModList(onPage = 1) {
+				function updateModList(onPage = 1) {
 					var modList = document.getElementById("modList");
 					var modItems = "";
-					var mods = Object.values(globalThis.Mods);
+					var mods = Object.values(globalThis.mods);
 
 					if (mods.length === 0) {
 						if (onPage === 1) {
@@ -385,14 +385,14 @@
 							</tr>
 							`;
 						}
-						globalThis.Searching = false;
+						globalThis.searching = false;
 						return;
 					}
 
 					mods.forEach((mod) => {
 						var tagList = mod.modData.tags && mod.modData.tags.length > 0 ? mod.modData.tags.slice(0, Math.min(mod.modData.tags.length, 4)).join('</span><a> </a><span class="badge text-bg-secondary">') : "";
 
-						modItems += `<tr class="modListItem" onclick='globalThis.DisplayMod("${mod.modID}")'>
+						modItems += `<tr class="modListItem" onclick='globalThis.displayMod("${mod.modID}")'>
 							<td>${mod.modData.name}</td>
 							<td>${mod.modData.author}</td>
 							<td>${mod.modData.version}</td>
@@ -411,9 +411,9 @@
 						</table>
 					`;
 					if (onPage === 1) {
-						globalThis.DisplayMod(mods[0].modID);
+						globalThis.displayMod(mods[0].modID);
 					}
-					globalThis.Searching = false;
+					globalThis.searching = false;
 				}
 			</script>
 		</div>

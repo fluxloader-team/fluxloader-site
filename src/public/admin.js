@@ -1,34 +1,34 @@
 globalThis.adminPageContent = document.getElementById("adminPageContent");
-globalThis.SearchQuery = "";
-globalThis.ModCache = {};
-globalThis.Users = {};
-globalThis.UserCache = {};
-globalThis.Actions = [];
-globalThis.CurrentPage = 1;
-globalThis.PageSize = 50;
-globalThis.TotalAdminPages = 1;
+globalThis.searchQuery = "";
+globalThis.modCache = {};
+globalThis.users = {};
+globalThis.userCache = {};
+globalThis.actions = [];
+globalThis.currentPage = 1;
+globalThis.pageSize = 50;
+globalThis.totalAdminPages = 1;
 
-globalThis.AdminPages = {
+globalThis.adminPages = {
 	Selection: {
 		content: `
 			<div class="adminpageColumn" style="width: 100%;gap:10px">
-				<button class="btn btn-primary" onclick="AdminPages.ModManagement.action()">Mod Management</button>
-				<button class="btn btn-primary" onclick="AdminPages.UserManagement.action()">User Management</button>
-				<button class="btn btn-primary" onclick="AdminPages.SiteActions.action()">Site Actions</button>
-				<button class="btn btn-primary" onclick="AdminPages.Bans.action()">Bans</button>
-				<button class="btn btn-primary" onclick="AdminPages.Config.action()">Config</button>
+				<button class="btn btn-primary" onclick="adminPages.ModManagement.action()">Mod Management</button>
+				<button class="btn btn-primary" onclick="adminPages.UserManagement.action()">User Management</button>
+				<button class="btn btn-primary" onclick="adminPages.SiteActions.action()">Site Actions</button>
+				<button class="btn btn-primary" onclick="adminPages.Bans.action()">Bans</button>
+				<button class="btn btn-primary" onclick="adminPages.Config.action()">Config</button>
 			</div>
 			`,
 		action: function () {
-			adminPageContent.innerHTML = AdminPages.Selection.content;
+			adminPageContent.innerHTML = adminPages.Selection.content;
 		},
 	},
 	UserManagement: {
 		content: `
 			<div class="adminpageColumn" style="width: 500px;">
 				<div id="Searchholder">
-					<input type="text" id="userSearchInput" placeholder="Search Users" style="width: 370px;" onchange="globalThis.PerformUserSearch()"/>
-					<select id="userSearchType" onchange="globalThis.PerformUserSearch()">
+					<input type="text" id="userSearchInput" placeholder="Search Users" style="width: 370px;" onchange="globalThis.performUserSearch()"/>
+					<select id="userSearchType" onchange="globalThis.performUserSearch()">
 						<option value="all">All</option>
 						<option value="admin">Admins</option>
 						<option value="banned">Banned</option>
@@ -54,8 +54,8 @@ globalThis.AdminPages = {
         	`,
 		action: async function () {
 			adminPageContent.classList = "adminpage adminpage-user-management";
-			adminPageContent.innerHTML = AdminPages.UserManagement.content;
-			await globalThis.PerformUserSearch();
+			adminPageContent.innerHTML = adminPages.UserManagement.content;
+			await globalThis.performUserSearch();
 		},
 	},
 	SiteActions: {
@@ -77,8 +77,8 @@ globalThis.AdminPages = {
 			`,
 		action: async function () {
 			adminPageContent.classList = "adminpage adminpage-site-actions";
-			adminPageContent.innerHTML = AdminPages.SiteActions.content;
-			await globalThis.LoadActions();
+			adminPageContent.innerHTML = adminPages.SiteActions.content;
+			await globalThis.loadActions();
 		},
 	},
 	Bans: {
@@ -96,8 +96,8 @@ globalThis.AdminPages = {
 			`,
 		action: async function () {
 			adminPageContent.classList = "adminpage adminpage-bans";
-			adminPageContent.innerHTML = AdminPages.Bans.content;
-			await globalThis.LoadBannedUsers();
+			adminPageContent.innerHTML = adminPages.Bans.content;
+			await globalThis.loadBannedUsers();
 		},
 	},
 	Config: {
@@ -106,14 +106,14 @@ globalThis.AdminPages = {
 				<h3>Config Editor</h3>
 				<div id="configEditor" style="width: 100%; height: 500px; border: 1px solid #ccc;"></div>
 				<div style="margin-top: 20px;">
-					<button class="btn btn-primary" onclick="globalThis.SaveConfig()">Save Config</button>
-					<button class="btn btn-secondary" onclick="globalThis.LoadConfig()">Reload Config</button>
+					<button class="btn btn-primary" onclick="globalThis.saveConfig()">Save Config</button>
+					<button class="btn btn-secondary" onclick="globalThis.loadConfig()">Reload Config</button>
 				</div>
 			</div>
 			`,
 		action: async function () {
 			adminPageContent.classList = "adminpage adminpage-config";
-			adminPageContent.innerHTML = AdminPages.Config.content;
+			adminPageContent.innerHTML = adminPages.Config.content;
 
 			// Initialize Monaco Editor
 			require.config({ paths: { vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs" } });
@@ -125,7 +125,7 @@ globalThis.AdminPages = {
 					automaticLayout: true,
 				});
 
-				globalThis.LoadConfig();
+				globalThis.loadConfig();
 			});
 		},
 	},
@@ -133,8 +133,8 @@ globalThis.AdminPages = {
 		content: `
 			<div class="adminpageColumn" style="width: 500px;">
 				<div id="Searchholder">
-					<input type="text" id="searchInput" placeholder="Search Mods" style="width: 370px;" onchange="globalThis.PerformSearch()"/>
-					<select id="searchtype" onchange="globalThis.PerformSearch()">
+					<input type="text" id="searchInput" placeholder="Search mods" style="width: 370px;" onchange="globalThis.performSearch()"/>
+					<select id="searchtype" onchange="globalThis.performSearch()">
 						<option value="all">All</option>
 						<option value="verified">Verified</option>
 						<option value="unverified">Unverified</option>
@@ -157,7 +157,7 @@ globalThis.AdminPages = {
         	`,
 		action: async function () {
 			adminPageContent.classList = "adminpage adminpage-mods";
-			adminPageContent.innerHTML = AdminPages.ModManagement.content;
+			adminPageContent.innerHTML = adminPages.ModManagement.content;
 			switch (document.getElementById("searchtype").value) {
 				case "verified":
 					verifiedOnly = "true";
@@ -174,37 +174,37 @@ globalThis.AdminPages = {
 			let searchQuery = {};
 
 			// Convert the query object to a JSON string and encode it for URL
-			globalThis.SearchQuery = encodeURIComponent(JSON.stringify(searchQuery));
+			globalThis.searchQuery = encodeURIComponent(JSON.stringify(searchQuery));
 
-			var response = await fetch(`/api/mods?search=${globalThis.SearchQuery}&verified=${verifiedOnly}`);
+			var response = await fetch(`/api/mods?search=${globalThis.searchQuery}&verified=${verifiedOnly}`);
 			var result = await response.json();
 			console.log(result.mods);
-			globalThis.Mods = {};
+			globalThis.mods = {};
 			if (result.mods && Array.isArray(result.mods)) {
 				result.mods.forEach((mod) => {
-					globalThis.Mods[mod.modID] = mod;
+					globalThis.mods[mod.modID] = mod;
 				});
 			}
 			console.log("Response:", result.mods);
-			UpdateModList();
+			updateModList();
 		},
 	},
 };
 
 // ------------------------------------------ Manage Mod ------------------------------------------
 
-globalThis.UpdateModList = function () {
+globalThis.updateModList = function () {
 	var modList = document.getElementById("modList");
 	var modItems = "";
-	Object.values(globalThis.Mods).forEach((mod) => {
-		modItems += `<tr class="modListItem" onclick='globalThis.DisplayMod("${mod.modID}")'><td>${mod.modData.name}</td><td>${mod.modData.author}</td><td>${mod.modData.version}</td></tr>`;
+	Object.values(globalThis.mods).forEach((mod) => {
+		modItems += `<tr class="modListItem" onclick='globalThis.displayMod("${mod.modID}")'><td>${mod.modData.name}</td><td>${mod.modData.author}</td><td>${mod.modData.version}</td></tr>`;
 	});
 	modList.innerHTML = `<table class="displayInner"><tr><th width="200">Name</th><th width="200">Author</th><th width="100">Version</th></tr> ${modItems}`;
 	modList.innerHTML += "</table>";
 
 	// Check if there are any mods before trying to display the first one
-	if (Object.values(globalThis.Mods).length > 0) {
-		globalThis.DisplayMod(Object.values(globalThis.Mods)[0].modID);
+	if (Object.values(globalThis.mods).length > 0) {
+		globalThis.displayMod(Object.values(globalThis.mods)[0].modID);
 	} else {
 		// Display a message when no mods are found
 		var modDisplay = document.getElementById("modDisplay");
@@ -223,7 +223,7 @@ globalThis.UpdateModList = function () {
 	}
 };
 
-globalThis.PerformSearch = async function () {
+globalThis.performSearch = async function () {
 	var searchInput = document.getElementById("searchInput");
 	var searchText = searchInput.value;
 	var verifiedOnly = "";
@@ -255,24 +255,24 @@ globalThis.PerformSearch = async function () {
 	}
 
 	// Convert the query object to a JSON string and encode it for URL
-	globalThis.SearchQuery = encodeURIComponent(JSON.stringify(searchQuery));
+	globalThis.searchQuery = encodeURIComponent(JSON.stringify(searchQuery));
 
-	var response = await fetch(`/api/mods?search=${globalThis.SearchQuery}&verified=${verifiedOnly}`);
+	var response = await fetch(`/api/mods?search=${globalThis.searchQuery}&verified=${verifiedOnly}`);
 	var result = await response.json();
 	console.log(result.mods);
-	globalThis.Mods = {};
+	globalThis.mods = {};
 	if (result.mods && Array.isArray(result.mods)) {
 		result.mods.forEach((mod) => {
-			globalThis.Mods[mod.modID] = mod;
+			globalThis.mods[mod.modID] = mod;
 		});
 	}
 	console.log("Response:", result.mods);
-	UpdateModList();
+	updateModList();
 };
 
-globalThis.DisplayMod = async function (modID) {
+globalThis.displayMod = async function (modID) {
 	// Check if the mod exists
-	var mod = globalThis.Mods[modID];
+	var mod = globalThis.mods[modID];
 	if (!mod) {
 		console.error(`Mod with ID ${modID} not found`);
 		var modDisplay = document.getElementById("modDisplay");
@@ -337,15 +337,15 @@ globalThis.DisplayMod = async function (modID) {
 	dependenciesList.innerHTML += "</table>";
 
 	try {
-		if (globalThis.ModCache[mod.modID]) {
-			await globalThis.DisplayModApi(globalThis.ModCache[mod.modID]);
+		if (globalThis.modCache[mod.modID]) {
+			await globalThis.displayModAPI(globalThis.modCache[mod.modID]);
 		} else {
 			var response = await fetch(`/api/mods?modid=${mod.modID}&option=info`);
 			var result = await response.json();
 			console.log("Response:", result.mod);
 			if (result.mod) {
-				globalThis.ModCache[result.mod.modID] = result.mod;
-				await globalThis.DisplayModApi(globalThis.ModCache[result.mod.modID]);
+				globalThis.modCache[result.mod.modID] = result.mod;
+				await globalThis.displayModAPI(globalThis.modCache[result.mod.modID]);
 			} else {
 				console.error(`API returned no mod data for ID ${mod.modID}`);
 				document.getElementById("modDisplayDescription").innerHTML = "Failed to load detailed mod information.";
@@ -357,11 +357,11 @@ globalThis.DisplayMod = async function (modID) {
 	}
 };
 
-globalThis.DisplayModApi = async function (mod) {
+globalThis.displayModAPI = async function (mod) {
 	try {
 		// Check if mod and modData exist
 		if (!mod || !mod.modData) {
-			console.error("Invalid mod data provided to DisplayModApi");
+			console.error("Invalid mod data provided to displayModAPI");
 			document.getElementById("modDisplayDescription").innerHTML = "Error: Invalid mod data";
 			return;
 		}
@@ -390,7 +390,7 @@ globalThis.DisplayModApi = async function (mod) {
 
 		// Update mod display actions
 		if (mod.modID) {
-			await globalThis.UpdateModDisplayActions(mod.modID);
+			await globalThis.updateModDisplayActions(mod.modID);
 
 			// Fetch versions
 			try {
@@ -399,7 +399,7 @@ globalThis.DisplayModApi = async function (mod) {
 				console.log("Response:", result);
 
 				if (result.versions) {
-					await globalThis.UpdateVersionsList(mod.modID, result.versions);
+					await globalThis.updateVersionsList(mod.modID, result.versions);
 				} else {
 					console.warn("No versions found for mod:", mod.modID);
 				}
@@ -446,8 +446,8 @@ globalThis.getModVersion = async function (modID, version) {
 			}
 
 			// Cache the mod data and display it
-			globalThis.ModCache[result.mod.modID] = result.mod;
-			await globalThis.DisplayModApi(globalThis.ModCache[result.mod.modID]);
+			globalThis.modCache[result.mod.modID] = result.mod;
+			await globalThis.displayModAPI(globalThis.modCache[result.mod.modID]);
 		} catch (fetchError) {
 			console.error("Error fetching mod version:", fetchError);
 			alert("Failed to retrieve mod version. Please try again later.");
@@ -458,7 +458,7 @@ globalThis.getModVersion = async function (modID, version) {
 	}
 };
 
-globalThis.UpdateVersionsList = async function (modID, versions) {
+globalThis.updateVersionsList = async function (modID, versions) {
 	try {
 		// Check if modID is valid
 		if (!modID) {
@@ -505,7 +505,7 @@ globalThis.UpdateVersionsList = async function (modID, versions) {
 	}
 };
 
-globalThis.UpdateModDisplayActions = async function (modID) {
+globalThis.updateModDisplayActions = async function (modID) {
 	try {
 		// Check if modID is valid
 		if (!modID) {
@@ -519,11 +519,11 @@ globalThis.UpdateModDisplayActions = async function (modID) {
 			return;
 		}
 
-		var mod = globalThis.Mods[modID];
+		var mod = globalThis.mods[modID];
 
 		// Basic actions that don't require mod data
 		var actionsHtml = `<div class="btn-group" role="group" style="padding-left: 15px;margin-top:5px; height: 40px;">
-<button class="btn btn-primary" onclick='globalThis.DownloadMod("${modID}")'>Download</button>
+<button class="btn btn-primary" onclick='globalThis.downloadMod("${modID}")'>Download</button>
 <button class="btn btn-success" onclick="navigator.clipboard.writeText('${modID}')">Copy ID</button>
 </div>
 <select class="form-select" id="versionSelection" style="padding-left: 15px;margin-top:5px; height: 40px;width: 230px" onchange='globalThis.getModVersion("${modID}",this.value)'>
@@ -536,17 +536,17 @@ globalThis.UpdateModDisplayActions = async function (modID) {
 			var authorId = mod.Author && mod.Author.discordID ? mod.Author.discordID : null;
 
 			actionsHtml += `<div class="btn-group" role="group" style="padding-left: 15px;margin-top:5px; height: 40px;">
-<button class="btn btn-success" onclick='globalThis.VerifyMod("${modID}")'>Verify</button>
-<button class="btn btn-danger" onclick='globalThis.DenyMod("${modID}")'>Deny</button>`;
+<button class="btn btn-success" onclick='globalThis.verifyMod("${modID}")'>Verify</button>
+<button class="btn btn-danger" onclick='globalThis.denyMod("${modID}")'>Deny</button>`;
 
 			// Only add Ban Author button if we have a valid author ID
 			if (authorId) {
-				actionsHtml += `<button class="btn btn-danger" onclick='globalThis.BanAuthor("${authorId}")'>Ban Author</button>`;
+				actionsHtml += `<button class="btn btn-danger" onclick='globalThis.banAuthor("${authorId}")'>Ban Author</button>`;
 			}
 
 			actionsHtml += `</div>`;
 		} else {
-			console.warn(`Mod with ID ${modID} not found in globalThis.Mods`);
+			console.warn(`Mod with ID ${modID} not found in globalThis.mods`);
 		}
 
 		modDisplayActions.innerHTML = actionsHtml;
@@ -557,7 +557,7 @@ globalThis.UpdateModDisplayActions = async function (modID) {
 
 // ------------------------------------------ Download Mod ------------------------------------------
 
-globalThis.DownloadMod = async function (modID) {
+globalThis.downloadMod = async function (modID) {
 	try {
 		// Check if modID is valid
 		if (!modID) {
@@ -566,7 +566,7 @@ globalThis.DownloadMod = async function (modID) {
 			return;
 		}
 
-		var mod = globalThis.Mods[modID];
+		var mod = globalThis.mods[modID];
 		if (!mod) {
 			console.error(`Mod with ID ${modID} not found`);
 			alert("Error: Mod not found");
@@ -612,7 +612,7 @@ globalThis.DownloadMod = async function (modID) {
 
 // ------------------------------------------ Admin Action ------------------------------------------
 
-globalThis.VerifyMod = async function (modID) {
+globalThis.verifyMod = async function (modID) {
 	if (!confirm("Are you sure you want to verify this mod?")) {
 		return;
 	}
@@ -639,14 +639,14 @@ globalThis.VerifyMod = async function (modID) {
 
 		alert("Mod verified successfully!");
 		// Refresh the mod list to show the updated status
-		await globalThis.PerformSearch();
+		await globalThis.performSearch();
 	} catch (error) {
 		console.error("Error verifying mod:", error);
 		alert("An error occurred while verifying the mod.");
 	}
 };
 
-globalThis.DenyMod = async function (modID) {
+globalThis.denyMod = async function (modID) {
 	if (!confirm("Are you sure you want to deny and delete this mod? This action cannot be undone.")) {
 		return;
 	}
@@ -673,14 +673,14 @@ globalThis.DenyMod = async function (modID) {
 
 		alert("Mod denied and deleted successfully!");
 		// Refresh the mod list
-		await globalThis.PerformSearch();
+		await globalThis.performSearch();
 	} catch (error) {
 		console.error("Error denying mod:", error);
 		alert("An error occurred while denying the mod.");
 	}
 };
 
-globalThis.BanAuthor = async function (authorID) {
+globalThis.banAuthor = async function (authorID) {
 	if (!confirm("Are you sure you want to ban this author? This will prevent them from uploading mods.")) {
 		return;
 	}
@@ -714,7 +714,7 @@ globalThis.BanAuthor = async function (authorID) {
 
 // ------------------------------------------ User Management ------------------------------------------
 
-globalThis.PerformUserSearch = async function () {
+globalThis.performUserSearch = async function () {
 	var searchInput = document.getElementById("userSearchInput");
 	var searchQuery = searchInput.value;
 	var searchType = document.getElementById("userSearchType").value;
@@ -740,7 +740,7 @@ globalThis.PerformUserSearch = async function () {
 			return;
 		}
 
-		globalThis.Users = {};
+		globalThis.users = {};
 
 		if (result.users && result.users.length > 0) {
 			result.users.forEach((user) => {
@@ -752,21 +752,21 @@ globalThis.PerformUserSearch = async function () {
 					return;
 				}
 
-				globalThis.Users[user.discordID] = user;
+				globalThis.users[user.discordID] = user;
 			});
 		}
 	} catch (e) {
 		console.error("Error processing users:", e);
 	}
 
-	UpdateUserList();
+	updateUserList();
 };
 
-globalThis.UpdateUserList = function () {
+globalThis.updateUserList = function () {
 	var userList = document.getElementById("userList");
 	var userItems = "";
 
-	Object.values(globalThis.Users).forEach((user) => {
+	Object.values(globalThis.users).forEach((user) => {
 		var statusBadge = "";
 		if (user.banned) {
 			statusBadge = '<span class="badge bg-danger">Banned</span>';
@@ -775,7 +775,7 @@ globalThis.UpdateUserList = function () {
 			statusBadge += ' <span class="badge bg-success">Admin</span>';
 		}
 
-		userItems += `<tr class="userListItem" onclick='globalThis.DisplayUser("${user.discordID}")'>
+		userItems += `<tr class="userListItem" onclick='globalThis.displayUser("${user.discordID}")'>
             <td>${user.discordUsername}</td>
             <td>${statusBadge}</td>
         </tr>`;
@@ -789,13 +789,13 @@ globalThis.UpdateUserList = function () {
         ${userItems}
     </table>`;
 
-	if (Object.values(globalThis.Users).length > 0) {
-		globalThis.DisplayUser(Object.values(globalThis.Users)[0].discordID);
+	if (Object.values(globalThis.users).length > 0) {
+		globalThis.displayUser(Object.values(globalThis.users)[0].discordID);
 	}
 };
 
-globalThis.DisplayUser = async function (discordID) {
-	var user = globalThis.Users[discordID];
+globalThis.displayUser = async function (discordID) {
+	var user = globalThis.users[discordID];
 	var userDisplay = document.getElementById("userDisplay");
 
 	userDisplay.innerHTML = `<div class="displayInner">
@@ -813,8 +813,8 @@ globalThis.DisplayUser = async function (discordID) {
     </div>`;
 
 	// Get user stats
-	if (globalThis.UserCache[discordID]) {
-		await DisplayUserStats(globalThis.UserCache[discordID]);
+	if (globalThis.userCache[discordID]) {
+		await displayUserStats(globalThis.userCache[discordID]);
 	} else {
 		var discordUser = JSON.parse(localStorage.getItem("discordUser"));
 		var response = await fetch("/api/users", {
@@ -836,14 +836,14 @@ globalThis.DisplayUser = async function (discordID) {
 			return;
 		}
 
-		globalThis.UserCache[discordID] = result;
-		await DisplayUserStats(result);
+		globalThis.userCache[discordID] = result;
+		await displayUserStats(result);
 	}
 
-	await UpdateUserDisplayActions(discordID);
+	await updateUserDisplayActions(discordID);
 };
 
-globalThis.DisplayUserStats = async function (userData) {
+globalThis.displayUserStats = async function (userData) {
 	var userStats = document.getElementById("userStats");
 	var stats = userData.stats;
 
@@ -859,7 +859,7 @@ globalThis.DisplayUserStats = async function (userData) {
 	}
 
 	userStats.innerHTML = `
-        <p>Mods Uploaded: ${stats.modsUploaded}</p>
+        <p>mods Uploaded: ${stats.modsUploaded}</p>
         <p>Mod Versions Uploaded: ${stats.modVersionsUploaded}</p>
         ${
 			stats.modVersionsUploaded > 0
@@ -883,8 +883,8 @@ globalThis.DisplayUserStats = async function (userData) {
     `;
 };
 
-globalThis.UpdateUserDisplayActions = async function (discordID) {
-	var user = globalThis.Users[discordID];
+globalThis.updateUserDisplayActions = async function (discordID) {
+	var user = globalThis.users[discordID];
 	var userDisplayActions = document.getElementById("userDisplayActions");
 
 	userDisplayActions.innerHTML = `
@@ -892,17 +892,17 @@ globalThis.UpdateUserDisplayActions = async function (discordID) {
             <button class="btn btn-success" onclick="navigator.clipboard.writeText('${discordID}')">Copy ID</button>
         </div>
         <div class="btn-group" role="group" style="padding-left: 15px;margin-top:5px; height: 40px;">
-            ${user.banned ? `<button class="btn btn-success" onclick='globalThis.UnbanUser("${discordID}")'>Unban User</button>` : `<button class="btn btn-danger" onclick='globalThis.BanUser("${discordID}")'>Ban User</button>`}
+            ${user.banned ? `<button class="btn btn-success" onclick='globalThis.unbanUser("${discordID}")'>Unban User</button>` : `<button class="btn btn-danger" onclick='globalThis.banUser("${discordID}")'>Ban User</button>`}
             ${
 				user.permissions.includes("admin")
-					? `<button class="btn btn-warning" onclick='globalThis.RemoveAdmin("${discordID}")'>Remove Admin</button>`
-					: `<button class="btn btn-primary" onclick='globalThis.SetAdmin("${discordID}")'>Set as Admin</button>`
+					? `<button class="btn btn-warning" onclick='globalThis.removeAdmin("${discordID}")'>Remove Admin</button>`
+					: `<button class="btn btn-primary" onclick='globalThis.setAdmin("${discordID}")'>Set as Admin</button>`
 			}
         </div>
     `;
 };
 
-globalThis.BanUser = async function (discordID) {
+globalThis.banUser = async function (discordID) {
 	if (!confirm("Are you sure you want to ban this user? This will prevent them from uploading mods.")) {
 		return;
 	}
@@ -929,15 +929,15 @@ globalThis.BanUser = async function (discordID) {
 
 		alert("User banned successfully!");
 		// Update the user in the cache
-		globalThis.Users[discordID].banned = true;
-		await globalThis.DisplayUser(discordID);
+		globalThis.users[discordID].banned = true;
+		await globalThis.displayUser(discordID);
 	} catch (error) {
 		console.error("Error banning user:", error);
 		alert("An error occurred while banning the user.");
 	}
 };
 
-globalThis.UnbanUser = async function (discordID) {
+globalThis.unbanUser = async function (discordID) {
 	if (!confirm("Are you sure you want to unban this user?")) {
 		return;
 	}
@@ -964,15 +964,15 @@ globalThis.UnbanUser = async function (discordID) {
 
 		alert("User unbanned successfully!");
 		// Update the user in the cache
-		globalThis.Users[discordID].banned = false;
-		await globalThis.DisplayUser(discordID);
+		globalThis.users[discordID].banned = false;
+		await globalThis.displayUser(discordID);
 	} catch (error) {
 		console.error("Error unbanning user:", error);
 		alert("An error occurred while unbanning the user.");
 	}
 };
 
-globalThis.SetAdmin = async function (discordID) {
+globalThis.setAdmin = async function (discordID) {
 	if (!confirm("Are you sure you want to set this user as an admin?")) {
 		return;
 	}
@@ -999,17 +999,17 @@ globalThis.SetAdmin = async function (discordID) {
 
 		alert("User set as admin successfully!");
 		// Update the user in the cache
-		if (!globalThis.Users[discordID].permissions.includes("admin")) {
-			globalThis.Users[discordID].permissions.push("admin");
+		if (!globalThis.users[discordID].permissions.includes("admin")) {
+			globalThis.users[discordID].permissions.push("admin");
 		}
-		await globalThis.DisplayUser(discordID);
+		await globalThis.displayUser(discordID);
 	} catch (error) {
 		console.error("Error setting admin:", error);
 		alert("An error occurred while setting the user as admin.");
 	}
 };
 
-globalThis.RemoveAdmin = async function (discordID) {
+globalThis.removeAdmin = async function (discordID) {
 	if (!confirm("Are you sure you want to remove admin status from this user?")) {
 		return;
 	}
@@ -1036,8 +1036,8 @@ globalThis.RemoveAdmin = async function (discordID) {
 
 		alert("Admin status removed successfully!");
 		// Update the user in the cache
-		globalThis.Users[discordID].permissions = globalThis.Users[discordID].permissions.filter((p) => p !== "admin");
-		await globalThis.DisplayUser(discordID);
+		globalThis.users[discordID].permissions = globalThis.users[discordID].permissions.filter((p) => p !== "admin");
+		await globalThis.displayUser(discordID);
 	} catch (error) {
 		console.error("Error removing admin:", error);
 		alert("An error occurred while removing admin status.");
@@ -1046,8 +1046,8 @@ globalThis.RemoveAdmin = async function (discordID) {
 
 // ------------------------------------------ Site Actions ------------------------------------------
 
-globalThis.LoadActions = async function (page = 1) {
-	globalThis.CurrentPage = page;
+globalThis.loadActions = async function (page = 1) {
+	globalThis.currentPage = page;
 
 	try {
 		var discordUser = JSON.parse(localStorage.getItem("discordUser"));
@@ -1059,7 +1059,7 @@ globalThis.LoadActions = async function (page = 1) {
 			body: JSON.stringify({
 				discordUser: discordUser,
 				page: page,
-				size: globalThis.PageSize,
+				size: globalThis.pageSize,
 			}),
 		});
 		var result = await response.json();
@@ -1070,20 +1070,20 @@ globalThis.LoadActions = async function (page = 1) {
 			return;
 		}
 
-		globalThis.Actions = result.actions;
-		globalThis.TotalAdminPages = result.pagination.totalAdminPages;
+		globalThis.actions = result.actions;
+		globalThis.totalAdminPages = result.pagination.totalAdminPages;
 
-		UpdateActionsList();
+		updateActionsList();
 	} catch (error) {
 		console.error("Error loading actions:", error);
 	}
 };
 
-globalThis.UpdateActionsList = function () {
+globalThis.updateActionsList = function () {
 	var actionsList = document.getElementById("actionsList");
 	var actionsItems = "";
 
-	globalThis.Actions.forEach((action) => {
+	globalThis.actions.forEach((action) => {
 		actionsItems += `<tr>
             <td>${action.discordID}</td>
             <td>${action.action}</td>
@@ -1109,20 +1109,20 @@ globalThis.UpdateActionsList = function () {
 	var paginationHtml = "";
 
 	// Previous button
-	paginationHtml += `<li class="page-item ${globalThis.CurrentPage === 1 ? "disabled" : ""}">
-        <a class="page-link" href="#" onclick="globalThis.LoadActions(${globalThis.CurrentPage - 1}); return false;">Previous</a>
+	paginationHtml += `<li class="page-item ${globalThis.currentPage === 1 ? "disabled" : ""}">
+        <a class="page-link" href="#" onclick="globalThis.LoadActions(${globalThis.currentPage - 1}); return false;">Previous</a>
     </li>`;
 
 	// Page numbers
-	for (let i = Math.max(1, globalThis.CurrentPage - 2); i <= Math.min(globalThis.TotalAdminPages, globalThis.CurrentPage + 2); i++) {
-		paginationHtml += `<li class="page-item ${i === globalThis.CurrentPage ? "active" : ""}">
+	for (let i = Math.max(1, globalThis.currentPage - 2); i <= Math.min(globalThis.totalAdminPages, globalThis.currentPage + 2); i++) {
+		paginationHtml += `<li class="page-item ${i === globalThis.currentPage ? "active" : ""}">
             <a class="page-link" href="#" onclick="globalThis.LoadActions(${i}); return false;">${i}</a>
         </li>`;
 	}
 
 	// Next button
-	paginationHtml += `<li class="page-item ${globalThis.CurrentPage === globalThis.TotalAdminPages ? "disabled" : ""}">
-        <a class="page-link" href="#" onclick="globalThis.LoadActions(${globalThis.CurrentPage + 1}); return false;">Next</a>
+	paginationHtml += `<li class="page-item ${globalThis.currentPage === globalThis.totalAdminPages ? "disabled" : ""}">
+        <a class="page-link" href="#" onclick="globalThis.loadActions(${globalThis.currentPage + 1}); return false;">Next</a>
     </li>`;
 
 	pagination.innerHTML = paginationHtml;
@@ -1130,7 +1130,7 @@ globalThis.UpdateActionsList = function () {
 
 // ------------------------------------------Banned Users ------------------------------------------
 
-globalThis.LoadBannedUsers = async function () {
+globalThis.loadBannedUsers = async function () {
 	try {
 		var discordUser = JSON.parse(localStorage.getItem("discordUser"));
 		var response = await fetch("/api/users", {
@@ -1154,13 +1154,13 @@ globalThis.LoadBannedUsers = async function () {
 		// Filter for banned users
 		var bannedUsers = result.users.filter((user) => user.banned);
 
-		UpdateBannedUsersList(bannedUsers);
+		updateBannedUsersList(bannedUsers);
 	} catch (error) {
 		console.error("Error loading banned users:", error);
 	}
 };
 
-globalThis.UpdateBannedUsersList = function (bannedUsers) {
+globalThis.updateBannedUsersList = function (bannedUsers) {
 	var bannedUsersList = document.getElementById("bannedUsersList");
 
 	if (bannedUsers.length === 0) {
@@ -1176,7 +1176,7 @@ globalThis.UpdateBannedUsersList = function (bannedUsers) {
             <td>${user.discordID}</td>
             <td>${new Date(user.joinedAt).toLocaleString()}</td>
             <td>
-                <button class="btn btn-success btn-sm" onclick='globalThis.UnbanUserFromList("${user.discordID}")'>Unban</button>
+                <button class="btn btn-success btn-sm" onclick='globalThis.unbanUserFromList("${user.discordID}")'>Unban</button>
             </td>
         </tr>`;
 	});
@@ -1196,7 +1196,7 @@ globalThis.UpdateBannedUsersList = function (bannedUsers) {
     </table>`;
 };
 
-globalThis.UnbanUserFromList = async function (discordID) {
+globalThis.unbanUserFromList = async function (discordID) {
 	if (!confirm("Are you sure you want to unban this user?")) {
 		return;
 	}
@@ -1223,7 +1223,7 @@ globalThis.UnbanUserFromList = async function (discordID) {
 
 		alert("User unbanned successfully!");
 		// Reload the banned users list
-		await globalThis.LoadBannedUsers();
+		await globalThis.loadBannedUsers();
 	} catch (error) {
 		console.error("Error unbanning user:", error);
 		alert("An error occurred while unbanning the user.");
@@ -1232,7 +1232,7 @@ globalThis.UnbanUserFromList = async function (discordID) {
 
 // ------------------------------------------ Config ------------------------------------------
 
-globalThis.LoadConfig = async function () {
+globalThis.loadConfig = async function () {
 	try {
 		var discordUser = JSON.parse(localStorage.getItem("discordUser"));
 		var response = await fetch("/api/config", {
@@ -1268,7 +1268,7 @@ globalThis.LoadConfig = async function () {
 	}
 };
 
-globalThis.SaveConfig = async function () {
+globalThis.saveConfig = async function () {
 	if (!confirm("Are you sure you want to save changes to the config file? This could affect the site's functionality.")) {
 		return;
 	}
@@ -1313,4 +1313,4 @@ globalThis.SaveConfig = async function () {
 
 console.log("admin page loaded");
 
-globalThis.AdminPages.Selection.action();
+globalThis.adminPages.Selection.action();
