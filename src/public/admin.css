@@ -1,0 +1,180 @@
+.adminpage {
+	display: flex;
+	flex-direction: row;
+	width: 100%;
+	height: 100%;
+}
+
+.adminpageColumn {
+	display: flex;
+	flex-direction: column;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	scrollbar-width: none;
+	height: 100%;
+	background-color: var(--color-bg-light);
+}
+
+/* ----------------------------------- Page/User Management ----------------------------------- */
+
+.adminpage.adminpage-user-management {
+	height: calc(100% - 45px);
+}
+
+.adminpage-user-management .adminpageColumn {
+	border: 10px solid #222222;
+}
+
+.userList {
+	width: 50%;
+	height: calc(100% - 45px);
+	display: flex;
+	flex-direction: column;
+	padding: 10px;
+	border: 10px solid #222222;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	scrollbar-width: none;
+}
+
+.userListItem {
+	border-bottom: 3px solid #2c2c2c;
+}
+
+.userListItem:hover {
+	background-color: #494949;
+}
+
+.userDisplay {
+	width: calc(100%);
+	height: calc(100%);
+	overflow-x: hidden;
+	overflow-y: scroll;
+	scrollbar-width: none;
+}
+
+.userDisplayData {
+	padding: 10px;
+	scrollbar-width: none;
+	width: 100%;
+	height: calc(100% - 50px);
+	display: flex;
+	flex-direction: column;
+	overflow-x: hidden;
+}
+
+.userDisplayActions {
+	background-color: #222222;
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	width: calc(100% - 500px);
+	height: 155px;
+	display: flex;
+	flex-direction: row;
+	gap: 10px;
+}
+
+/* ----------------------------------- Page/Si Actions ----------------------------------- */
+
+.adminpage.adminpage-site-actions {
+	flex-direction: column;
+	height: calc(100% - 45px);
+	overflow-y: auto;
+}
+
+.adminpage-site-actions .adminpageColumn {
+	border: 10px solid #222222;
+	padding: 20px;
+}
+
+.adminpage-site-actions .pagination {
+	margin-top: 20px;
+	justify-content: center;
+}
+
+/* ----------------------------------- Page/Bans ----------------------------------- */
+
+.adminpage.adminpage-bans {
+	flex-direction: column;
+	height: calc(100% - 45px);
+	overflow-y: auto;
+}
+
+.adminpage-bans .adminpageColumn {
+	border: 10px solid #222222;
+	padding: 20px;
+}
+
+/* ----------------------------------- Page/Config ----------------------------------- */
+
+.adminpage.adminpage-config {
+	flex-direction: column;
+	height: calc(100% - 45px);
+	overflow-y: auto;
+}
+
+.adminpage-config .adminpageColumn {
+	border: 10px solid #222222;
+	padding: 20px;
+}
+
+/* ----------------------------------- Page/Mods ----------------------------------- */
+
+.adminpage.adminpage-mods {
+	height: calc(100% - 45px);
+}
+
+.adminpage-mods .adminpageColumn {
+	border: 10px solid #222222;
+}
+
+.adminpage-mods .modList {
+	width: 50%;
+	height: calc(100% - 45px);
+	display: flex;
+	flex-direction: column;
+	padding: 10px;
+	border: 10px solid #222222;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	scrollbar-width: none;
+}
+
+.adminpage-mods .modListItem {
+	border-bottom: 3px solid #2c2c2c;
+}
+
+.adminpage-mods .modListItem:hover {
+	background-color: #494949;
+}
+
+.adminpage-mods .modDisplay {
+	width: calc(100%);
+	height: calc(100%);
+	overflow-x: hidden;
+	overflow-y: scroll;
+	scrollbar-width: none;
+}
+
+.adminpage-mods.modDisplayData {
+	padding: 10px;
+	scrollbar-width: none;
+	width: 100%;
+	height: calc(100% - 50px);
+	display: flex;
+	flex-direction: column;
+	overflow-x: hidden;
+}
+
+.adminpage-mods .modDisplayActions {
+	background-color: #222222;
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	width: calc(100% - 500px);
+	height: 155px;
+	display: flex;
+	flex-direction: row;
+	gap: 10px;
+}

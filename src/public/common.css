@@ -1,0 +1,155 @@
+:root {
+	/* Base Colours */
+	--color-bg-dark3: #22242b;
+	--color-bg-dark2: #1f222b;
+	--color-bg-dark: #272a34;
+	--color-bg-medium: #2c2f39;
+	--color-bg-light: #3a3d49;
+	--color-bg-light2: #4c4f5b;
+	--color-bg-light3: #6f717a;
+	--color-text-primary: #ddd;
+	--color-text-secondary: #aaa;
+	--color-text-muted: #919191;
+	--color-text-muted2: #67677b;
+
+	--color-vivid-green: #53b356;
+	--color-dark-green: #4c6949;
+	--color-vivid-red: #d9534f;
+	--color-dark-red: #92453b;
+	--color-vivid-orange: #f0ad4e;
+	--color-vivid-blue: #528bf1;
+
+	/* Modified Colours */
+	--color-bg-dark3-hover-lighter: #2a2d36;
+	--color-bg-dark2-hover-lighter: #33373f;
+	--color-bg-dark2-active-lighter: #454853;
+	--color-bg-dark-hover-lighter: #3a3d49;
+	--color-bg-dark-hover-darker: #20232d;
+	--color-bg-dark-active-lighter: #4c505d;
+	--color-bg-medium-hover-darker: #272a33;
+	--color-bg-medium-active-darker: #24262f;
+	--color-bg-medium-hover-lighter: #333640;
+	--color-bg-light-hover-lighter: #404450;
+	--color-bg-light-active-darker: #353640;
+	--color-bg-light-active-lighter: #525564;
+	--color-bg-light2-hover-lighter: #5c5f70;
+	--color-bg-light3-hover-lighter: #848790;
+	--color-vivid-blue-hover-lighter: #7d9bf6;
+	--color-dark-red-hover-lighter: #b04a3c;
+	--color-dark-green-hover-lighter: #5c7a5c;
+
+	/* Specific Colours */
+	--color-control: #888;
+	--color-control-hover-lighter: #a3a3a3;
+	--color-control-active: #585858;
+	--color-control-active-hover-lighter: #6a6a6a;
+
+	/* Values */
+	--br-small: 0.2rem;
+	--br-medium: 0.4rem;
+}
+
+/* ----------------------------------- General ----------------------------------- */
+
+body,
+html {
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+}
+
+.pageContainer {
+	height: 100vh;
+	width: 100vw;
+	display: flex;
+	flex-direction: column;
+	background-color: var(--color-bg-light);
+}
+
+.fullpage {
+	width: 100%;
+	height: 100%;
+}
+
+.headerContainer {
+	color: pink;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+	height: 50px;
+	background-color: var(--color-bg-dark2);
+	padding: 20px;
+}
+
+/* ----------------------------------- Upload ----------------------------------- */
+
+.modUploadForm {
+	height: 100%;
+	margin: auto;
+	width: 1200px;
+	max-width: 100%;
+	padding: 20px 40px;
+	background-color: var(--color-bg-dark);
+	overflow: auto;
+}
+
+/* ----------------------------------- Home ----------------------------------- */
+
+.modList {
+	width: 50%;
+	height: calc(100% - 45px);
+	display: flex;
+	flex-direction: column;
+	padding: 10px;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	scrollbar-width: none;
+}
+
+.modListItem {
+	cursor: pointer;
+}
+
+.modListItem:hover {
+	background-color: var(--color-bg-light-hover-lighter);
+}
+
+.modDisplayHolder {
+	height: calc(100%);
+	display: flex;
+	flex-direction: row;
+	gap: 0px;
+	background-color: var(--color-bg-light);
+}
+
+.modDisplay {
+	width: calc(50%);
+	height: calc(100% - 50px);
+	overflow-x: hidden;
+	overflow-y: scroll;
+	scrollbar-width: none;
+	background-color: var(--color-bg-medium);
+}
+
+.modDisplayData {
+	padding: 20px;
+	scrollbar-width: none;
+	width: 100%;
+	height: calc(100% - 50px);
+	display: flex;
+	flex-direction: column;
+	overflow-x: hidden;
+}
+
+.modDisplayActions {
+	background-color: #222222;
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	width: calc(50%);
+	height: 50px;
+	display: flex;
+	flex-direction: row;
+	gap: 10px;
+}

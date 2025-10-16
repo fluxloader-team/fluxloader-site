@@ -1,0 +1,133 @@
+const http = require("http");
+const fs = require("fs");
+const Utils = require("./common/utils.js");
+const path = require("path");
+const discord = require("./discord/discordbot.js");
+
+const CONFIG_PATH = path.join(__dirname, "config.json");
+const DEFAULT_CONFIG = {
+	discord: {
+		clientId: "CLIENT_ID",
+		clientSecret: "CLIENT_SECRET",
+		redirectUri: "https://example.com/auth/discord/callback",
+		token: "TOKEN",
+		runbot: false,
+		serverLog: true,
+		serverLogChannel: "SERVER_LOG_CHANNEL",
+		serverActionsChannel: "SERVER_ACTIONS_CHANNEL",
+	},
+	mongodb: {
+		uri: "mongodb://localhost:27017/somejoinstring",
+	},
+	git: {
+		pull: true,
+	},
+	ModSettings: {
+		validationTime: 172800,
+	},
+};
+
+const logger = new Utils.Log("sandustry.web.main", "./sandustry.web.main.txt", true);
+
+process.on("uncaughtException", function (err) {
+	logger.info(`Caught exception: ${err.stack}`);
+});
+
+globalThis.config = DEFAULT_CONFIG;
+globalThis.pages = {};
+globalThis.public = {};
+globalThis.timers = [];
+
+// --------------------------------------------------------------------------------------
+
+function loadConfig() {
+	if (!fs.existsSync(CONFIG_PATH)) {
+		logger.info("Config file not found, generating default config.json...");
+		fs.writeFileSync(CONFIG_PATH, JSON.stringify(DEFAULT_CONFIG, null, 2), "utf-8");
+	}
+
+	globalThis.config = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf-8"));
+}
+
+function loadResources() {
+	let pageNames = [];
+	fs.readdirSync("./pages", { withFileTypes: true, recursive: true }).forEach((entry) => {
+		if (entry.isDirectory()) return;
+		pageNames.push(entry.name);
+		const filePath = path.resolve(entry.path, entry.name);
+		const fileModule = require(filePath);
+		fileModule.paths.forEach((path) => (pages[path] = fileModule));
+	});
+
+	logger.info(`pages loaded: [ ${pageNames.join(", ")} ]`);
+
+	let publicFileNames = [];
+	fs.readdirSync("./public", { withFileTypes: true, recursive: true }).forEach((entry) => {
+		if (entry.isDirectory()) return;
+		publicFileNames.push(entry.name);
+		const filePath = path.resolve(entry.path, entry.name);
+		public[entry.name] = fs.readFileSync(filePath, "utf8");
+	});
+
+	logger.info(`public files loaded: [ ${publicFileNames.join(", ")} ]`);
+
+	let timerNames = [];
+	fs.readdirSync("./timers", { withFileTypes: true, recursive: true }).forEach((entry) => {
+		if (entry.isDirectory()) return;
+		timerNames.push(entry.name);
+		const filePath = path.resolve(entry.path, entry.name);
+		const fileModule = require(filePath);
+		timers.push(fileModule);
+	});
+
+	logger.info(`Timers loaded: [ ${timerNames.join(", ")} ]`);
+}
+
+function handleWebRequests(req, res) {
+	var url = req.url;
+	var urlSplit = url.split("?");
+	var urlName = urlSplit[0];
+
+	var page = pages[urlName];
+	if (page) {
+		logger.debug(`Received request for page: ${url}`);
+		page.run(req, res);
+	} else {
+		var publicFile = public[urlName.replace("/", "")];
+		if (publicFile) {
+			const type = { ".html": "text/html", ".css": "text/css", ".js": "application/javascript" }[path.extname(urlName)] || "text/html";
+			logger.debug(`Received request for public file: ${url} (Content-Type: ${type})`);
+			res.writeHead(200, { "Content-Type": type });
+			res.end(publicFile);
+			return;
+		} else {
+			logger.debug(`Requested resource not found: ${url}`);
+			res.writeHead(404, { "Content-Type": "text/html" });
+			res.end("404");
+		}
+	}
+}
+
+function main() {
+	logger.info("Starting the fluxloader site");
+
+	loadConfig();
+	loadResources();
+
+	if (globalThis.config.discord.runbot) {
+		discord.run();
+	}
+
+	const server = http.createServer(handleWebRequests);
+	server.listen(20221);
+
+	setInterval(() => {
+		for (const timer of timers) {
+			timer.run();
+		}
+	}, 5000);
+
+	logger.info("Server started: http://localhost:20221");
+}
+
+main();
