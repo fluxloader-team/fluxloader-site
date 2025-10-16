@@ -1,5 +1,5 @@
-var colors = require("colors");
-var fs = require("fs");
+const colors = require("colors");
+const fs = require("fs");
 
 class Log {
 	currentLogs = [];

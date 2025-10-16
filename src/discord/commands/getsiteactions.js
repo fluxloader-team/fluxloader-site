@@ -3,45 +3,22 @@
  * @description Implements the `/getsiteactions` slash command for the discord bot. This command retrieves site actions.
  */
 
-var { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-var Utils = require("./../../common/utils.js");
-var log = new Utils.Log("sandustry.bot.command.getsiteactions", "./sandustry.bot.main.txt", true);
-var Mongo = require("./../../common/db");
-/**
- * Namespace for discord bot commands.
- * @namespace getSiteActions
- * @memberof module:discord.commands
- */
-/**
- * Slash command definition and execution logic for `/getsiteactions`.
- *
- * @type {Object}
- * @property data - The slash command structure for `/getsiteactions`.
- * @property {Function} execute - The logic to process the command when invoked.
- * @memberof module:discord.commands.GetModInfo
- */
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const Utils = require("./../../common/utils.js");
+const Mongo = require("./../../common/db");
+
+const logger =new Utils.Log("sandustry.bot.command.getsiteactions", "./sandustry.bot.main.txt", true);
+
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName("getsiteactions")
 		.setDescription("Gets site actions from search request")
 		.addStringOption((option) => option.setName("query").setDescription("The search query (userID or action)").setRequired(true))
 		.addIntegerOption((option) => option.setName("page").setDescription("The page number to show")),
-	/**
-	 * Executes the `/getsiteactions` command.
-	 *
-	 * @async
-	 * @function execute
-	 * @memberof module:discord.commands.GetModInfo
-	 * @param interaction - The interaction object representing the command invocation.
-	 *
-	 * @returns {Promise<void>} Resolves when the command's logic is complete and a reply has been sent.
-	 *
-	 * @throws {Error} Logs an error and sends an error response to the user if something goes wrong during command execution.
-	 *
-	 */
+
 	async execute(interaction) {
 		await interaction.deferReply();
-		log.info(`getting site actions for ${interaction.options.getString("query")}`);
+		logger.info(`getting site actions for ${interaction.options.getString("query")}`);
 		var query = { $or: [{ discordID: { $regex: interaction.options.getString("query"), $options: "i" } }, { action: { $regex: interaction.options.getString("query"), $options: "i" } }] };
 		//type of ActionEntry[]
 		var Actions = await Mongo.GetAction.Get(query, { number: interaction.options.getInteger("page") || 1, size: 10 });
@@ -60,7 +37,7 @@ module.exports = {
 			});
 			await interaction.editReply({ embeds: [embed] });
 		} catch (e) {
-			log.info(`Error fetching site actions: ${e}`);
+			logger.info(`Error fetching site actions: ${e}`);
 			await interaction.editReply({ content: "An error occurred while fetching the site actions. Please try again later." });
 		}
 	},

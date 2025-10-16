@@ -1,9 +1,8 @@
-var Utils = require("../../common/utils.js");
-const https = require("https");
-var Mongo = require("../../common/db");
-var { verifyDiscordUser } = require("../../common/verifydiscorduser");
+const Utils = require("../../common/utils.js");
+const Mongo = require("../../common/db");
+const { verifyDiscordUser } = require("../../common/verifydiscorduser");
 
-var log = new Utils.Log("sandustry.web.pages.admin", "./sandustry.web.main.txt", true);
+const logger =new Utils.Log("sandustry.web.pages.admin", "./sandustry.web.main.txt", true);
 
 module.exports = {
 	paths: ["/api/admin/page"],
@@ -38,12 +37,12 @@ module.exports = {
 						return;
 					}
 					if (UserData.permissions.includes("admin")) {
-						res.end(JSON.stringify({ run: globalThis.components["admin.js"] }));
+						res.end(JSON.stringify({ run: globalThis.public["admin.js"] }));
 					} else {
 						res.end(JSON.stringify({ error: "User does not have admin permissions" }));
 					}
 				} catch (error) {
-					log.info(`Error ${error}`);
+					logger.info(`Error ${error}`);
 					res.end(JSON.stringify({ error: "Invalid JSON format" }));
 				}
 			});

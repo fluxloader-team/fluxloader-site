@@ -1,5 +1,5 @@
 {
-	"name": "fluxloadersite",
+	"name": "fluxloader-site",
 	"version": "1.0.0",
 	"main": "src/index.js",
 	"scripts": {
@@ -19,8 +19,5 @@
 		"sanitize-html": "^2.15.0",
 		"semver": "^7.7.1",
 		"ws": "^8.18.1"
-	},
-	"devDependencies": {
-		"clean-jsdoc-theme": "^4.3.0"
 	}
 }

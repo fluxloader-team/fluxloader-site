@@ -1,9 +1,8 @@
+const Utils = require("../../common/utils.js");
+const { decompress } = require("@mongodb-js/zstd");
+const Mongo = require("../../common/db");
 
-var Utils = require("../../common/utils.js");
-var { decompress } = require("@mongodb-js/zstd");
-var Mongo = require("../../common/db");
-
-var log = new Utils.Log("sandustry.web.pages.search", "./sandustry.web.main.txt", true);
+const logger =new Utils.Log("sandustry.web.pages.search", "./sandustry.web.main.txt", true);
 
 module.exports = {
 	paths: ["/api/mods"],
@@ -51,14 +50,14 @@ module.exports = {
 								);
 								return;
 							}
-							log.info(`Attempting to retrieve mod data for modID: ${modID}, version: ${querys["version"] || "latest"}`);
+							logger.info(`Attempting to retrieve mod data for modID: ${modID}, version: ${querys["version"] || "latest"}`);
 							var modData = {};
 							if (querys["version"]) {
 								modData = await Mongo.GetMod.Versions.One(modID, querys["version"]);
 							} else {
 								modData = await Mongo.GetMod.Versions.One(modID);
 							}
-							log.info(
+							logger.info(
 								`Retrieved modData: ${JSON.stringify({
 									modID: modID,
 									version: querys["version"] || "latest",
@@ -79,7 +78,7 @@ module.exports = {
 								return;
 							}
 							if (!modData.modfile) {
-								log.info(`Mod file data is missing for modID: ${modID}, version: ${querys["version"] || "latest"}`);
+								logger.info(`Mod file data is missing for modID: ${modID}, version: ${querys["version"] || "latest"}`);
 								res.writeHead(201, { "Content-Type": "application/json" });
 								res.end(
 									JSON.stringify({
@@ -90,7 +89,7 @@ module.exports = {
 								);
 								return;
 							}
-							log.info(`Processing download for modID: ${modID}, version: ${querys["version"] || "latest"}, modfile length: ${modData.modfile ? modData.modfile.length : 0}`);
+							logger.info(`Processing download for modID: ${modID}, version: ${querys["version"] || "latest"}, modfile length: ${modData.modfile ? modData.modfile.length : 0}`);
 							var compressedBuffer = Buffer.from(modData.modfile, "base64");
 							var decompressedBuffer = await decompress(compressedBuffer);
 							res.writeHead(200, {
@@ -99,9 +98,9 @@ module.exports = {
 							});
 							res.end(decompressedBuffer);
 						} catch (error) {
-							log.info(`Error processing mod download: ${error.message}`);
-							log.info(`Error stack: ${error.stack}`);
-							log.info(
+							logger.info(`Error processing mod download: ${error.message}`);
+							logger.info(`Error stack: ${error.stack}`);
+							logger.info(
 								`Error context: modID=${modID}, version=${querys["version"] || "latest"}, modData=${JSON.stringify({
 									exists: !!modData,
 									hasModfile: modData && !!modData.modfile,
@@ -136,14 +135,14 @@ module.exports = {
 								);
 								return;
 							}
-							log.info(`Attempting to retrieve mod info for modID: ${modID}, version: ${querys["version"] || "latest"}`);
+							logger.info(`Attempting to retrieve mod info for modID: ${modID}, version: ${querys["version"] || "latest"}`);
 							var modVersion = {};
 							if (querys["version"]) {
 								modVersion = await Mongo.GetMod.Versions.One(modID, querys["version"], { modfile: 0 });
 							} else {
 								modVersion = await Mongo.GetMod.Versions.One(modID, "", { modfile: 0 });
 							}
-							log.info(
+							logger.info(
 								`Retrieved modVersion: ${JSON.stringify({
 									modID: modID,
 									version: querys["version"] || "latest",
@@ -167,9 +166,9 @@ module.exports = {
 							res.writeHead(201, { "Content-Type": "application/json" });
 							res.end(JSON.stringify({ mod: modVersion }));
 						} catch (err) {
-							log.info(`Error fetching mod info: ${err.message}`);
-							log.info(`Error stack: ${err.stack}`);
-							log.info(
+							logger.info(`Error fetching mod info: ${err.message}`);
+							logger.info(`Error stack: ${err.stack}`);
+							logger.info(
 								`Error context: modID=${modID}, version=${querys["version"] || "latest"}, modVersion=${JSON.stringify({
 									exists: !!modVersion,
 									modVersionKeys: modVersion ? Object.keys(modVersion) : [],
@@ -195,7 +194,7 @@ module.exports = {
 							var modID = querys["modid"];
 							var modIDs = querys["modids"];
 
-							log.info(
+							logger.info(
 								`Attempting to retrieve versions with parameters: ${JSON.stringify({
 									modID: modID || null,
 									modIDs: modIDs || null,
@@ -207,7 +206,7 @@ module.exports = {
 							if (modIDs) {
 								// Parse the comma-separated list of mod IDs
 								var modIDsArray = modIDs.split(",");
-								log.info(`Processing versions request for multiple modIDs: ${modIDsArray.join(", ")}`);
+								logger.info(`Processing versions request for multiple modIDs: ${modIDsArray.join(", ")}`);
 
 								// Check if full version data is requested
 								if (querys["data"] === "true") {
@@ -224,7 +223,7 @@ module.exports = {
 								// Get version numbers for multiple mod IDs
 								var versionsMap = await Mongo.GetMod.Versions.MultipleNumbers(modIDsArray);
 
-								log.info(
+								logger.info(
 									`Retrieved versions for multiple modIDs: ${JSON.stringify({
 										requestedCount: modIDsArray.length,
 										returnedCount: Object.keys(versionsMap).length,
@@ -237,13 +236,13 @@ module.exports = {
 							}
 							// Handle single mod ID case (original behavior)
 							else if (modID) {
-								log.info(`Processing versions request for single modID: ${modID}`);
+								logger.info(`Processing versions request for single modID: ${modID}`);
 								// Check if full version data is requested
 								if (querys["data"] === "true") {
 									// Get all version data (excluding the modfile to reduce payload size)
 									var versionsData = await Mongo.GetMod.Versions.All(modID, { modfile: 0 });
 
-									log.info(
+									logger.info(
 										`Retrieved full version data for modID ${modID}: ${JSON.stringify({
 											count: versionsData.length,
 											versions: versionsData.length > 0 ? versionsData.map((v) => v.version) : [],
@@ -264,12 +263,12 @@ module.exports = {
 									res.writeHead(201, { "Content-Type": "application/json" });
 									res.end(JSON.stringify({ versions: versionsData }));
 								}
-								
+
 								// Get only version numbers (origina#l behavior)
 								else {
 									var versions = await Mongo.GetMod.Versions.Numbers(modID);
 
-									log.info(
+									logger.info(
 										`Retrieved version numbers for modID ${modID}: ${JSON.stringify({
 											count: versions.length,
 											versions: versions,
@@ -301,9 +300,9 @@ module.exports = {
 								return;
 							}
 						} catch (err) {
-							log.info(`Error fetching versions: ${err.message}`);
-							log.info(`Error stack: ${err.stack}`);
-							log.info(
+							logger.info(`Error fetching versions: ${err.message}`);
+							logger.info(`Error stack: ${err.stack}`);
+							logger.info(
 								`Error context: ${JSON.stringify({
 									modID: modID || null,
 									modIDs: modIDs || null,
@@ -339,7 +338,7 @@ module.exports = {
 							throw new Error("Invalid search query format");
 						}
 					} catch (jsonError) {
-						log.info("Invalid JSON search query: " + jsonError.message);
+						logger.info("Invalid JSON search query: " + jsonError.message);
 						res.writeHead(201, { "Content-Type": "application/json" });
 						res.end(
 							JSON.stringify({
@@ -394,7 +393,7 @@ module.exports = {
 						})
 					);
 				} catch (error) {
-					log.info("Error occurred while searching mods:" + error);
+					logger.info("Error occurred while searching mods:" + error);
 
 					res.writeHead(201, { "Content-Type": "application/json" });
 					res.end(

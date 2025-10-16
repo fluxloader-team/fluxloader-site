@@ -10,7 +10,7 @@ module.exports = {
 				},
 			};
 
-			var req = require("https").request(options, (res) => {
+			const req = require("https").request(options, (res) => {
 				let data = "";
 
 				res.on("data", (chunk) => {

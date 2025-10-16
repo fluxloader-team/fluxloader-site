@@ -1,8 +1,8 @@
-var querystring = require("querystring");
-var https = require("https");
-var Utils = require("../../common/utils.js");
+const querystring = require("querystring");
+const https = require("https");
+const Utils = require("../../common/utils.js");
 
-var log = new Utils.Log("sandustry.web.pages.discord", "./sandustry.web.main.txt", true);
+const logger =new Utils.Log("sandustry.web.pages.discord", "./sandustry.web.main.txt", true);
 
 function makeRequest(host, path, method, headers, postData) {
 	return new Promise((resolve, reject) => {
@@ -51,7 +51,7 @@ module.exports = {
 
 		if (pathname === "/auth/discord") {
 			var authURL = `https://discord.com/oauth2/authorize?client_id=${globalThis.config.discord.clientId}&redirect_uri=${encodeURIComponent(globalThis.config.discord.redirectUri)}&response_type=code&scope=identify`;
-			log.info("Redirecting to discord Authorization URL...");
+			logger.info("Redirecting to discord Authorization URL...");
 			res.writeHead(302, { Location: authURL });
 			return res.end();
 		}
@@ -64,7 +64,7 @@ module.exports = {
 			}
 
 			try {
-				log.info(`Received code: ${code}`);
+				logger.info(`Received code: ${code}`);
 				var tokenData = querystring.stringify({
 					client_id: globalThis.config.discord.clientId,
 					client_secret: globalThis.config.discord.clientSecret,
@@ -75,7 +75,7 @@ module.exports = {
 
 				var tokenResponse = await makeRequest("discord.com", "/api/oauth2/token", "POST", { "Content-Type": "application/x-www-form-urlencoded" }, tokenData);
 
-				log.info(`Token Response: ${JSON.stringify(tokenResponse)}`);
+				logger.info(`Token Response: ${JSON.stringify(tokenResponse)}`);
 				if (!tokenResponse.access_token) {
 					res.writeHead(500, { "Content-Type": "text/html" });
 					return res.end("<h1>Error: Failed to retrieve access token from discord.</h1>");
@@ -83,7 +83,7 @@ module.exports = {
 
 				var userResponse = await makeRequest("discord.com", "/api/users/@me", "GET", { Authorization: `Bearer ${tokenResponse.access_token}` });
 
-				log.info(`User Response: ${JSON.stringify(userResponse)}`);
+				logger.info(`User Response: ${JSON.stringify(userResponse)}`);
 				userResponse.tokenResponse = tokenResponse;
 				res.writeHead(200, { "Content-Type": "text/html" });
 				return res.end(`<script>
@@ -92,7 +92,7 @@ module.exports = {
                     </script>
 `);
 			} catch (err) {
-				log.info(`Error during discord OAuth2 process: ${err.message}`);
+				logger.info(`Error during discord OAuth2 process: ${err.message}`);
 				res.writeHead(500, { "Content-Type": "text/html" });
 				return res.end("<h1>Error: Something went wrong during the discord authentication process.</h1>");
 			}

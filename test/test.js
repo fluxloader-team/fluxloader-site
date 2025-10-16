@@ -1,6 +1,6 @@
-var Module = require("module");
+const Module = require("module");
 var originalLoad = Module._load;
-var fs = require("fs").promises;
+const fs = require("fs").promises;
 
 Module.asyncLoad = async function (request, parent, isMain) {
 	return new Promise((resolve, reject) => {

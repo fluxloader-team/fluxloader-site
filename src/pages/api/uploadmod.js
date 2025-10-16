@@ -1,7 +1,7 @@
-var Mongo = require("../../common/db");
-var Utils = require("../../common/utils.js");
+const Mongo = require("../../common/db");
+const Utils = require("../../common/utils.js");
 
-var log = new Utils.Log("sandustry.web.pages.uploadmod", "./sandustry.web.main.txt", true);
+const logger =new Utils.Log("sandustry.web.pages.uploadmod", "./sandustry.web.main.txt", true);
 
 module.exports = {
 	paths: ["/api/uploadmod"],
@@ -82,7 +82,7 @@ module.exports = {
 					})
 				);
 			} catch (error) {
-				log.error("Error in uploadmod API:" + error.stack ? error.stack : error.message);
+				logger.error("Error in uploadmod API:" + error.stack ? error.stack : error.message);
 				await res.writeHead(400, { "Content-Type": "application/json" });
 				await res.end(JSON.stringify({ error: error.message }));
 			}

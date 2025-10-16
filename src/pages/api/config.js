@@ -1,10 +1,9 @@
-var Utils = require("../../common/utils.js");
-var fs = require("fs");
-var path = require("path");
-var https = require("https");
-var { verifyDiscordUser } = require("../../common/verifydiscorduser");
+const Utils = require("../../common/utils.js");
+const fs = require("fs");
+const path = require("path");
+const { verifyDiscordUser } = require("../../common/verifydiscorduser");
 
-const log = new Utils.Log("sandustry.web.pages.config", "./sandustry.web.main.txt", true);
+const logger = new Utils.Log("sandustry.web.pages.config", "./sandustry.web.main.txt", true);
 
 module.exports = {
 	paths: ["/api/config"],
@@ -25,7 +24,7 @@ module.exports = {
 						var discordUserData = data.discordUser;
 
 						// Verify the user is authenticated and has admin permissions
-						var Mongo = require("../../common/db");
+						const Mongo = require("../../common/db");
 						var UserData = await Mongo.GetUser.One(discordUserData.id);
 						if (!UserData) {
 							res.writeHead(403, { "Content-Type": "application/json" });
@@ -96,7 +95,7 @@ module.exports = {
 							res.end(JSON.stringify({ error: "Invalid request" }));
 						}
 					} catch (error) {
-						log.info(`Error ${error}`);
+						logger.info(`Error ${error}`);
 						res.writeHead(500, { "Content-Type": "application/json" });
 						res.end(JSON.stringify({ error: "Server error" }));
 					}
@@ -106,7 +105,7 @@ module.exports = {
 				res.end(JSON.stringify({ error: "Method not allowed" }));
 			}
 		} catch (error) {
-			log.info(`Error ${error}`);
+			logger.info(`Error ${error}`);
 			res.writeHead(500, { "Content-Type": "application/json" });
 			res.end(JSON.stringify({ error: "Server error" }));
 		}

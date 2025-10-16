@@ -1,8 +1,8 @@
-var Utils = require("../../common/utils.js");
-var Mongo = require("../../common/db");
-var { verifyDiscordUser } = require("../../common/verifydiscorduser");
+const Utils = require("../../common/utils.js");
+const Mongo = require("../../common/db");
+const { verifyDiscordUser } = require("../../common/verifydiscorduser");
 
-const log = new Utils.Log("sandustry.web.pages.users", "./sandustry.web.main.txt", true);
+const logger = new Utils.Log("sandustry.web.pages.users", "./sandustry.web.main.txt", true);
 
 module.exports = {
 	paths: ["/api/users"],
@@ -128,7 +128,7 @@ module.exports = {
 					res.end(JSON.stringify({ error: "Invalid action" }));
 				}
 			} catch (error) {
-				log.info(`Error ${error}`);
+				logger.info(`Error ${error}`);
 				res.writeHead(500, { "Content-Type": "application/json" });
 				res.end(JSON.stringify({ error: "Server error" }));
 			}

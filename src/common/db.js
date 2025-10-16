@@ -1,12 +1,12 @@
-var { MongoClient } = require("mongodb");
-var Utils = require("../common/utils.js");
+const { MongoClient } = require("mongodb");
+const Utils = require("../common/utils.js");
 const https = require("https");
 const { compress } = require("@mongodb-js/zstd");
-var JSZip = require("jszip");
+const JSZip = require("jszip");
 const sanitizeHTML = require("sanitize-html");
 const fs = require("fs");
 
-var log = new Utils.Log("sandustry.common.DB", "./sandustry.common.txt", true);
+const logger =new Utils.Log("sandustry.common.DB", "./sandustry.common.txt", true);
 
 // Read in schema.mod-info.json - this is a requirement for db.js to work
 var modInfoSchema = fs.readFileSync("common/schema.mod-info.json", "utf8");
@@ -91,7 +91,7 @@ async function handleClient(runClient) {
 			return await runClient(globalClient);
 		}
 	} catch (err) {
-		log.info(`${err}`);
+		logger.info(`${err}`);
 		throw err;
 	}
 }
@@ -366,7 +366,7 @@ var GetMod = {
 			var endresult = await handleClient(async (client) => {
 				var db = client.db("SandustryMods");
 				var modsCollection = db.collection("Mods");
-				log.info(`Searching for modID: ${modID} with project: ${JSON.stringify(project)}`);
+				logger.info(`Searching for modID: ${modID} with project: ${JSON.stringify(project)}`);
 				var result = modsCollection.find({ modID: modID }).sort(sort).project(project).limit(1);
 				const res = await result.toArray();
 				return res[0];
@@ -429,8 +429,8 @@ var GetMod = {
 					}
 				}
 
-				log.info(`Found ${fileNames.length} total files in the zip: ${fileNames.join(", ")}`);
-				log.info(`Found ${topLevelDirs.size} top-level directories: ${Array.from(topLevelDirs).join(", ")}`);
+				logger.info(`Found ${fileNames.length} total files in the zip: ${fileNames.join(", ")}`);
+				logger.info(`Found ${topLevelDirs.size} top-level directories: ${Array.from(topLevelDirs).join(", ")}`);
 
 				// If all files are in 1 common directory then make a new zip with them all moved up 1 level
 				if (!someWithoutDirs && topLevelDirs.size == 1) {
@@ -439,7 +439,7 @@ var GetMod = {
 						let standardized = path.replace(/\\/g, "/");
 						let split = standardized.split("/");
 						let newPath = split.slice(1).join("/");
-						log.info(`Converting path ${path} to ${newPath}`);
+						logger.info(`Converting path ${path} to ${newPath}`);
 						newContent.file(newPath, file.async("nodebuffer"));
 					}
 

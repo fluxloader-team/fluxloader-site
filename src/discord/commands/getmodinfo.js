@@ -1,58 +1,25 @@
-/**
- * @file getmodinfo.js
- * @description Implements the `/getmodinfo` slash command for the discord bot. This command retrieves detailed information about a specific mod and its version.
- */
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const Utils = require("../../common/utils.js");
+const Mongo = require("../../common/db");
 
-var { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-var Utils = require("../../common/utils.js");
-var log = new Utils.Log("sandustry.bot.command.GetModInfo", "./sandustry.bot.main.txt", true);
-var Mongo = require("../../common/db");
-/**
- * Namespace for discord bot commands.
- * @namespace GetModInfo
- * @memberof module:discord.commands
- */
-/**
- * Slash command definition and execution logic for `/getmodinfo`.
- *
- * This command retrieves information about a specific mod, including its name, description, author, version, dependencies, and more.
- *
- * @type {Object}
- * @property data - The slash command structure for `/getmodinfo`.
- * @property {Function} execute - The logic to process the command when invoked.
- * @memberof module:discord.commands.GetModInfo
- */
+const logger =new Utils.Log("sandustry.bot.command.GetModInfo", "./sandustry.bot.main.txt", true);
+
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName("getmodinfo")
 		.setDescription("Gets the specified mod info")
 		.addStringOption((option) => option.setName("modid").setDescription("The ID of the mod you want to fetch information for").setRequired(true))
 		.addStringOption((option) => option.setName("version").setDescription("The version of the mod").setRequired(true)),
-	/**
-	 * Executes the `/getmodinfo` command.
-	 *
-	 * @async
-	 * @function execute
-	 * @memberof module:discord.commands.GetModInfo
-	 * @param interaction - The interaction object representing the command invocation.
-	 *
-	 * @returns {Promise<void>} Resolves when the command's logic is complete and a reply has been sent.
-	 *
-	 * @throws {Error} Logs an error and sends an error response to the user if something goes wrong during command execution.
-	 *
-	 * @example
-	 * // Example usage in discord
-	 * /getmodinfo modid:<mod-id> version:<mod-version>
-	 */
+
 	async execute(interaction) {
 		await interaction.deferReply();
-		log.info(`getting mod info for ${interaction.options.getString("modid")}`);
+		logger.info(`getting mod info for ${interaction.options.getString("modid")}`);
 
 		var modID = interaction.options.getString("modid");
 		var version = interaction.options.getString("version");
 
-		log.info(`modID: ${modID}, version: ${version}`);
-		log.info("connecting to database");
+		logger.info(`modID: ${modID}, version: ${version}`);
+		logger.info("connecting to database");
 		try {
 			var modData = {};
 			if (version != "") {
@@ -93,7 +60,7 @@ module.exports = {
 
 			await interaction.editReply({ embeds: [embed] });
 		} catch (error) {
-			log.info(`Error fetching mod info: ${error}`);
+			logger.info(`Error fetching mod info: ${error}`);
 			await interaction.editReply({ content: "An error occurred while fetching the mod info. Please try again later." });
 		}
 	},

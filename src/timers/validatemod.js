@@ -1,6 +1,7 @@
-var Utils = require("../common/utils.js");
+const Utils = require("../common/utils.js");
 const mongo = require("../common/db");
-var log = new Utils.Log("sandustry.timer.Validate", "./sandustry.timer.main.txt", true);
+
+const logger =new Utils.Log("sandustry.timer.Validate", "./sandustry.timer.main.txt", true);
 var validationTime = globalThis.config.ModSettings.validationTime;
 
 module.exports = {
@@ -9,7 +10,7 @@ module.exports = {
 			// Get all unverified mods
 			var unverifiedMods = await mongo.GetMod.Data.FindUnverified();
 			if (unverifiedMods.length > 0) {
-				log.info(`Found ${unverifiedMods.length} unverified mod(s) to check.`);
+				logger.info(`Found ${unverifiedMods.length} unverified mod(s) to check.`);
 				var now = new Date();
 
 				for (var mod of unverifiedMods) {
@@ -44,7 +45,7 @@ module.exports = {
 				}
 			}
 		} catch (error) {
-			log.info(`Error verifying mods: ${error.message}`);
+			logger.info(`Error verifying mods: ${error.message}`);
 		}
 	},
 };
