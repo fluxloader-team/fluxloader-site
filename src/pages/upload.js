@@ -1,5 +1,3 @@
-const ejs = require("ejs");
-
 module.exports = {
 	paths: ["/upload"],
 

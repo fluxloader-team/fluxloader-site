@@ -1,5 +1,5 @@
 const Utils = require("../../common/utils.js");
-const Mongo = require("../../common/db");
+const DB = require("../../common/db");
 const { verifyDiscordUser } = require("../../common/verifydiscorduser");
 
 const logger = new Utils.Log("sandustry.web.pages.users", "./sandustry.web.main.txt", true);
@@ -23,7 +23,7 @@ module.exports = {
 				var discordUserData = data.discordUser;
 
 				// Verify the user is authenticated and has admin permissions
-				var UserData = await Mongo.GetUser.One(discordUserData.id);
+				var UserData = await DB.GetUser.One(discordUserData.id);
 				if (!UserData) {
 					res.writeHead(403, { "Content-Type": "application/json" });
 					res.end(JSON.stringify({ error: "User not found" }));
@@ -46,7 +46,7 @@ module.exports = {
 				// Handle different actions
 				if (data.action === "GetUserDetails") {
 					const userID = data.userID;
-					const user = await Mongo.GetUser.One(userID);
+					const user = await DB.GetUser.One(userID);
 					if (!user) {
 						res.writeHead(404, { "Content-Type": "application/json" });
 						res.end(JSON.stringify({ error: "User not found" }));
@@ -54,12 +54,12 @@ module.exports = {
 					}
 
 					// Get user's mods
-					const mods = await Mongo.GetMod.Data.Search(JSON.stringify({ "Author.discordID": userID }), null, false);
+					const mods = await DB.getMod.Data.Search(JSON.stringify({ "Author.discordID": userID }), null, false);
 
 					// Get user's mod versions
 					let modVersions = [];
 					for (const mod of mods) {
-						const versions = await Mongo.GetMod.Versions.All(mod.modID);
+						const versions = await DB.getMod.versions.All(mod.modID);
 						modVersions = modVersions.concat(
 							versions.map((v) => ({
 								modID: mod.modID,
@@ -77,7 +77,7 @@ module.exports = {
 						time: new Date(),
 						logged: false,
 					};
-					await Mongo.GetAction.Add(actionEntry);
+					await DB.GetAction.Add(actionEntry);
 
 					// Return user data with stats
 					res.writeHead(200, { "Content-Type": "application/json" });
@@ -95,7 +95,7 @@ module.exports = {
 					const search = data.search || "";
 
 					// Search for users
-					let users = await Mongo.GetUser.Search(search);
+					let users = await DB.GetUser.Search(search);
 
 					// Log the action
 					var actionEntry = {
@@ -104,13 +104,13 @@ module.exports = {
 						time: new Date(),
 						logged: false,
 					};
-					await Mongo.GetAction.Add(actionEntry);
+					await DB.GetAction.Add(actionEntry);
 
 					res.writeHead(200, { "Content-Type": "application/json" });
 					res.end(JSON.stringify({ users: users }));
 				} else if (data.action === "listUsers") {
 					// Get all users (limited to 50)
-					const users = await Mongo.GetUser.List();
+					const users = await DB.GetUser.List();
 
 					// Log the action
 					var actionEntry = {
@@ -119,7 +119,7 @@ module.exports = {
 						time: new Date(),
 						logged: false,
 					};
-					await Mongo.GetAction.Add(actionEntry);
+					await DB.GetAction.Add(actionEntry);
 
 					res.writeHead(200, { "Content-Type": "application/json" });
 					res.end(JSON.stringify({ users: users }));

@@ -1,13 +1,13 @@
-/**
- * @file searchmods.js
- * @description Implements the `/searchmods` slash command for the discord bot. This command allows users to search for mods by name or tags and receive detailed results.
- */
-
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-const Utils = require("./../../common/utils.js"); // Adjust this accordingly
-const Mongo = require("./../../common/db");
+const Utils = require("./../../common/utils.js");
+const DB = require("./../../common/db");
 
-const logger =new Utils.Log("sandustry.bot.command.SearchMods", "./sandustry.bot.main.txt", true);
+const logger = new Utils.Log("sandustry.bot.command.SearchMods", "./sandustry.bot.main.txt", true);
+
+function truncateDescription(description, limit = 100) {
+	if (!description || description.length <= limit) return description || "No description provided";
+	return description.substring(0, limit - 3) + "...";
+}
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -22,7 +22,7 @@ module.exports = {
 
 		var query = interaction.options.getString("query");
 		logger.info(`Searching mods for query: ${query}`);
-		var searchResults = await Mongo.GetMod.Data.Search(query, interaction.options.getBoolean("verifiedOnly"), false, { number: interaction.options.getInteger("page") || 1, size: 10 });
+		var searchResults = await DB.getMod.Data.Search(query, interaction.options.getBoolean("verifiedOnly"), false, { number: interaction.options.getInteger("page") || 1, size: 10 });
 		try {
 			if (searchResults.length === 0) {
 				await interaction.editReply({ content: `No mods found matching the query: \`${query}\`.` });
@@ -59,8 +59,3 @@ module.exports = {
 		}
 	},
 };
-
-function truncateDescription(description, limit = 100) {
-	if (!description || description.length <= limit) return description || "No description provided";
-	return description.substring(0, limit - 3) + "...";
-}

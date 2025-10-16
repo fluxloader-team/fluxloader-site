@@ -277,7 +277,7 @@
 							<button class="btn btn-primary" onclick='globalThis.DownloadMod("${modID}")'>Download</button>
 							<button class="btn btn-success" onclick="navigator.clipboard.writeText('${modID}')">Copy ID</button>
 						</div>
-						<select class="form-select" id="versionSelection" style="padding-left: 15px;margin-top:5px; height: 40px;width: 230px" onchange='globalThis.GetModVersion("${modID}",this.value)'>
+						<select class="form-select" id="versionSelection" style="padding-left: 15px;margin-top:5px; height: 40px;width: 230px" onchange='globalThis.getModVersion("${modID}",this.value)'>
 							<option selected>Change Version</option>
 						</select>`;
 				};
@@ -338,7 +338,7 @@
 					await globalThis.UpdateVersionsList(mod.modID, result.versions);
 				};
 
-				globalThis.GetModVersion = async function (modID, version) {
+				globalThis.getModVersion = async function (modID, version) {
 					var response = await fetch(`/api/mods?modid=${modID}&option=info&version=${version}`);
 					var result = await response.json();
 					console.log("Response:", result.mod);

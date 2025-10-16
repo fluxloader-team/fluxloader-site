@@ -415,11 +415,11 @@ globalThis.DisplayModApi = async function (mod) {
 	}
 };
 
-globalThis.GetModVersion = async function (modID, version) {
+globalThis.getModVersion = async function (modID, version) {
 	try {
 		// Check if modID and version are valid
 		if (!modID) {
-			console.error("Invalid mod ID provided to GetModVersion");
+			console.error("Invalid mod ID provided to getModVersion");
 			alert("Error: Invalid mod ID");
 			return;
 		}
@@ -453,7 +453,7 @@ globalThis.GetModVersion = async function (modID, version) {
 			alert("Failed to retrieve mod version. Please try again later.");
 		}
 	} catch (error) {
-		console.error("Error in GetModVersion:", error);
+		console.error("Error in getModVersion:", error);
 		alert("An unexpected error occurred while retrieving the mod version.");
 	}
 };
@@ -526,7 +526,7 @@ globalThis.UpdateModDisplayActions = async function (modID) {
 <button class="btn btn-primary" onclick='globalThis.DownloadMod("${modID}")'>Download</button>
 <button class="btn btn-success" onclick="navigator.clipboard.writeText('${modID}')">Copy ID</button>
 </div>
-<select class="form-select" id="versionSelection" style="padding-left: 15px;margin-top:5px; height: 40px;width: 230px" onchange='globalThis.GetModVersion("${modID}",this.value)'>
+<select class="form-select" id="versionSelection" style="padding-left: 15px;margin-top:5px; height: 40px;width: 230px" onchange='globalThis.getModVersion("${modID}",this.value)'>
 <option selected>Change Version</option>
 </select>`;
 

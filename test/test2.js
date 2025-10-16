@@ -1,4 +1,4 @@
-function GetModifier(message = "") {
+function getModifier(message = "") {
 	var err = new Error(message);
 	var stackLines = (err.stack || "").split("\n");
 	var relevantLines = stackLines.filter(
@@ -42,14 +42,14 @@ function instrumentGlobalProperty(target, prop, initialValue, originalDescriptor
 			enumerable: !!originalDescriptor.enumerable,
 
 			get() {
-				console.log(`globalThis Property set by: ${GetModifier()} ${prop}`);
+				console.log(`globalThis Property set by: ${getModifier()} ${prop}`);
 				//globalThis.internalTracker.setValues[]
 				return currentValue;
 			},
 			set(newValue) {
 				var oldValue = currentValue;
 				var hasOwn = Object.prototype.hasOwnProperty.call(target, prop);
-				var stack = GetModifier(`Setting ${String(prop)}`);
+				var stack = getModifier(`Setting ${String(prop)}`);
 				var action = hasOwn ? "Modified" : "Added/Set";
 				console.log(`--- Global Assignment Detected (Setter) ---`);
 				console.log(`  Property: ${String(prop)}`);
@@ -83,7 +83,7 @@ function instrumentGlobalProperty(target, prop, initialValue, originalDescriptor
 
 Object.defineProperty = function (obj, prop, descriptor) {
 	if (obj === globalThis) {
-		var stack = GetModifier(`Defining ${String(prop)}`);
+		var stack = getModifier(`Defining ${String(prop)}`);
 		console.log(`--- Global DefineProperty Intercepted ---`);
 		console.log(`  Property: ${String(prop)}`);
 		console.log(`  Descriptor:`, descriptor);

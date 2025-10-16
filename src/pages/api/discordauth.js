@@ -2,7 +2,7 @@ const querystring = require("querystring");
 const https = require("https");
 const Utils = require("../../common/utils.js");
 
-const logger =new Utils.Log("sandustry.web.pages.discord", "./sandustry.web.main.txt", true);
+const logger = new Utils.Log("sandustry.web.pages.discord", "./sandustry.web.main.txt", true);
 
 function makeRequest(host, path, method, headers, postData) {
 	return new Promise((resolve, reject) => {

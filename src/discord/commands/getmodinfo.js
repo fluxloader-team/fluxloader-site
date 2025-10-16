@@ -1,8 +1,20 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const Utils = require("../../common/utils.js");
-const Mongo = require("../../common/db");
+const db = require("../../common/db");
 
-const logger =new Utils.Log("sandustry.bot.command.GetModInfo", "./sandustry.bot.main.txt", true);
+const logger = new Utils.Log("sandustry.bot.command.GetModInfo", "./sandustry.bot.main.txt", true);
+
+function formatDependencies(dependencies) {
+	if (!dependencies || typeof dependencies !== "object") return null;
+	return Object.entries(dependencies)
+		.map(([name, version]) => `**${name}**: ${version}`)
+		.join("\n");
+}
+
+function truncateDescription(description, limit = 1024) {
+	if (description.length <= limit) return description;
+	return description.substring(0, limit - 3) + "...";
+}
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -23,9 +35,9 @@ module.exports = {
 		try {
 			var modData = {};
 			if (version != "") {
-				modData = Mongo.GetMod.Versions.One(modID, version, { modfile: 0 });
+				modData = db.getMod.versions.One(modID, version, { modfile: 0 });
 			} else {
-				modData = Mongo.GetMod.Versions.One(modID, "", { modfile: 0 });
+				modData = db.getMod.versions.One(modID, "", { modfile: 0 });
 			}
 
 			if (!modData) {
@@ -65,15 +77,3 @@ module.exports = {
 		}
 	},
 };
-
-function formatDependencies(dependencies) {
-	if (!dependencies || typeof dependencies !== "object") return null;
-	return Object.entries(dependencies)
-		.map(([name, version]) => `**${name}**: ${version}`)
-		.join("\n");
-}
-
-function truncateDescription(description, limit = 1024) {
-	if (description.length <= limit) return description;
-	return description.substring(0, limit - 3) + "...";
-}

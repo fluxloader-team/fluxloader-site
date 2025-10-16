@@ -1,8 +1,8 @@
 const Utils = require("../../common/utils.js");
 const { decompress } = require("@mongodb-js/zstd");
-const Mongo = require("../../common/db");
+const DB = require("../../common/db");
 
-const logger =new Utils.Log("sandustry.web.pages.search", "./sandustry.web.main.txt", true);
+const logger = new Utils.Log("sandustry.web.pages.search", "./sandustry.web.main.txt", true);
 
 module.exports = {
 	paths: ["/api/mods"],
@@ -53,9 +53,9 @@ module.exports = {
 							logger.info(`Attempting to retrieve mod data for modID: ${modID}, version: ${querys["version"] || "latest"}`);
 							var modData = {};
 							if (querys["version"]) {
-								modData = await Mongo.GetMod.Versions.One(modID, querys["version"]);
+								modData = await DB.getMod.versions.One(modID, querys["version"]);
 							} else {
-								modData = await Mongo.GetMod.Versions.One(modID);
+								modData = await DB.getMod.versions.One(modID);
 							}
 							logger.info(
 								`Retrieved modData: ${JSON.stringify({
@@ -138,9 +138,9 @@ module.exports = {
 							logger.info(`Attempting to retrieve mod info for modID: ${modID}, version: ${querys["version"] || "latest"}`);
 							var modVersion = {};
 							if (querys["version"]) {
-								modVersion = await Mongo.GetMod.Versions.One(modID, querys["version"], { modfile: 0 });
+								modVersion = await DB.getMod.versions.One(modID, querys["version"], { modfile: 0 });
 							} else {
-								modVersion = await Mongo.GetMod.Versions.One(modID, "", { modfile: 0 });
+								modVersion = await DB.getMod.versions.One(modID, "", { modfile: 0 });
 							}
 							logger.info(
 								`Retrieved modVersion: ${JSON.stringify({
@@ -221,7 +221,7 @@ module.exports = {
 								}
 
 								// Get version numbers for multiple mod IDs
-								var versionsMap = await Mongo.GetMod.Versions.MultipleNumbers(modIDsArray);
+								var versionsMap = await DB.getMod.versions.MultipleNumbers(modIDsArray);
 
 								logger.info(
 									`Retrieved versions for multiple modIDs: ${JSON.stringify({
@@ -240,7 +240,7 @@ module.exports = {
 								// Check if full version data is requested
 								if (querys["data"] === "true") {
 									// Get all version data (excluding the modfile to reduce payload size)
-									var versionsData = await Mongo.GetMod.Versions.All(modID, { modfile: 0 });
+									var versionsData = await DB.getMod.versions.All(modID, { modfile: 0 });
 
 									logger.info(
 										`Retrieved full version data for modID ${modID}: ${JSON.stringify({
@@ -266,7 +266,7 @@ module.exports = {
 
 								// Get only version numbers (origina#l behavior)
 								else {
-									var versions = await Mongo.GetMod.Versions.Numbers(modID);
+									var versions = await DB.getMod.versions.Numbers(modID);
 
 									logger.info(
 										`Retrieved version numbers for modID ${modID}: ${JSON.stringify({
@@ -368,9 +368,9 @@ module.exports = {
 						if (querys["size"]) {
 							page.size = parseInt(querys["size"]);
 						}
-						mods = await Mongo.GetMod.Data.Search(searchQuery, VerifiedOnly, false, page);
+						mods = await DB.getMod.Data.Search(searchQuery, VerifiedOnly, false, page);
 					} else {
-						mods = await Mongo.GetMod.Data.Search(searchQuery, VerifiedOnly, false);
+						mods = await DB.getMod.Data.Search(searchQuery, VerifiedOnly, false);
 					}
 
 					if (mods.length === 0) {

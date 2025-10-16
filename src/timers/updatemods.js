@@ -1,7 +1,7 @@
 const Utils = require("../common/utils.js");
-const mongo = require("../common/db");
+const DB = require("../common/db");
 
-const logger =new Utils.Log("sandustry.timer.moddata", "./sandustry.timer.main.txt", true);
+const logger = new Utils.Log("sandustry.timer.moddata", "./sandustry.timer.main.txt", true);
 
 module.exports = {
 	async run() {
@@ -9,13 +9,13 @@ module.exports = {
 		var page = 1;
 		var MorePages = true;
 		while (MorePages) {
-			var Mods = await mongo.GetMod.Data.Search(JSON.stringify({ "modData.name": { $regex: "", $options: "i" } }), null, false, { number: page, size: 100 }, { _id: 1, modID: 1, modData: 1 });
+			var Mods = await DB.getMod.Data.Search(JSON.stringify({ "modData.name": { $regex: "", $options: "i" } }), null, false, { number: page, size: 100 }, { _id: 1, modID: 1, modData: 1 });
 			if (!Mods || Mods.length === 0) {
 				MorePages = false;
 			} else {
 				//log.info(`Found ${Mods.length} mods`);
 				var modIDs = Mods.map((mod) => mod.modID);
-				var modDataList = await mongo.GetMod.Versions.Multiple(modIDs);
+				var modDataList = await DB.getMod.versions.Multiple(modIDs);
 				var modDataMap = Object.fromEntries(modDataList.map((mod) => [mod.modID, mod.modData]));
 				//log.info(`${JSON.stringify(modDataMap)}`)
 				for (var mod of Mods) {
@@ -31,14 +31,14 @@ module.exports = {
 
 					if (mod.modData.version !== modData.version) {
 						mod.modData.version = modData.version;
-						await mongo.GetMod.Data.Update(mod.modID, mod);
+						await DB.getMod.Data.Update(mod.modID, mod);
 
 						var action = {
 							discordID: "Timer",
 							action: `Updated mod ${mod.modID} to version ${modData.version}`,
 							time: new Date(),
 						};
-						await mongo.GetAction.Add(action);
+						await DB.GetAction.Add(action);
 					}
 					modData = null;
 					mod = null;

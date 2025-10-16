@@ -6,12 +6,10 @@ const JSZip = require("jszip");
 const sanitizeHTML = require("sanitize-html");
 const fs = require("fs");
 
-const logger =new Utils.Log("sandustry.common.DB", "./sandustry.common.txt", true);
+const logger = new Utils.Log("sandustry.common.DB", "./sandustry.common.txt", true);
 
-// Read in schema.mod-info.json - this is a requirement for db.js to work
-var modInfoSchema = fs.readFileSync("common/schema.mod-info.json", "utf8");
-modInfoSchema = JSON.parse(modInfoSchema);
-
+var modInfoSchemaContent = fs.readFileSync("common/schema.mod-info.json", "utf8");
+var modInfoSchema = JSON.parse(modInfoSchemaContent);
 var mongoUri = globalThis.config.mongodb.uri;
 var globalClient = null;
 
@@ -145,8 +143,8 @@ function verifyDiscordUser(userId, accessToken) {
 	});
 }
 
-var GetMod = {
-	Versions: {
+var getMod = {
+	versions: {
 		All: async function (modID = "", project = {}, sort = { uploadTime: -1 }) {
 			var endresult = await handleClient(async (client) => {
 				var db = await client.db("SandustryMods");
@@ -559,7 +557,7 @@ var GetMod = {
 			});
 			return endresult;
 		},
-		
+
 		async function(verifiedOnly = true, project = {}) {
 			var endresult = await handleClient(async (client) => {
 				var db = client.db("SandustryMods");
@@ -734,7 +732,7 @@ var GetAction = {
 };
 
 module.exports = {
-	GetMod,
+	getMod,
 	GetUser,
 	GetAction,
 	handleClient: exportedHandleClient,

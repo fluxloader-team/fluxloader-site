@@ -2,6 +2,7 @@ const Utils = require("../../common/utils.js");
 const fs = require("fs");
 const path = require("path");
 const { verifyDiscordUser } = require("../../common/verifydiscorduser");
+const DB = require("../../common/db");
 
 const logger = new Utils.Log("sandustry.web.pages.config", "./sandustry.web.main.txt", true);
 
@@ -24,8 +25,7 @@ module.exports = {
 						var discordUserData = data.discordUser;
 
 						// Verify the user is authenticated and has admin permissions
-						const Mongo = require("../../common/db");
-						var UserData = await Mongo.GetUser.One(discordUserData.id);
+						var UserData = await DB.GetUser.One(discordUserData.id);
 						if (!UserData) {
 							res.writeHead(403, { "Content-Type": "application/json" });
 							res.end(JSON.stringify({ error: "User not found" }));
@@ -58,7 +58,7 @@ module.exports = {
 								time: new Date(),
 								logged: false,
 							};
-							await Mongo.GetAction.Add(actionEntry);
+							await DB.GetAction.Add(actionEntry);
 
 							res.writeHead(200, { "Content-Type": "application/json" });
 							res.end(JSON.stringify({ config: configContent }));
@@ -86,7 +86,7 @@ module.exports = {
 								time: new Date(),
 								logged: false,
 							};
-							await Mongo.GetAction.Add(actionEntry);
+							await DB.GetAction.Add(actionEntry);
 
 							res.writeHead(200, { "Content-Type": "application/json" });
 							res.end(JSON.stringify({ success: true }));

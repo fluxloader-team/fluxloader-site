@@ -27,14 +27,18 @@ const DEFAULT_CONFIG = {
 	},
 };
 
+const logger = new Utils.Log("sandustry.web.main", "./sandustry.web.main.txt", true);
+
+process.on("uncaughtException", function (err) {
+	logger.info(`Caught exception: ${err.stack}`);
+});
+
 globalThis.config = DEFAULT_CONFIG;
 globalThis.pages = {};
 globalThis.public = {};
 globalThis.timers = [];
 
-const logger =new Utils.Log("sandustry.web.main", "./sandustry.web.main.txt", true);
-
-// ---------------------------------------------------------------
+// --------------------------------------------------------------------------------------
 
 function loadConfig() {
 	if (!fs.existsSync(CONFIG_PATH)) {
@@ -51,8 +55,6 @@ function loadResources() {
 		if (entry.isDirectory()) return;
 		pageNames.push(entry.name);
 		const filePath = path.resolve(entry.path, entry.name);
-		const fileResolved = require.resolve(filePath);
-		delete require.cache[fileResolved];
 		const fileModule = require(filePath);
 		fileModule.paths.forEach((path) => (pages[path] = fileModule));
 	});
@@ -74,8 +76,6 @@ function loadResources() {
 		if (entry.isDirectory()) return;
 		timerNames.push(entry.name);
 		const filePath = path.resolve(entry.path, entry.name);
-		const fileResolved = require.resolve(filePath);
-		delete require.cache[fileResolved];
 		const fileModule = require(filePath);
 		timers.push(fileModule);
 	});
@@ -108,14 +108,8 @@ function handleWebRequests(req, res) {
 	}
 }
 
-// ---------------------------------------------------------------
-
 function main() {
 	logger.info("Starting the fluxloader site");
-
-	process.on("uncaughtException", function (err) {
-		logger.info(`Caught exception: ${err.stack}`);
-	});
 
 	loadConfig();
 	loadResources();

@@ -1,6 +1,6 @@
 const { verifyDiscordUser } = require("../../common/verifydiscorduser");
 const Utils = require("../../common/utils.js");
-const Mongo = require("../../common/db");
+const DB = require("../../common/db");
 
 const logger = new Utils.Log("sandustry.web.pages.actions", "./sandustry.web.main.txt", true);
 
@@ -21,7 +21,7 @@ module.exports = {
 					var discordUserData = data.discordUser;
 
 					// Verify the user is authenticated and has admin permissions
-					var UserData = await Mongo.GetUser.One(discordUserData.id);
+					var UserData = await DB.GetUser.One(discordUserData.id);
 					if (!UserData) {
 						res.writeHead(403, { "Content-Type": "application/json" });
 						res.end(JSON.stringify({ error: "User not found" }));
@@ -53,10 +53,10 @@ module.exports = {
 					}
 
 					// Get actions with pagination
-					const actions = await Mongo.GetAction.Get(query, { number: page, size: size });
+					const actions = await DB.GetAction.Get(query, { number: page, size: size });
 
 					// Get total count for pagination
-					const totalCount = await Mongo.GetAction.Count(query);
+					const totalCount = await DB.GetAction.Count(query);
 
 					// Log the action
 					var actionEntry = {
@@ -65,7 +65,7 @@ module.exports = {
 						time: new Date(),
 						logged: false,
 					};
-					await Mongo.GetAction.Add(actionEntry);
+					await DB.GetAction.Add(actionEntry);
 
 					// Return actions with pagination info
 					res.writeHead(200, { "Content-Type": "application/json" });

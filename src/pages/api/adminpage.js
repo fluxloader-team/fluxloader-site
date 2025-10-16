@@ -1,8 +1,8 @@
 const Utils = require("../../common/utils.js");
-const Mongo = require("../../common/db");
+const DB = require("../../common/db");
 const { verifyDiscordUser } = require("../../common/verifydiscorduser");
 
-const logger =new Utils.Log("sandustry.web.pages.admin", "./sandustry.web.main.txt", true);
+const logger = new Utils.Log("sandustry.web.pages.admin", "./sandustry.web.main.txt", true);
 
 module.exports = {
 	paths: ["/api/admin/page"],
@@ -19,10 +19,10 @@ module.exports = {
 				try {
 					res.writeHead(200, { "Content-Type": "application/json" });
 					var discordUserData = (await JSON.parse(body)).discordUser;
-					var UserData = await Mongo.GetUser.One(discordUserData.id);
+					var UserData = await DB.GetUser.One(discordUserData.id);
 					if (UserData) {
 					} else {
-						UserData = await Mongo.GetUser.Add({
+						UserData = await DB.GetUser.Add({
 							discordID: discordUserData.id,
 							discordUsername: discordUserData.username,
 							permissions: ["user"],

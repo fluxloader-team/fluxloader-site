@@ -1,8 +1,8 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const Utils = require("./../../common/utils.js");
-const Mongo = require("./../../common/db");
+const DB = require("./../../common/db");
 
-const logger =new Utils.Log("sandustry.bot.command.GetModVersions", "./sandustry.bot.main.txt", true);
+const logger = new Utils.Log("sandustry.bot.command.getModVersions", "./sandustry.bot.main.txt", true);
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -18,7 +18,7 @@ module.exports = {
 
 		logger.info(`modID: ${modID}`);
 		try {
-			var modsList = await Mongo.GetMod.Versions.Numbers(modID);
+			var modsList = await DB.getMod.versions.Numbers(modID);
 
 			if (modsList.length == 0) {
 				await interaction.editReply({ content: `Mod with ID \`${modID}\` was not found!` });

@@ -1,13 +1,17 @@
-const Mongo = require("../common/db");
+const DB = require("../common/db");
 
 module.exports = {
 	async run() {
-		var unloggedActions = await Mongo.GetAction.Get({ logged: false });
+		var unloggedActions = await DB.GetAction.Get({ logged: false });
 		if (!unloggedActions) return;
-		unloggedActions = unloggedActions.splice(0, 5);
-		for (var action of unloggedActions) {
+
+		// Log the first 5 unlogged actions
+		const toLog = unloggedActions.splice(0, 5);
+		for (var action of toLog) {
 			action.logged = true;
-			await Mongo.GetAction.Update(action);
+			await DB.GetAction.Update(action);
+
+			// For now we are just posting these to the discord server actions channel
 			if (globalThis.discord) {
 				await globalThis.discord.client.channels.cache.get(globalThis.config.discord.serverActionsChannel).send(`Site Action: ${action.action} by ${action.discordID}`);
 			}

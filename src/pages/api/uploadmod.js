@@ -1,7 +1,7 @@
-const Mongo = require("../../common/db");
+const DB = require("../../common/db");
 const Utils = require("../../common/utils.js");
 
-const logger =new Utils.Log("sandustry.web.pages.uploadmod", "./sandustry.web.main.txt", true);
+const logger = new Utils.Log("sandustry.web.pages.uploadmod", "./sandustry.web.main.txt", true);
 
 module.exports = {
 	paths: ["/api/uploadmod"],
@@ -51,7 +51,7 @@ module.exports = {
 				var { filename } = payload;
 
 				// Upload the payload
-				var uploadResult = await Mongo.GetMod.Data.Upload(payload);
+				var uploadResult = await DB.getMod.Data.Upload(payload);
 				checkError(uploadResult);
 
 				// Check if this is an update to an existing mod
@@ -59,7 +59,7 @@ module.exports = {
 					const modID = uploadResult.split(":")[1];
 
 					// Upload the payload (as an update using 3rd parameter as true)
-					uploadResult = await Mongo.GetMod.Data.Upload(payload, false, true);
+					uploadResult = await DB.getMod.Data.Upload(payload, false, true);
 					checkError(uploadResult);
 
 					// Succesful upload as an update
