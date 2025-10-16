@@ -51,7 +51,7 @@ module.exports = {
 				var { filename } = payload;
 
 				// Upload the payload
-				var uploadResult = await DB.getMod.Data.Upload(payload);
+				var uploadResult = await DB.mods.data.upload(payload);
 				checkError(uploadResult);
 
 				// Check if this is an update to an existing mod
@@ -59,7 +59,7 @@ module.exports = {
 					const modID = uploadResult.split(":")[1];
 
 					// Upload the payload (as an update using 3rd parameter as true)
-					uploadResult = await DB.getMod.Data.Upload(payload, false, true);
+					uploadResult = await DB.mods.data.upload(payload, false, true);
 					checkError(uploadResult);
 
 					// Succesful upload as an update

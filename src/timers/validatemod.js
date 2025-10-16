@@ -8,14 +8,14 @@ module.exports = {
 	async run() {
 		try {
 			// Get all unverified mods
-			var unverifiedMods = await DB.getMod.Data.FindUnverified();
+			var unverifiedMods = await DB.mods.data.findUnverified();
 			if (unverifiedMods.length > 0) {
 				logger.info(`Found ${unverifiedMods.length} unverified mod(s) to check.`);
 				var now = new Date();
 
 				for (var mod of unverifiedMods) {
 					// Get the oldest version of the mod
-					var modVersion = await DB.getMod.versions.Oldest(mod.modID);
+					var modVersion = await DB.mods.versions.oldest(mod.modID);
 
 					if (!modVersion) {
 						//log.info(`No version found for modID: ${mod.modID}. Skipping...`);
@@ -28,7 +28,7 @@ module.exports = {
 					if (elapsedTime > validationTime) {
 						// Update the mod to be verified
 						mod.verified = true;
-						await DB.getMod.Data.Update(mod.modID, mod);
+						await DB.mods.data.update(mod.modID, mod);
 
 						// Log the action
 						var action = {
@@ -37,7 +37,7 @@ module.exports = {
 							time: new Date(),
 							logged: false,
 						};
-						await DB.GetAction.Add(action);
+						await DB.actions.add(action);
 						//log.info(`ModID: ${mod.modID} verified successfully.`);
 					} else {
 						// log.info(`ModID: ${mod.modID} not yet eligible for verification. Validating at ${uploadTime + elapsedTime}`);

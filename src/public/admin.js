@@ -824,7 +824,7 @@ globalThis.DisplayUser = async function (discordID) {
 			},
 			body: JSON.stringify({
 				discordUser: discordUser,
-				action: "GetUserDetails",
+				action: "usersDetails",
 				userID: discordID,
 			}),
 		});

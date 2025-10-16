@@ -28,7 +28,7 @@ module.exports = {
 				var authorID = data.authorID;
 
 				// Verify the user is authenticated and has admin permissions
-				var UserData = await DB.GetUser.One(discordUserData.id);
+				var UserData = await DB.users.one(discordUserData.id);
 				if (!UserData) {
 					res.end(JSON.stringify({ error: "User not found" }));
 					return;
@@ -54,7 +54,7 @@ module.exports = {
 						}
 
 						// Get the mod
-						var mod = await DB.getMod.Data.One(modID);
+						var mod = await DB.mods.data.one(modID);
 						if (!mod) {
 							res.end(JSON.stringify({ error: "Mod not found" }));
 							return;
@@ -62,7 +62,7 @@ module.exports = {
 
 						// Update the mod's verified status
 						mod.verified = true;
-						await DB.getMod.Data.Update(modID, mod);
+						await DB.mods.data.update(modID, mod);
 
 						// Log the action
 						var actionEntry = {
@@ -71,7 +71,7 @@ module.exports = {
 							time: new Date(),
 							logged: false,
 						};
-						await DB.GetAction.Add(actionEntry);
+						await DB.actions.add(actionEntry);
 
 						res.end(JSON.stringify({ success: true, message: "Mod verified successfully" }));
 						break;
@@ -83,14 +83,14 @@ module.exports = {
 						}
 
 						// Get the mod
-						var mod = await DB.getMod.Data.One(modID);
+						var mod = await DB.mods.data.one(modID);
 						if (!mod) {
 							res.end(JSON.stringify({ error: "Mod not found" }));
 							return;
 						}
 
 						// Delete the mod and all its versions
-						await DB.getMod.Delete(modID);
+						await DB.mods.delete(modID);
 
 						// Log the action
 						var actionEntry = {
@@ -99,7 +99,7 @@ module.exports = {
 							time: new Date(),
 							logged: false,
 						};
-						await DB.GetAction.Add(actionEntry);
+						await DB.actions.add(actionEntry);
 
 						res.end(JSON.stringify({ success: true, message: "Mod denied and deleted successfully" }));
 						break;
@@ -111,7 +111,7 @@ module.exports = {
 						}
 
 						// Ban the user
-						await DB.GetUser.Ban(authorID);
+						await DB.users.ban(authorID);
 
 						// Log the action
 						var actionEntry = {
@@ -120,7 +120,7 @@ module.exports = {
 							time: new Date(),
 							logged: false,
 						};
-						await DB.GetAction.Add(actionEntry);
+						await DB.actions.add(actionEntry);
 
 						res.end(JSON.stringify({ success: true, message: "Author banned successfully" }));
 						break;
@@ -132,14 +132,14 @@ module.exports = {
 						}
 
 						// Unban the user
-						var user = await DB.GetUser.One(authorID);
+						var user = await DB.users.one(authorID);
 						if (!user) {
 							res.end(JSON.stringify({ error: "User not found" }));
 							return;
 						}
 
 						// Update user's banned status
-						await DB.GetUser.Unban(authorID);
+						await DB.users.unban(authorID);
 
 						// Log the action
 						var actionEntry = {
@@ -148,7 +148,7 @@ module.exports = {
 							time: new Date(),
 							logged: false,
 						};
-						await DB.GetAction.Add(actionEntry);
+						await DB.actions.add(actionEntry);
 
 						res.end(JSON.stringify({ success: true, message: "User unbanned successfully" }));
 						break;
@@ -160,7 +160,7 @@ module.exports = {
 						}
 
 						// Get the user
-						var user = await DB.GetUser.One(authorID);
+						var user = await DB.users.one(authorID);
 						if (!user) {
 							res.end(JSON.stringify({ error: "User not found" }));
 							return;
@@ -168,7 +168,7 @@ module.exports = {
 
 						// Update user's permissions
 						if (!user.permissions.includes("admin")) {
-							await DB.GetUser.UpdatePermissions(authorID, "admin", true);
+							await DB.users.updatePermissions(authorID, "admin", true);
 						}
 
 						// Log the action
@@ -178,7 +178,7 @@ module.exports = {
 							time: new Date(),
 							logged: false,
 						};
-						await DB.GetAction.Add(actionEntry);
+						await DB.actions.add(actionEntry);
 
 						res.end(JSON.stringify({ success: true, message: "User set as admin successfully" }));
 						break;
@@ -190,7 +190,7 @@ module.exports = {
 						}
 
 						// Get the user
-						var user = await DB.GetUser.One(authorID);
+						var user = await DB.users.one(authorID);
 						if (!user) {
 							res.end(JSON.stringify({ error: "User not found" }));
 							return;
@@ -198,7 +198,7 @@ module.exports = {
 
 						// Update user's permissions
 						if (user.permissions.includes("admin")) {
-							await DB.GetUser.UpdatePermissions(authorID, "admin", false);
+							await DB.users.updatePermissions(authorID, "admin", false);
 						}
 
 						// Log the action
@@ -208,7 +208,7 @@ module.exports = {
 							time: new Date(),
 							logged: false,
 						};
-						await DB.GetAction.Add(actionEntry);
+						await DB.actions.add(actionEntry);
 
 						res.end(JSON.stringify({ success: true, message: "Admin status removed successfully" }));
 						break;

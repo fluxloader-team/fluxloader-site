@@ -19,10 +19,10 @@ module.exports = {
 				try {
 					res.writeHead(200, { "Content-Type": "application/json" });
 					var discordUserData = (await JSON.parse(body)).discordUser;
-					var UserData = await DB.GetUser.One(discordUserData.id);
+					var UserData = await DB.users.one(discordUserData.id);
 					if (UserData) {
 					} else {
-						UserData = await DB.GetUser.Add({
+						UserData = await DB.users.add({
 							discordID: discordUserData.id,
 							discordUsername: discordUserData.username,
 							permissions: ["user"],

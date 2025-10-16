@@ -22,7 +22,7 @@ module.exports = {
 		logger.info(`getting site actions for ${interaction.options.getString("query")}`);
 		var query = { $or: [{ discordID: { $regex: interaction.options.getString("query"), $options: "i" } }, { action: { $regex: interaction.options.getString("query"), $options: "i" } }] };
 		//type of ActionEntry[]
-		var Actions = await DB.GetAction.Get(query, { number: interaction.options.getInteger("page") || 1, size: 10 });
+		var Actions = await DB.actions.get(query, { number: interaction.options.getInteger("page") || 1, size: 10 });
 		try {
 			var embed = new EmbedBuilder()
 				.setTitle("Site Actions")

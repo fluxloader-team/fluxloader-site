@@ -23,7 +23,7 @@ module.exports = {
 				var discordUserData = data.discordUser;
 
 				// Verify the user is authenticated and has admin permissions
-				var UserData = await DB.GetUser.One(discordUserData.id);
+				var UserData = await DB.users.one(discordUserData.id);
 				if (!UserData) {
 					res.writeHead(403, { "Content-Type": "application/json" });
 					res.end(JSON.stringify({ error: "User not found" }));
@@ -44,9 +44,9 @@ module.exports = {
 				}
 
 				// Handle different actions
-				if (data.action === "GetUserDetails") {
+				if (data.action === "usersDetails") {
 					const userID = data.userID;
-					const user = await DB.GetUser.One(userID);
+					const user = await DB.users.one(userID);
 					if (!user) {
 						res.writeHead(404, { "Content-Type": "application/json" });
 						res.end(JSON.stringify({ error: "User not found" }));
@@ -54,12 +54,12 @@ module.exports = {
 					}
 
 					// Get user's mods
-					const mods = await DB.getMod.Data.Search(JSON.stringify({ "Author.discordID": userID }), null, false);
+					const mods = await DB.mods.data.search(JSON.stringify({ "Author.discordID": userID }), null, false);
 
 					// Get user's mod versions
 					let modVersions = [];
 					for (const mod of mods) {
-						const versions = await DB.getMod.versions.All(mod.modID);
+						const versions = await DB.mods.versions.all(mod.modID);
 						modVersions = modVersions.concat(
 							versions.map((v) => ({
 								modID: mod.modID,
@@ -77,7 +77,7 @@ module.exports = {
 						time: new Date(),
 						logged: false,
 					};
-					await DB.GetAction.Add(actionEntry);
+					await DB.actions.add(actionEntry);
 
 					// Return user data with stats
 					res.writeHead(200, { "Content-Type": "application/json" });
@@ -95,7 +95,7 @@ module.exports = {
 					const search = data.search || "";
 
 					// Search for users
-					let users = await DB.GetUser.Search(search);
+					let users = await DB.users.search(search);
 
 					// Log the action
 					var actionEntry = {
@@ -104,13 +104,13 @@ module.exports = {
 						time: new Date(),
 						logged: false,
 					};
-					await DB.GetAction.Add(actionEntry);
+					await DB.actions.add(actionEntry);
 
 					res.writeHead(200, { "Content-Type": "application/json" });
 					res.end(JSON.stringify({ users: users }));
 				} else if (data.action === "listUsers") {
 					// Get all users (limited to 50)
-					const users = await DB.GetUser.List();
+					const users = await DB.users.List();
 
 					// Log the action
 					var actionEntry = {
@@ -119,7 +119,7 @@ module.exports = {
 						time: new Date(),
 						logged: false,
 					};
-					await DB.GetAction.Add(actionEntry);
+					await DB.actions.add(actionEntry);
 
 					res.writeHead(200, { "Content-Type": "application/json" });
 					res.end(JSON.stringify({ users: users }));

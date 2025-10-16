@@ -21,7 +21,7 @@ module.exports = {
 					var discordUserData = data.discordUser;
 
 					// Verify the user is authenticated and has admin permissions
-					var UserData = await DB.GetUser.One(discordUserData.id);
+					var UserData = await DB.users.one(discordUserData.id);
 					if (!UserData) {
 						res.writeHead(403, { "Content-Type": "application/json" });
 						res.end(JSON.stringify({ error: "User not found" }));
@@ -53,10 +53,10 @@ module.exports = {
 					}
 
 					// Get actions with pagination
-					const actions = await DB.GetAction.Get(query, { number: page, size: size });
+					const actions = await DB.actions.get(query, { number: page, size: size });
 
 					// Get total count for pagination
-					const totalCount = await DB.GetAction.Count(query);
+					const totalCount = await DB.actions.count(query);
 
 					// Log the action
 					var actionEntry = {
@@ -65,7 +65,7 @@ module.exports = {
 						time: new Date(),
 						logged: false,
 					};
-					await DB.GetAction.Add(actionEntry);
+					await DB.actions.add(actionEntry);
 
 					// Return actions with pagination info
 					res.writeHead(200, { "Content-Type": "application/json" });

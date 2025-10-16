@@ -1,3 +1,5 @@
+const https = require("https");
+
 module.exports = {
 	verifyDiscordUser: (userId, accessToken) => {
 		return new Promise((resolve, reject) => {
@@ -10,7 +12,7 @@ module.exports = {
 				},
 			};
 
-			const req = require("https").request(options, (res) => {
+			const req = https.request(options, (res) => {
 				let data = "";
 
 				res.on("data", (chunk) => {

@@ -35,9 +35,9 @@ module.exports = {
 		try {
 			var modData = {};
 			if (version != "") {
-				modData = db.getMod.versions.One(modID, version, { modfile: 0 });
+				modData = db.getMod.versions.one(modID, version, { modfile: 0 });
 			} else {
-				modData = db.getMod.versions.One(modID, "", { modfile: 0 });
+				modData = db.getMod.versions.one(modID, "", { modfile: 0 });
 			}
 
 			if (!modData) {

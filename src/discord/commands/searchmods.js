@@ -22,7 +22,7 @@ module.exports = {
 
 		var query = interaction.options.getString("query");
 		logger.info(`Searching mods for query: ${query}`);
-		var searchResults = await DB.getMod.Data.Search(query, interaction.options.getBoolean("verifiedOnly"), false, { number: interaction.options.getInteger("page") || 1, size: 10 });
+		var searchResults = await DB.mods.data.search(query, interaction.options.getBoolean("verifiedOnly"), false, { number: interaction.options.getInteger("page") || 1, size: 10 });
 		try {
 			if (searchResults.length === 0) {
 				await interaction.editReply({ content: `No mods found matching the query: \`${query}\`.` });

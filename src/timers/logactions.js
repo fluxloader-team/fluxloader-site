@@ -2,14 +2,14 @@ const DB = require("../common/db");
 
 module.exports = {
 	async run() {
-		var unloggedActions = await DB.GetAction.Get({ logged: false });
+		var unloggedActions = await DB.actions.get({ logged: false });
 		if (!unloggedActions) return;
 
 		// Log the first 5 unlogged actions
 		const toLog = unloggedActions.splice(0, 5);
 		for (var action of toLog) {
 			action.logged = true;
-			await DB.GetAction.Update(action);
+			await DB.actions.update(action);
 
 			// For now we are just posting these to the discord server actions channel
 			if (globalThis.discord) {

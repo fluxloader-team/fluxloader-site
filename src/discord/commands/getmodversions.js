@@ -18,7 +18,7 @@ module.exports = {
 
 		logger.info(`modID: ${modID}`);
 		try {
-			var modsList = await DB.getMod.versions.Numbers(modID);
+			var modsList = await DB.mods.versions.numbers(modID);
 
 			if (modsList.length == 0) {
 				await interaction.editReply({ content: `Mod with ID \`${modID}\` was not found!` });

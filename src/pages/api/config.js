@@ -25,7 +25,7 @@ module.exports = {
 						var discordUserData = data.discordUser;
 
 						// Verify the user is authenticated and has admin permissions
-						var UserData = await DB.GetUser.One(discordUserData.id);
+						var UserData = await DB.users.one(discordUserData.id);
 						if (!UserData) {
 							res.writeHead(403, { "Content-Type": "application/json" });
 							res.end(JSON.stringify({ error: "User not found" }));
@@ -58,7 +58,7 @@ module.exports = {
 								time: new Date(),
 								logged: false,
 							};
-							await DB.GetAction.Add(actionEntry);
+							await DB.actions.add(actionEntry);
 
 							res.writeHead(200, { "Content-Type": "application/json" });
 							res.end(JSON.stringify({ config: configContent }));
@@ -86,7 +86,7 @@ module.exports = {
 								time: new Date(),
 								logged: false,
 							};
-							await DB.GetAction.Add(actionEntry);
+							await DB.actions.add(actionEntry);
 
 							res.writeHead(200, { "Content-Type": "application/json" });
 							res.end(JSON.stringify({ success: true }));

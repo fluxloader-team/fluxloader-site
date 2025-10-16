@@ -53,9 +53,9 @@ module.exports = {
 							logger.info(`Attempting to retrieve mod data for modID: ${modID}, version: ${querys["version"] || "latest"}`);
 							var modData = {};
 							if (querys["version"]) {
-								modData = await DB.getMod.versions.One(modID, querys["version"]);
+								modData = await DB.mods.versions.one(modID, querys["version"]);
 							} else {
-								modData = await DB.getMod.versions.One(modID);
+								modData = await DB.mods.versions.one(modID);
 							}
 							logger.info(
 								`Retrieved modData: ${JSON.stringify({
@@ -138,9 +138,9 @@ module.exports = {
 							logger.info(`Attempting to retrieve mod info for modID: ${modID}, version: ${querys["version"] || "latest"}`);
 							var modVersion = {};
 							if (querys["version"]) {
-								modVersion = await DB.getMod.versions.One(modID, querys["version"], { modfile: 0 });
+								modVersion = await DB.mods.versions.one(modID, querys["version"], { modfile: 0 });
 							} else {
-								modVersion = await DB.getMod.versions.One(modID, "", { modfile: 0 });
+								modVersion = await DB.mods.versions.one(modID, "", { modfile: 0 });
 							}
 							logger.info(
 								`Retrieved modVersion: ${JSON.stringify({
@@ -221,7 +221,7 @@ module.exports = {
 								}
 
 								// Get version numbers for multiple mod IDs
-								var versionsMap = await DB.getMod.versions.MultipleNumbers(modIDsArray);
+								var versionsMap = await DB.mods.versions.multipleNumbers(modIDsArray);
 
 								logger.info(
 									`Retrieved versions for multiple modIDs: ${JSON.stringify({
@@ -240,7 +240,7 @@ module.exports = {
 								// Check if full version data is requested
 								if (querys["data"] === "true") {
 									// Get all version data (excluding the modfile to reduce payload size)
-									var versionsData = await DB.getMod.versions.All(modID, { modfile: 0 });
+									var versionsData = await DB.mods.versions.all(modID, { modfile: 0 });
 
 									logger.info(
 										`Retrieved full version data for modID ${modID}: ${JSON.stringify({
@@ -266,7 +266,7 @@ module.exports = {
 
 								// Get only version numbers (origina#l behavior)
 								else {
-									var versions = await DB.getMod.versions.Numbers(modID);
+									var versions = await DB.mods.versions.numbers(modID);
 
 									logger.info(
 										`Retrieved version numbers for modID ${modID}: ${JSON.stringify({
@@ -368,9 +368,9 @@ module.exports = {
 						if (querys["size"]) {
 							page.size = parseInt(querys["size"]);
 						}
-						mods = await DB.getMod.Data.Search(searchQuery, VerifiedOnly, false, page);
+						mods = await DB.mods.data.search(searchQuery, VerifiedOnly, false, page);
 					} else {
-						mods = await DB.getMod.Data.Search(searchQuery, VerifiedOnly, false);
+						mods = await DB.mods.data.search(searchQuery, VerifiedOnly, false);
 					}
 
 					if (mods.length === 0) {

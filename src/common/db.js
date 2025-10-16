@@ -5,6 +5,7 @@ const { compress } = require("@mongodb-js/zstd");
 const JSZip = require("jszip");
 const sanitizeHTML = require("sanitize-html");
 const fs = require("fs");
+const { verifyDiscordUser } = require("./verifydiscorduser");
 
 const logger = new Utils.Log("sandustry.common.DB", "./sandustry.common.txt", true);
 
@@ -94,58 +95,14 @@ async function handleClient(runClient) {
 	}
 }
 
+// This is icky
 async function exportedHandleClient(runClient = async function (client = new MongoClient(mongoUri)) {}) {
 	return await handleClient(runClient);
 }
 
-function verifyDiscordUser(userId, accessToken) {
-	return new Promise((resolve, reject) => {
-		var options = {
-			hostname: "discord.com",
-			path: "/api/users/@me",
-			method: "GET",
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
-			},
-		};
-
-		var req = https.request(options, (res) => {
-			let data = "";
-
-			res.on("data", (chunk) => {
-				data += chunk.toString();
-			});
-
-			res.on("end", () => {
-				try {
-					var userResponse = JSON.parse(data);
-
-					// Check if the user ID matches the ID from the token response
-					if (res.statusCode === 200 && userResponse.id === userId) {
-						resolve(true);
-					} else {
-						console.warn("User ID mismatch or token is invalid:", userResponse);
-						resolve(false);
-					}
-				} catch (err) {
-					console.error("Error parsing user verification response:", err);
-					resolve(false);
-				}
-			});
-		});
-
-		req.on("error", (err) => {
-			console.error("Error verifying discord user:", err);
-			resolve(false);
-		});
-
-		req.end();
-	});
-}
-
-var getMod = {
+var mods = {
 	versions: {
-		All: async function (modID = "", project = {}, sort = { uploadTime: -1 }) {
+		all: async function (modID = "", project = {}, sort = { uploadTime: -1 }) {
 			var endresult = await handleClient(async (client) => {
 				var db = await client.db("SandustryMods");
 				var modVersionsCollection = await db.collection("ModVersions");
@@ -155,7 +112,7 @@ var getMod = {
 			return endresult;
 		},
 
-		Oldest: async function (modID = "", project = {}) {
+		oldest: async function (modID = "", project = {}) {
 			var endresult = await handleClient(async (client) => {
 				var db = client.db("SandustryMods");
 				var modVersionsCollection = db.collection("ModVersions");
@@ -171,7 +128,7 @@ var getMod = {
 			return endresult;
 		},
 
-		One: async function (modID = "", version = "", project = {}, sort = { uploadTime: -1 }) {
+		one: async function (modID = "", version = "", project = {}, sort = { uploadTime: -1 }) {
 			var endresult = await handleClient(async (client) => {
 				var db = client.db("SandustryMods");
 				var modVersionsCollection = db.collection("ModVersions");
@@ -187,7 +144,7 @@ var getMod = {
 			return endresult;
 		},
 
-		Multiple: async function (modIDs = [], project = { uploadTime: 1, modData: 1, modID: 1 }, sort = { uploadTime: -1 }) {
+		multiple: async function (modIDs = [], project = { uploadTime: 1, modData: 1, modID: 1 }, sort = { uploadTime: -1 }) {
 			if (!modIDs.length) return [];
 
 			var endresult = await handleClient(async (client) => {
@@ -222,7 +179,7 @@ var getMod = {
 			return endresult;
 		},
 
-		Numbers: async function (modID = "") {
+		numbers: async function (modID = "") {
 			var sort = { uploadTime: -1 };
 			var endresult = await handleClient(async (client) => {
 				var db = await client.db("SandustryMods");
@@ -233,7 +190,7 @@ var getMod = {
 			return endresult.map((entry) => entry.modData.version || "Unknown");
 		},
 
-		MultipleNumbers: async function (modIDs = []) {
+		multipleNumbers: async function (modIDs = []) {
 			if (!modIDs.length) return {};
 
 			var sort = { uploadTime: -1 };
@@ -260,7 +217,7 @@ var getMod = {
 			return endresult;
 		},
 
-		Delete: async function (modID = "", version = "") {
+		delete: async function (modID = "", version = "") {
 			var endresult = await handleClient(async (client) => {
 				var db = client.db("SandustryMods");
 				var modVersionsCollection = await db.collection("ModVersions");
@@ -276,8 +233,8 @@ var getMod = {
 		},
 	},
 
-	Data: {
-		Search: async function (query = "", verifiedOnly = true, IdsOnly = true, page = { number: 1, size: 200 }, project = {}, sort = { uploadTime: -1 }) {
+	data: {
+		search: async function (query = "", verifiedOnly = true, IdsOnly = true, page = { number: 1, size: 200 }, project = {}, sort = { uploadTime: -1 }) {
 			//{
 			//    $or: [
 			//        { "modData.modID": { $regex: query, $options: 'i' } },
@@ -350,7 +307,7 @@ var getMod = {
 			return endresult;
 		},
 
-		FindUnverified: async function (limit = 10000, project = {}) {
+		findUnverified: async function (limit = 10000, project = {}) {
 			var endresult = await handleClient(async (client) => {
 				var db = client.db("SandustryMods");
 				var modsCollection = db.collection("Mods");
@@ -360,7 +317,7 @@ var getMod = {
 			return endresult;
 		},
 
-		One: async function (modID = "", project = {}, sort = {}) {
+		one: async function (modID = "", project = {}, sort = {}) {
 			var endresult = await handleClient(async (client) => {
 				var db = client.db("SandustryMods");
 				var modsCollection = db.collection("Mods");
@@ -372,7 +329,7 @@ var getMod = {
 			return endresult;
 		},
 
-		Upload: async function (payload = { filename: "", filedata: "", discordInfo: { id: "", tokenResponse: { access_token: "" } } }, discordBypass = false, bypassUpdateCheck = false) {
+		upload: async function (payload = { filename: "", filedata: "", discordInfo: { id: "", tokenResponse: { access_token: "" } } }, discordBypass = false, bypassUpdateCheck = false) {
 			var endresult = await handleClient(async (client) => {
 				var db = client.db("SandustryMods");
 				var modsCollection = db.collection("Mods");
@@ -390,7 +347,7 @@ var getMod = {
 					if (!isValidUser) {
 						return "discord user validation failed";
 					} else {
-						var UserRecord = await GetUser.One(discordInfo.id);
+						var UserRecord = await users.one(discordInfo.id);
 						if (!UserRecord) {
 							var User = new UserEntry();
 							User.discordID = discordInfo.id;
@@ -399,7 +356,7 @@ var getMod = {
 							User.description = "new user";
 							User.joinedAt = new Date();
 							User.banned = false;
-							await GetUser.Add(User);
+							await users.add(User);
 						} else {
 							if (UserRecord.banned) {
 								return "User is banned";
@@ -541,14 +498,14 @@ var getMod = {
 				var action = new ActionEntry();
 				action.action = `Uploaded mod ${modData.name} ID ${modID} version ${modData.version}`;
 				action.discordID = discordInfo.id;
-				GetAction.Add(action);
+				actions.add(action);
 				return modID;
 			});
 
 			return endresult;
 		},
 
-		Update: async function (modID = "", entry = new ModEntry()) {
+		update: async function (modID = "", entry = new ModEntry()) {
 			var endresult = await handleClient(async (client) => {
 				var db = client.db("SandustryMods");
 				var modsCollection = db.collection("Mods");
@@ -557,37 +514,9 @@ var getMod = {
 			});
 			return endresult;
 		},
-
-		async function(verifiedOnly = true, project = {}) {
-			var endresult = await handleClient(async (client) => {
-				var db = client.db("SandustryMods");
-				var modsCollection = db.collection("Mods");
-
-				var query = {};
-				if (verifiedOnly === true) {
-					query.verified = true;
-				} else if (verifiedOnly === false) {
-					query.verified = false;
-				}
-
-				var count = await modsCollection.countDocuments(query);
-
-				if (count === 0) {
-					return null;
-				}
-
-				var random = Math.floor(Math.random() * count);
-
-				var result = await modsCollection.find(query).project(project).skip(random).limit(1).toArray();
-
-				return result.length > 0 ? result[0] : null;
-			});
-
-			return endresult;
-		},
 	},
 
-	Delete: async function (modID = "") {
+	delete: async function (modID = "") {
 		var endresult = await handleClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var modsCollection = db.collection("Mods");
@@ -600,8 +529,8 @@ var getMod = {
 	},
 };
 
-var GetUser = {
-	One: async function (discordID = "") {
+var users = {
+	one: async function (discordID = "") {
 		var endresult = await handleClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var userCollection = db.collection("Users");
@@ -611,7 +540,7 @@ var GetUser = {
 		return endresult;
 	},
 
-	Add: async function (userData = new UserEntry()) {
+	add: async function (userData = new UserEntry()) {
 		var endresult = await handleClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var userCollection = db.collection("Users");
@@ -627,7 +556,7 @@ var GetUser = {
 		return endresult;
 	},
 
-	Ban: async function (discordID = "") {
+	ban: async function (discordID = "") {
 		var endresult = await handleClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var userCollection = db.collection("Users");
@@ -637,7 +566,7 @@ var GetUser = {
 		return endresult;
 	},
 
-	Unban: async function (discordID = "") {
+	unban: async function (discordID = "") {
 		var endresult = await handleClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var userCollection = db.collection("Users");
@@ -647,7 +576,7 @@ var GetUser = {
 		return endresult;
 	},
 
-	UpdatePermissions: async function (discordID = "", permission = "", add = true) {
+	updatePermissions: async function (discordID = "", permission = "", add = true) {
 		var endresult = await handleClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var userCollection = db.collection("Users");
@@ -658,7 +587,7 @@ var GetUser = {
 		return endresult;
 	},
 
-	Search: async function (search = "", limit = 50) {
+	search: async function (search = "", limit = 50) {
 		var endresult = await handleClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var userCollection = db.collection("Users");
@@ -673,7 +602,7 @@ var GetUser = {
 		return endresult;
 	},
 
-	List: async function (limit = 50, query = {}) {
+	list: async function (limit = 50, query = {}) {
 		var endresult = await handleClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var userCollection = db.collection("Users");
@@ -684,8 +613,8 @@ var GetUser = {
 	},
 };
 
-var GetAction = {
-	Add: async function (action = new ActionEntry()) {
+var actions = {
+	add: async function (action = new ActionEntry()) {
 		var endresult = await handleClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var actionCollection = db.collection("Actions");
@@ -695,7 +624,7 @@ var GetAction = {
 		return endresult;
 	},
 
-	Get: async function (query = {}, page = { number: 1, size: 200 }) {
+	get: async function (query = {}, page = { number: 1, size: 200 }) {
 		var endresult = await handleClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var actionCollection = db.collection("Actions");
@@ -710,7 +639,7 @@ var GetAction = {
 		return endresult;
 	},
 
-	Update: async function (action = new ActionEntry()) {
+	update: async function (action = new ActionEntry()) {
 		var endresult = await handleClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var actionCollection = db.collection("Actions");
@@ -720,7 +649,7 @@ var GetAction = {
 		return endresult;
 	},
 
-	Count: async function (query = {}) {
+	count: async function (query = {}) {
 		var endresult = await handleClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var actionCollection = db.collection("Actions");
@@ -732,8 +661,8 @@ var GetAction = {
 };
 
 module.exports = {
-	getMod,
-	GetUser,
-	GetAction,
+	mods,
+	users,
+	actions,
 	handleClient: exportedHandleClient,
 };
