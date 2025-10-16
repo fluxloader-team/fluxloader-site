@@ -1,13 +1,12 @@
 const { MongoClient } = require("mongodb");
 const Utils = require("../common/utils.js");
-const https = require("https");
 const { compress } = require("@mongodb-js/zstd");
 const JSZip = require("jszip");
 const sanitizeHTML = require("sanitize-html");
 const fs = require("fs");
 const { verifyDiscordUser } = require("./verifydiscorduser");
 
-const logger = new Utils.Log("sandustry.common.DB", "./sandustry.common.txt", true);
+const logger = new Utils.Log("common.db");
 
 var modInfoSchemaContent = fs.readFileSync("common/schema.mod-info.json", "utf8");
 var modInfoSchema = JSON.parse(modInfoSchemaContent);
@@ -80,30 +79,25 @@ class ActionEntry {
 	logged = false;
 }
 
-async function handleClient(runClient) {
+async function runWithMongoClient(callback) {
 	if (!globalClient) {
 		globalClient = new MongoClient(mongoUri);
 		await globalClient.connect();
 	}
 	try {
-		if (runClient) {
-			return await runClient(globalClient);
+		if (callback) {
+			return await callback(globalClient);
 		}
 	} catch (err) {
-		logger.info(`${err}`);
+		logger.err(err);
 		throw err;
 	}
-}
-
-// This is icky
-async function exportedHandleClient(runClient = async function (client = new MongoClient(mongoUri)) {}) {
-	return await handleClient(runClient);
 }
 
 var mods = {
 	versions: {
 		all: async function (modID = "", project = {}, sort = { uploadTime: -1 }) {
-			var endresult = await handleClient(async (client) => {
+			var endresult = await runWithMongoClient(async (client) => {
 				var db = await client.db("SandustryMods");
 				var modVersionsCollection = await db.collection("ModVersions");
 				var result = await modVersionsCollection.find({ modID: modID }).sort(sort).project(project);
@@ -113,7 +107,7 @@ var mods = {
 		},
 
 		oldest: async function (modID = "", project = {}) {
-			var endresult = await handleClient(async (client) => {
+			var endresult = await runWithMongoClient(async (client) => {
 				var db = client.db("SandustryMods");
 				var modVersionsCollection = db.collection("ModVersions");
 				var result = await modVersionsCollection.findOne(
@@ -129,7 +123,7 @@ var mods = {
 		},
 
 		one: async function (modID = "", version = "", project = {}, sort = { uploadTime: -1 }) {
-			var endresult = await handleClient(async (client) => {
+			var endresult = await runWithMongoClient(async (client) => {
 				var db = client.db("SandustryMods");
 				var modVersionsCollection = db.collection("ModVersions");
 				var result = {};
@@ -147,7 +141,7 @@ var mods = {
 		multiple: async function (modIDs = [], project = { uploadTime: 1, modData: 1, modID: 1 }, sort = { uploadTime: -1 }) {
 			if (!modIDs.length) return [];
 
-			var endresult = await handleClient(async (client) => {
+			var endresult = await runWithMongoClient(async (client) => {
 				var db = client.db("SandustryMods");
 				var modVersionsCollection = db.collection("ModVersions");
 				var pipeline = [
@@ -181,7 +175,7 @@ var mods = {
 
 		numbers: async function (modID = "") {
 			var sort = { uploadTime: -1 };
-			var endresult = await handleClient(async (client) => {
+			var endresult = await runWithMongoClient(async (client) => {
 				var db = await client.db("SandustryMods");
 				var modVersionsCollection = await db.collection("ModVersions");
 				var result = await modVersionsCollection.find({ modID: modID }, { projection: { "modData.version": 1, _id: 0 } }).sort(sort);
@@ -194,7 +188,7 @@ var mods = {
 			if (!modIDs.length) return {};
 
 			var sort = { uploadTime: -1 };
-			var endresult = await handleClient(async (client) => {
+			var endresult = await runWithMongoClient(async (client) => {
 				var db = await client.db("SandustryMods");
 				var modVersionsCollection = await db.collection("ModVersions");
 				var result = await modVersionsCollection
@@ -218,7 +212,7 @@ var mods = {
 		},
 
 		delete: async function (modID = "", version = "") {
-			var endresult = await handleClient(async (client) => {
+			var endresult = await runWithMongoClient(async (client) => {
 				var db = client.db("SandustryMods");
 				var modVersionsCollection = await db.collection("ModVersions");
 				var Versions = await modVersionsCollection.find({ modID: modID });
@@ -249,7 +243,7 @@ var mods = {
 			//        { "modData.workerEntrypoint": { $regex: query, $options: 'i' } },
 			//    ]
 			//}
-			var endresult = await handleClient(async (client) => {
+			var endresult = await runWithMongoClient(async (client) => {
 				var db = client.db("SandustryMods");
 				var modsCollection = db.collection("Mods");
 				var projection = {};
@@ -276,7 +270,7 @@ var mods = {
 					const modIds = searchResults.map((mod) => mod.modID);
 
 					// Fetch all version numbers in a single database query
-					const allVersions = await handleClient(async (client) => {
+					const allVersions = await runWithMongoClient(async (client) => {
 						const db = client.db("SandustryMods");
 						const modVersionsCollection = db.collection("ModVersions");
 						const results = await modVersionsCollection
@@ -308,7 +302,7 @@ var mods = {
 		},
 
 		findUnverified: async function (limit = 10000, project = {}) {
-			var endresult = await handleClient(async (client) => {
+			var endresult = await runWithMongoClient(async (client) => {
 				var db = client.db("SandustryMods");
 				var modsCollection = db.collection("Mods");
 				var result = await modsCollection.find({ verified: false }).project(project).limit(limit).toArray();
@@ -318,7 +312,7 @@ var mods = {
 		},
 
 		one: async function (modID = "", project = {}, sort = {}) {
-			var endresult = await handleClient(async (client) => {
+			var endresult = await runWithMongoClient(async (client) => {
 				var db = client.db("SandustryMods");
 				var modsCollection = db.collection("Mods");
 				logger.info(`Searching for modID: ${modID} with project: ${JSON.stringify(project)}`);
@@ -330,7 +324,7 @@ var mods = {
 		},
 
 		upload: async function (payload = { filename: "", filedata: "", discordInfo: { id: "", tokenResponse: { access_token: "" } } }, discordBypass = false, bypassUpdateCheck = false) {
-			var endresult = await handleClient(async (client) => {
+			var endresult = await runWithMongoClient(async (client) => {
 				var db = client.db("SandustryMods");
 				var modsCollection = db.collection("Mods");
 				var versionsCollection = db.collection("ModVersions");
@@ -506,7 +500,7 @@ var mods = {
 		},
 
 		update: async function (modID = "", entry = new ModEntry()) {
-			var endresult = await handleClient(async (client) => {
+			var endresult = await runWithMongoClient(async (client) => {
 				var db = client.db("SandustryMods");
 				var modsCollection = db.collection("Mods");
 				var result = await modsCollection.updateOne({ modID: modID }, { $set: entry });
@@ -517,7 +511,7 @@ var mods = {
 	},
 
 	delete: async function (modID = "") {
-		var endresult = await handleClient(async (client) => {
+		var endresult = await runWithMongoClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var modsCollection = db.collection("Mods");
 			var result = await modsCollection.deleteOne({ modID: modID });
@@ -531,7 +525,7 @@ var mods = {
 
 var users = {
 	one: async function (discordID = "") {
-		var endresult = await handleClient(async (client) => {
+		var endresult = await runWithMongoClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var userCollection = db.collection("Users");
 			var result = await userCollection.findOne({ discordID: discordID });
@@ -541,7 +535,7 @@ var users = {
 	},
 
 	add: async function (userData = new UserEntry()) {
-		var endresult = await handleClient(async (client) => {
+		var endresult = await runWithMongoClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var userCollection = db.collection("Users");
 			var userExists = await userCollection.find({ discordID: userData.discordID }).limit(1).toArray();
@@ -557,7 +551,7 @@ var users = {
 	},
 
 	ban: async function (discordID = "") {
-		var endresult = await handleClient(async (client) => {
+		var endresult = await runWithMongoClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var userCollection = db.collection("Users");
 			var result = await userCollection.updateOne({ discordID: discordID }, { $set: { banned: true } });
@@ -567,7 +561,7 @@ var users = {
 	},
 
 	unban: async function (discordID = "") {
-		var endresult = await handleClient(async (client) => {
+		var endresult = await runWithMongoClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var userCollection = db.collection("Users");
 			var result = await userCollection.updateOne({ discordID: discordID }, { $set: { banned: false } });
@@ -577,7 +571,7 @@ var users = {
 	},
 
 	updatePermissions: async function (discordID = "", permission = "", add = true) {
-		var endresult = await handleClient(async (client) => {
+		var endresult = await runWithMongoClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var userCollection = db.collection("Users");
 			var operation = add ? { $push: { permissions: permission } } : { $pull: { permissions: permission } };
@@ -588,7 +582,7 @@ var users = {
 	},
 
 	search: async function (search = "", limit = 50) {
-		var endresult = await handleClient(async (client) => {
+		var endresult = await runWithMongoClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var userCollection = db.collection("Users");
 			var query = search
@@ -603,7 +597,7 @@ var users = {
 	},
 
 	list: async function (limit = 50, query = {}) {
-		var endresult = await handleClient(async (client) => {
+		var endresult = await runWithMongoClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var userCollection = db.collection("Users");
 			var result = await userCollection.find(query).limit(limit).toArray();
@@ -615,7 +609,7 @@ var users = {
 
 var actions = {
 	add: async function (action = new ActionEntry()) {
-		var endresult = await handleClient(async (client) => {
+		var endresult = await runWithMongoClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var actionCollection = db.collection("Actions");
 			var result = await actionCollection.insertOne(action);
@@ -625,7 +619,7 @@ var actions = {
 	},
 
 	get: async function (query = {}, page = { number: 1, size: 200 }) {
-		var endresult = await handleClient(async (client) => {
+		var endresult = await runWithMongoClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var actionCollection = db.collection("Actions");
 			var result = await actionCollection
@@ -640,7 +634,7 @@ var actions = {
 	},
 
 	update: async function (action = new ActionEntry()) {
-		var endresult = await handleClient(async (client) => {
+		var endresult = await runWithMongoClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var actionCollection = db.collection("Actions");
 			var result = await actionCollection.updateOne({ _id: action._id }, { $set: action });
@@ -650,7 +644,7 @@ var actions = {
 	},
 
 	count: async function (query = {}) {
-		var endresult = await handleClient(async (client) => {
+		var endresult = await runWithMongoClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var actionCollection = db.collection("Actions");
 			var count = await actionCollection.countDocuments(query);
@@ -660,9 +654,4 @@ var actions = {
 	},
 };
 
-module.exports = {
-	mods,
-	users,
-	actions,
-	handleClient: exportedHandleClient,
-};
+module.exports = { mods, users, actions };

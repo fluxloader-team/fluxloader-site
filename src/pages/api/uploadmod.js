@@ -1,7 +1,7 @@
 const DB = require("../../common/db");
 const Utils = require("../../common/utils.js");
 
-const logger = new Utils.Log("sandustry.web.pages.uploadmod", "./sandustry.web.main.txt", true);
+const logger = new Utils.Log("pages.uploadmod");
 
 module.exports = {
 	paths: ["/api/uploadmod"],
@@ -12,9 +12,6 @@ module.exports = {
 			res.end("This is an API endpoint.");
 			return;
 		}
-
-		let body = "";
-		req.on("data", (chunk) => (body += chunk.toString()));
 
 		const checkError = (uploadResult) => {
 			if (!uploadResult) {
@@ -45,6 +42,8 @@ module.exports = {
 			}
 		};
 
+		let body = "";
+		req.on("data", (chunk) => body += chunk.toString());
 		req.on("end", async () => {
 			try {
 				var payload = await JSON.parse(body);

@@ -1,55 +1,58 @@
 const Utils = require("../common/utils.js");
 const DB = require("../common/db");
 
-const logger = new Utils.Log("sandustry.timer.moddata", "./sandustry.timer.main.txt", true);
+const logger = new Utils.Log("timers.moddata");
 
 module.exports = {
 	async run() {
-		var page = 1;
-		var MorePages = true;
-		while (MorePages) {
-			var Mods = await DB.mods.data.search(JSON.stringify({ "modData.name": { $regex: "", $options: "i" } }), null, false, { number: page, size: 100 }, { _id: 1, modID: 1, modData: 1 });
-			if (!Mods || Mods.length === 0) {
-				MorePages = false;
-			} else {
-				logger.info(`Updating ${Mods.length} mod data...`);
-				var modIDs = Mods.map((mod) => mod.modID);
-				var modDataList = await DB.mods.versions.multiple(modIDs);
-				var modDataMap = Object.fromEntries(modDataList.map((mod) => [mod.modID, mod.modData]));
-				for (var mod of Mods) {
-					var modData = modDataMap[mod.modID];
-					if (!modData || !modData.version) {
-						logger.error(`No mod version found in modData: ${modData}`);
-						continue;
-					}
-					if (!mod.modData || !mod.modData.version) {
-						logger.error(`No mod version found in mod.modData: ${mod.modData}`);
-						continue;
-					}
+		let page = 1;
+		while (true) {
+			const query = JSON.stringify({ "modData.name": { $regex: "", $options: "i" } });
+			let mods = await DB.mods.data.search(query, null, false, { number: page, size: 100 }, { _id: 1, modID: 1, modData: 1 });
+			if (!mods || mods.length === 0) break;
 
-					if (mod.modData.version !== modData.version) {
-						mod.modData.version = modData.version;
-						await DB.mods.data.update(mod.modID, mod);
+			let updatedMods = 0;
+			let modIDs = mods.map((mod) => mod.modID);
+			let modDataList = await DB.mods.versions.multiple(modIDs);
+			let modDataMap = Object.fromEntries(modDataList.map((mod) => [mod.modID, mod.modData]));
 
-						var action = {
-							discordID: "Timer",
-							action: `Updated mod ${mod.modID} to version ${modData.version}`,
-							time: new Date(),
-						};
-						await DB.actions.add(action);
-					}
-					modData = null;
-					mod = null;
+			for (let mod of mods) {
+				let modData = modDataMap[mod.modID];
+
+				if (!modData || !modData.version) {
+					logger.error(`No mod version found in modData: ${modData}`);
+					continue;
 				}
-				modDataMap = null;
-				modDataList = null;
-				Mods = null;
-				modIDs = null;
+				if (!mod.modData || !mod.modData.version) {
+					logger.error(`No mod version found in mod.modData: ${mod.modData}`);
+					continue;
+				}
 
-				page++;
+				if (mod.modData.version !== modData.version) {
+					mod.modData.version = modData.version;
+					await DB.mods.data.update(mod.modID, mod);
+					let action = {
+						discordID: "Timer",
+						action: `Updated mod ${mod.modID} to version ${modData.version}`,
+						time: new Date(),
+					};
+					updatedMods++;
+					await DB.actions.add(action);
+				}
+
+				modData = null;
+				mod = null;
 			}
-		}
 
-		logger.info("Mod data updated.");
+			if (updatedMods > 0) {
+				logger.info(`Updated ${updatedMods} mods on page ${page}`);
+			}
+
+			modDataMap = null;
+			modDataList = null;
+			mods = null;
+			modIDs = null;
+			page++;
+		}
 	},
 };

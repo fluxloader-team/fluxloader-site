@@ -2,7 +2,7 @@ const Utils = require("../../common/utils.js");
 const { decompress } = require("@mongodb-js/zstd");
 const DB = require("../../common/db");
 
-const logger = new Utils.Log("sandustry.web.pages.search", "./sandustry.web.main.txt", true);
+const logger = new Utils.Log("pages.search");
 
 module.exports = {
 	paths: ["/api/mods"],

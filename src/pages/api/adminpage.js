@@ -2,7 +2,7 @@ const Utils = require("../../common/utils.js");
 const DB = require("../../common/db");
 const { verifyDiscordUser } = require("../../common/verifydiscorduser");
 
-const logger = new Utils.Log("sandustry.web.pages.admin", "./sandustry.web.main.txt", true);
+const logger = new Utils.Log("pages.admin");
 
 module.exports = {
 	paths: ["/api/admin/page"],
@@ -11,10 +11,8 @@ module.exports = {
 		// Check if the method is POST
 		console.log(`Received request for /api/admin/page with method: ${req.method}`);
 		if (req.method === "POST") {
-			var body = "";
-			req.on("data", (chunk) => {
-				body += chunk;
-			});
+			let body = "";
+			req.on("data", (chunk) => body += chunk.toString());
 			req.on("end", async () => {
 				try {
 					res.writeHead(200, { "Content-Type": "application/json" });

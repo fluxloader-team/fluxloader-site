@@ -10,7 +10,7 @@ class Log {
 	saveLoopInterval = {};
 	logLevel = "debug";
 
-	constructor(name = "", path = "./log.txt", date = false, saveIntervalDuration = 10000) {
+	constructor(name = "", path = "./fluxloader.log", date = true, saveIntervalDuration = 10000) {
 		this.name = name;
 		this.path = path;
 		this.date = date;

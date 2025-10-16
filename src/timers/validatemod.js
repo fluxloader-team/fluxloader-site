@@ -1,8 +1,8 @@
 const Utils = require("../common/utils.js");
 const DB = require("../common/db");
 
-const logger = new Utils.Log("sandustry.timer.Validate", "./sandustry.timer.main.txt", true);
-var validationTime = globalThis.config.ModSettings.validationTime;
+const logger = new Utils.Log("timers.validate");
+var validationTime = globalThis.config.modSettings.validationTime;
 
 module.exports = {
 	async run() {

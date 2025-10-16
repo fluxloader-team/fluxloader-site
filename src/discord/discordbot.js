@@ -3,11 +3,7 @@ const fs = require("fs");
 const Utils = require("../common/utils.js");
 const path = require("path");
 
-const logger = new Utils.Log("sandustry.bot.main", "./sandustry.bot.main.txt", true);
-
-process.on("uncaughtException", function (err) {
-	logger.info(`Caught exception: ${err.stack}`);
-});
+const logger = new Utils.Log("discordbot.main");
 
 globalThis.botCommands = new Collection();
 globalThis.botEvents = {};

@@ -4,7 +4,7 @@ const path = require("path");
 const { verifyDiscordUser } = require("../../common/verifydiscorduser");
 const DB = require("../../common/db");
 
-const logger = new Utils.Log("sandustry.web.pages.config", "./sandustry.web.main.txt", true);
+const logger = new Utils.Log("pages.config");
 
 module.exports = {
 	paths: ["/api/config"],
@@ -13,12 +13,8 @@ module.exports = {
 		// Only allow POST requests with proper authentication
 		try {
 			if (req.method === "POST") {
-				// Process the request body
-				var body = "";
-				req.on("data", (chunk) => {
-					body += chunk;
-				});
-
+				let body = "";
+				req.on("data", (chunk) => body += chunk.toString());
 				req.on("end", async () => {
 					try {
 						var data = JSON.parse(body);

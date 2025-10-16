@@ -2,7 +2,7 @@ const { verifyDiscordUser } = require("../../common/verifydiscorduser");
 const Utils = require("../../common/utils.js");
 const DB = require("../../common/db");
 
-const logger = new Utils.Log("sandustry.web.pages.actions", "./sandustry.web.main.txt", true);
+const logger = new Utils.Log("pages.actions");
 
 module.exports = {
 	paths: ["/api/actions"],
@@ -10,11 +10,8 @@ module.exports = {
 	run: async function (req, res) {
 		// Only allow POST requests with proper authentication
 		if (req.method === "POST") {
-			var body = "";
-			req.on("data", (chunk) => {
-				body += chunk;
-			});
-
+			let body = "";
+			req.on("data", (chunk) => body += chunk.toString());
 			req.on("end", async () => {
 				try {
 					var data = JSON.parse(body);

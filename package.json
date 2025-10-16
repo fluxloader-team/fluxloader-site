@@ -3,7 +3,8 @@
 	"version": "1.0.0",
 	"main": "src/index.js",
 	"scripts": {
-		"start": "cd src && node ./index.js"
+		"start": "cd src && node ./index.js",
+		"deploy": "node ./deploy.js --no-checks"
 	},
 	"author": "",
 	"license": "ISC",

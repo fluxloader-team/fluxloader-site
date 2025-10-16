@@ -13,15 +13,11 @@ module.exports = {
 			};
 
 			const req = https.request(options, (res) => {
-				let data = "";
-
-				res.on("data", (chunk) => {
-					data += chunk.toString();
-				});
-
+				let body = "";
+				res.on("data", (chunk) => body += chunk.toString());
 				res.on("end", () => {
 					try {
-						var userResponse = JSON.parse(data);
+						var userResponse = JSON.parse(body);
 
 						// Check if the user ID matches the ID from the token response
 						if (res.statusCode === 200 && userResponse.id === userId) {

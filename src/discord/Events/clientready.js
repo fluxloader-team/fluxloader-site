@@ -1,10 +1,6 @@
 const Utils = require("../../common/utils.js");
 
-const logger = new Utils.Log("sandustry.bot.event.clientready", "./sandustry.bot.main.txt", true);
-
-process.on("uncaughtException", function (err) {
-	logger.info(`Caught exception: ${err.stack}`);
-});
+const logger = new Utils.Log("discordbot.event.clientready");
 
 async function registerCommands() {
 	logger.info("Registering application commands...");

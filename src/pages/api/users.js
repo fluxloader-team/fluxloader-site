@@ -2,7 +2,7 @@ const Utils = require("../../common/utils.js");
 const DB = require("../../common/db");
 const { verifyDiscordUser } = require("../../common/verifydiscorduser");
 
-const logger = new Utils.Log("sandustry.web.pages.users", "./sandustry.web.main.txt", true);
+const logger = new Utils.Log("pages.users");
 
 module.exports = {
 	paths: ["/api/users"],
@@ -14,9 +14,8 @@ module.exports = {
 			res.end(JSON.stringify({ error: "Method not allowed" }));
 		}
 
-		var body = "";
-		req.on("data", (chunk) => (body += chunk.toString()));
-
+		let body = "";
+		req.on("data", (chunk) => body += chunk.toString());
 		req.on("end", async () => {
 			try {
 				var data = JSON.parse(body);

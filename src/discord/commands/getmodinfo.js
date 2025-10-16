@@ -2,7 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const Utils = require("../../common/utils.js");
 const db = require("../../common/db");
 
-const logger = new Utils.Log("sandustry.bot.command.GetModInfo", "./sandustry.bot.main.txt", true);
+const logger = new Utils.Log("discordbot.command.getmodinfo");
 
 function formatDependencies(dependencies) {
 	if (!dependencies || typeof dependencies !== "object") return null;

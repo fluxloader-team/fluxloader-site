@@ -22,21 +22,19 @@ const DEFAULT_CONFIG = {
 	git: {
 		pull: true,
 	},
-	ModSettings: {
+	modSettings: {
 		validationTime: 172800,
 	},
+	requireGithubSecretForReload: true,
 };
 
-const logger = new Utils.Log("sandustry.web.main", "./sandustry.web.main.txt", true);
-
-process.on("uncaughtException", function (err) {
-	logger.info(`Caught exception: ${err.stack}`);
-});
+const logger = new Utils.Log("main");
 
 globalThis.config = DEFAULT_CONFIG;
 globalThis.pages = {};
 globalThis.public = {};
 globalThis.timers = [];
+globalThis.server = null;
 
 // --------------------------------------------------------------------------------------
 
@@ -111,6 +109,23 @@ function handleWebRequests(req, res) {
 function main() {
 	logger.info("Starting the fluxloader site");
 
+	process.on("uncaughtException", function (err) {
+		logger.info(`Caught exception: ${err.stack}`);
+	});
+
+	process.on("SIGTERM", async () => {
+		logger.info("Received SIGTERM, shutting down...");
+		if (globalThis.globalClient) {
+			await globalThis.globalClient.close();
+			globalThis.globalClient = null;
+		}
+		if (globalThis.server) {
+			globalThis.server.close(() => process.exit(0));
+		} else {
+			process.exit(0);
+		}
+	});
+
 	loadConfig();
 	loadResources();
 
@@ -118,8 +133,8 @@ function main() {
 		discord.run();
 	}
 
-	const server = http.createServer(handleWebRequests);
-	server.listen(20221);
+	globalThis.server = http.createServer(handleWebRequests);
+	globalThis.server.listen(20221);
 
 	setInterval(() => {
 		for (const timer of timers) {

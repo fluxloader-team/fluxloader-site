@@ -2,7 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const Utils = require("./../../common/utils.js");
 const DB = require("./../../common/db");
 
-const logger = new Utils.Log("sandustry.bot.command.SearchMods", "./sandustry.bot.main.txt", true);
+const logger = new Utils.Log("discordbot.command.searchmods");
 
 function truncateDescription(description, limit = 100) {
 	if (!description || description.length <= limit) return description || "No description provided";

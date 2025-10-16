@@ -2,7 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const Utils = require("./../../common/utils.js");
 const DB = require("./../../common/db");
 
-const logger = new Utils.Log("sandustry.bot.command.getModVersions", "./sandustry.bot.main.txt", true);
+const logger = new Utils.Log("discordbot.command.getmodversions");
 
 module.exports = {
 	data: new SlashCommandBuilder()

@@ -2,7 +2,7 @@ const querystring = require("querystring");
 const https = require("https");
 const Utils = require("../../common/utils.js");
 
-const logger = new Utils.Log("sandustry.web.pages.discord", "./sandustry.web.main.txt", true);
+const logger = new Utils.Log("pages.discord");
 
 function makeRequest(host, path, method, headers, postData) {
 	return new Promise((resolve, reject) => {
@@ -14,17 +14,13 @@ function makeRequest(host, path, method, headers, postData) {
 		};
 
 		var req = https.request(options, (res) => {
-			var data = "";
-
-			res.on("data", (chunk) => {
-				data += chunk;
-			});
-
-			res.on("end", () => {
+			let body = "";
+			res.on("data", (chunk) => body += chunk.toString());
+			res.on("end", async () => {
 				try {
-					resolve(JSON.parse(data));
+					resolve(JSON.parse(body));
 				} catch (err) {
-					reject(new Error("Failed to parse JSON response: " + data));
+					reject(new Error("Failed to parse JSON response: " + body));
 				}
 			});
 		});
