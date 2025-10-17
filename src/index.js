@@ -26,6 +26,7 @@ const DEFAULT_CONFIG = {
 		validationTime: 172800,
 	},
 	requireGithubSecretForReload: true,
+	githubSecret: null
 };
 
 const logger = new Utils.Log("main");

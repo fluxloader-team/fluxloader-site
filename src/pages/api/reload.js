@@ -3,7 +3,7 @@ const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 
-const GITHUB_SECRET = process.env.GITHUB_SECRET;
+const GITHUB_SECRET = globalThis.config.githubSecret;
 
 const logger = new Utils.Log("pages.reload");
 
@@ -24,15 +24,17 @@ module.exports = {
 		let body = "";
 		req.on("data", (chunk) => (body += chunk));
 		req.on("end", () => {
-			if (globalThis.requireGithubSecretForReload === true) {
+			if (!(globalThis.requireGithubSecretForReload === false)) {
 				if (!verifySignature(req, body)) {
 					res.writeHead(401);
+					logger.info("Invalid signature on reload request");
 					return res.end("Invalid signature");
 				}
 				const payload = JSON.parse(body);
 				logger.info(JSON.stringify(payload));
 				if (payload.ref !== "refs/heads/main") {
 					res.writeHead(200);
+					logger.info(`Ignoring reload request for ref: ${payload.ref}`);
 					return res.end("Ignored (not main)");
 				}
 			}
