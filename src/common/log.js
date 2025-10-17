@@ -1,120 +1,100 @@
-const colors = require("colors");
 const fs = require("fs");
+const path = require("path");
+const colors = require("colors/safe");
 
 class Log {
-	currentLogs = [];
-	name = "";
-	path = "";
-	date = false;
-	saveIntervalDuration = 0;
-	saveLoopInterval = {};
-	logLevel = "debug";
-
-	constructor(name = "", path = "./fluxloader.log", date = true, saveIntervalDuration = 10000) {
+	constructor(name = "", filePath = "./fluxloader.log", withDate = true, flushInterval = 3000) {
 		this.name = name;
-		this.path = path;
-		this.date = date;
-		this.saveIntervalDuration = saveIntervalDuration;
-		this.startSave();
+		this.filePath = path.resolve(filePath);
+		this.withDate = withDate;
+		this.saveInterval = flushInterval;
+		this.logLevel = "debug";
+		this.saveQueue = [];
+		this.isStopped = false;
+
+		this.ensureLogFile();
+		this.startLogSaver();
 	}
 
-	startSave() {
-		this.saveLoopInterval = setInterval(() => {
-			if (this.currentLogs.length == 0) {
-			} else {
-				if (globalThis.config.discord.serverLog && globalThis.config.discord.runbot) {
-					var botlog = this.currentLogs;
-					var logstosend = [];
-					botlog.forEach((log) => {
-						if (
-							log.length +
-								logstosend.join(`
-`).length >
-							1800
-						) {
-							globalThis.discord.client.channels.cache.get(globalThis.config.discord.serverLogChannel).send(
-								`Log @ ${Date.now()}
-` +
-									"```ansi" +
-									`
-` +
-									logstosend.join(`
-`) +
-									"```"
-							);
-							logstosend = [];
-						} else {
-							logstosend.push(log);
-						}
-					});
-					if (logstosend.length > 0) {
-						globalThis.discord.client.channels.cache.get(globalThis.config.discord.serverLogChannel).send(
-							`Log @ ${Date.now()}
-` +
-								"```ansi" +
-								`
-` +
-								logstosend.join(`
-`) +
-								"```"
-						);
-					}
-				}
-				try {
-					if (!fs.existsSync(this.path)) {
-						fs.writeFileSync(this.path, "");
-					}
-					fs.appendFileSync(
-						this.path,
-						this.currentLogs.join(`
-`) +
-							`
-`
-					);
-				} catch (e) {}
+	ensureLogFile() {
+		try {
+			const dir = path.dirname(this.filePath);
+			if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+			if (!fs.existsSync(this.filePath)) fs.writeFileSync(this.filePath, "");
+		} catch (e) {
+			console.error(`Logger: cannot create log file at ${this.filePath}:`, e.message);
+		}
+	}
 
-				this.currentLogs = [];
+	startLogSaver() {
+		// Save logs on an interval but async and unref so it doesn't block exit
+		this.saveTimer = setInterval(() => this.saveLogsAsync(), this.saveInterval);
+		this.saveTimer.unref();
+	}
+
+	async saveLogsAsync() {
+		if (this.saveQueue.length === 0 || this.isStopped) return;
+		const data = this.saveQueue.join("\n") + "\n";
+		this.saveQueue.length = 0;
+		try {
+			await fs.promises.appendFile(this.filePath, data);
+			if (globalThis.config?.discord?.serverLog && globalThis.config?.discord?.runbot) {
+				this.sendToDiscord(data);
 			}
-		}, this.saveIntervalDuration);
-	}
-
-	stopSave() {
-		clearInterval(this.saveLoopInterval);
-	}
-
-	info(Input = "") {
-		var logMessage = "";
-		if (this.date == true) {
-			logMessage = `${colors.green(this.name + " | " + Date.now())} : ${Input}`;
-		} else {
-			logMessage = `${colors.green(this.name)} : ${Input}`;
+		} catch (e) {
+			console.error(`Logger: async save failed: ${e.message}`);
 		}
-		this.currentLogs.push(logMessage);
-		console.log(logMessage);
 	}
 
-	debug(Input = "") {
-		if (this.logLevel == "debug") {
-			var logMessage = "";
-			if (this.date == true) {
-				logMessage = `${colors.yellow(this.name + " | " + Date.now())} : ${Input}`;
-			} else {
-				logMessage = `${colors.yellow(this.name)} : ${Input}`;
+	saveLogs() {
+		if (this.saveQueue.length === 0 || this.isStopped) return;
+		const data = this.saveQueue.join("\n") + "\n";
+		this.saveQueue.length = 0;
+		try {
+			fs.appendFileSync(this.filePath, data);
+			if (globalThis.config?.discord?.serverLog && globalThis.config?.discord?.runbot) {
+				this.sendToDiscord(data);
 			}
-			this.currentLogs.push(logMessage);
-			console.log(logMessage);
+		} catch (e) {
+			console.error(`Logger: save failed: ${e.message}`);
 		}
 	}
 
-	error(Input = "") {
-		var logMessage = "";
-		if (this.date == true) {
-			logMessage = `${colors.red(this.name + " | " + Date.now())} : ${Input}`;
-		} else {
-			logMessage = `${colors.red(this.name)} : ${Input}`;
+	async sendToDiscord(data) {
+		try {
+			const chunks = data.match(/(.|[\r\n]){1,1800}/g);
+			const ch = globalThis.discord.client.channels.cache.get(globalThis.config.discord.serverLogChannel);
+			for (const chunk of chunks) {
+				await ch.send("```ansi\n" + chunk + "\n```");
+			}
+		} catch (e) {
+			console.error("Logger: Discord send failed:", e.message);
 		}
-		this.currentLogs.push(logMessage);
-		console.log(logMessage);
+	}
+
+	stopSaver() {
+		clearInterval(this.saveTimer);
+		this.isStopped = true;
+		this.saveLogs();
+	}
+
+	log(colorFn, level, input) {
+		const timestamp = new Date().toISOString();
+		const prefix = this.withDate ? `${this.name} ${timestamp}` : this.name;
+		this.saveQueue.push(`${prefix} | ${input}`);
+		try {
+			console.log(colorFn(`${prefix} | `) + input);
+		} catch {}
+	}
+
+	info(msg) {
+		this.log(colors.green, "info", msg);
+	}
+	debug(msg) {
+		if (this.logLevel === "debug") this.log(colors.yellow, "debug", msg);
+	}
+	error(msg) {
+		this.log(colors.red, "error", msg);
 	}
 }
 

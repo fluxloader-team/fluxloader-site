@@ -9,7 +9,7 @@ module.exports = {
 
 	run: function (req, res) {
 		// Check if the method is POST
-		console.log(`Received request for /api/admin/page with method: ${req.method}`);
+		logger.info(`Received request for /api/admin/page with method: ${req.method}`);
 		if (req.method === "POST") {
 			let body = "";
 			req.on("data", (chunk) => body += chunk.toString());

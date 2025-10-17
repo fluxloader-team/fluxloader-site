@@ -1,7 +1,7 @@
 const Utils = require("../../common/utils.js");
 const crypto = require("crypto");
+const fs = require("fs");
 const path = require("path");
-const { spawn } = require("child_process");
 
 const GITHUB_SECRET = process.env.GITHUB_SECRET;
 
@@ -37,15 +37,19 @@ module.exports = {
 				}
 			}
 
-			const baseDir = path.resolve(__dirname, "..", "..", "..");
-			const deployScript = path.resolve(baseDir, "deploy.js");
-
-			const child = spawn(process.execPath, [deployScript], { cwd: baseDir, detached: true });
-			child.unref();
-			console.log(`Spawned deploy script (pid=${child.pid})`);
-
-			res.writeHead(200);
-			res.end("Deploy triggered");
+			// Signal the supervisor to redeploy
+			try {
+				const triggerFile = path.resolve(__dirname, "../../../deploy.trigger");
+				logger.info(`Triggering deploy by writing to: ${triggerFile}`);
+				fs.writeFileSync(triggerFile, Date.now().toString());
+				logger.info(`Wrote deploy trigger: ${triggerFile}`);
+				res.writeHead(200);
+				res.end("Deploy triggered");
+			} catch (err) {
+				logger.error(`Failed to write deploy trigger: ${err.message}`);
+				res.writeHead(500);
+				res.end("Deploy failed");
+			}
 		});
 	},
 };

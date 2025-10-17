@@ -4,7 +4,7 @@
 	"main": "src/index.js",
 	"scripts": {
 		"start": "cd src && node ./index.js",
-		"deploy": "node ./deploy.js --no-checks"
+		"deploy": "node ./supervisor.js --no-checks"
 	},
 	"author": "",
 	"license": "ISC",
