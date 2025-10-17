@@ -30,30 +30,32 @@ module.exports = {
 					logger.info("Invalid signature on reload request");
 					return res.end("Invalid signature");
 				}
+				logger.info("Valid signature on reload request");
+			}
 
-				// Only trigger on tags
-				const payload = JSON.parse(body);
-				if (!payload.ref.startsWith("refs/tags/")) {
-					res.writeHead(200);
-					return res.end("Ignored (not a tag)");
-				}
+			// Only trigger on tags
+			const payload = JSON.parse(body);
+			if (!payload.ref.startsWith("refs/tags/")) {
+				logger.info("Reload request ignored (not a tag)");
+				res.writeHead(200);
+				return res.end("Ignored (not a tag)");
+			}
 
-				try {
-					const tagName = payload.ref.replace("refs/tags/", "");
-					logger.info(`Deploy triggered by tag: ${tagName}`);
+			try {
+				const tagName = payload.ref.replace("refs/tags/", "");
+				logger.info(`Deploy triggered by tag: ${tagName}`);
 
-					// Signal the supervisor to redeploy
-					const triggerFile = path.resolve(__dirname, "../../../deploy.trigger");
-					logger.info(`Triggering deploy by writing to: ${triggerFile}`);
-					fs.writeFileSync(triggerFile, Date.now().toString());
+				// Signal the supervisor to redeploy
+				const triggerFile = path.resolve(__dirname, "../../../deploy.trigger");
+				logger.info(`Triggering deploy by writing to: ${triggerFile}`);
+				fs.writeFileSync(triggerFile, Date.now().toString());
 
-					res.writeHead(200);
-					res.end("Deploy triggered");
-				} catch (err) {
-					logger.error(`Failed to write deploy trigger: ${err.message}`);
-					res.writeHead(500);
-					res.end("Deploy failed");
-				}
+				res.writeHead(200);
+				res.end("Deploy triggered");
+			} catch (err) {
+				logger.error(`Failed to write deploy trigger: ${err.message}`);
+				res.writeHead(500);
+				res.end("Deploy failed");
 			}
 		});
 	},
