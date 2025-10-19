@@ -9,6 +9,7 @@
 		<link rel="stylesheet" href="common.css" />
 		<link rel="stylesheet" href="admin.css" />
 	</head>
+
 	<body>
 		<div class="pageContainer">
 			<div class="headerContainer" id="headerContainer">
@@ -18,66 +19,13 @@
 					<img src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg" alt="discord Logo" title="Login with Discord" style="width: 100px; height: 20px; margin-right: 5px" />
 				</a>
 			</div>
-
 			<div id="adminPageContent" class="adminpage fullpage"></div>
-
-			<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-			<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
-			<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/loader.min.js"></script>
-
-			<script>
-				var discordUser = JSON.parse(localStorage.getItem("discordUser"));
-
-				if (discordUser) {
-					console.log("discord User:", discordUser);
-					var headerContainer = document.getElementById("headerContainer");
-					headerContainer.removeChild(document.getElementById("discordLogin"));
-
-					var discordDropdown = document.createElement("div");
-					discordDropdown.className = "dropdown";
-
-					discordDropdown.innerHTML = `
-                <button class="btn dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    <img src="https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png" alt="${discordUser.global_name}" class="rounded-circle" style="width: 30px; height: 30px; margin-right: 5px;">
-                    ${discordUser.global_name}
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="userDropdown">
-                    <li><a class="dropdown-item" href="/upload">Upload Mod</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="#" id="logoutButton">Logout</a></li>
-                </ul>
-            `;
-
-					headerContainer.appendChild(discordDropdown);
-
-					var logoutButton = document.getElementById("logoutButton");
-					logoutButton.addEventListener("click", function () {
-						localStorage.removeItem("discordUser");
-						window.location.reload();
-					});
-				} else {
-					window.location.href = "/";
-				}
-
-				document.addEventListener("DOMContentLoaded", async () => {
-					var response = await fetch("/api/admin/page", {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-						},
-						body: JSON.stringify({
-							discordUser: discordUser,
-						}),
-					});
-					var result = await response.json();
-					if (result.error) {
-						window.location.href = "/";
-					} else {
-						Function(result.run)();
-					}
-				});
-			</script>
 		</div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/loader.min.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
+		<script src="admin.js"></script>
 	</body>
 </html>

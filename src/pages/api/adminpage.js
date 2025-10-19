@@ -35,7 +35,7 @@ module.exports = {
 						return;
 					}
 					if (UserData.permissions.includes("admin")) {
-						res.end(JSON.stringify({ run: globalThis.public["admin.js"] }));
+						res.end(JSON.stringify({ run: globalThis.public["adminpayload.js"] }));
 					} else {
 						res.end(JSON.stringify({ error: "User does not have admin permissions" }));
 					}
