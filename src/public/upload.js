@@ -1,39 +1,33 @@
-var discordUser = JSON.parse(localStorage.getItem("discordUser"));
+const discordUser = JSON.parse(localStorage.getItem("discordUser"));
 if (discordUser) {
 	console.log("discord User:", discordUser);
-	var rightContainer = document.getElementById("rightContainer");
-	rightContainer.removeChild(document.getElementById("discordLogin"));
 
-	var discordDropdown = document.createElement("div");
+	const discordDropdown = document.createElement("div");
 	discordDropdown.className = "dropdown";
-
 	discordDropdown.innerHTML = `
-                <button class="btn dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    <img src="https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png" alt="${discordUser.global_name}" class="rounded-circle" style="width: 30px; height: 30px; margin-right: 5px;">
-                    ${discordUser.global_name}
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="userDropdown">
-                    <li><a class="dropdown-item" href="/upload">Upload Mod</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="#" id="logoutButton">Logout</a></li>
-                </ul>
-            `;
+		<button class="btn dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+			<img src="https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png" alt="${discordUser.global_name}" class="rounded-circle" style="width: 30px; height: 30px; margin-right: 5px;">
+			${discordUser.global_name}
+		</button>
+		<ul class="dropdown-menu" aria-labelledby="userDropdown">
+			<li><a class="dropdown-item" href="/upload">Upload Mod</a></li>
+			<li><hr class="dropdown-divider"></li>
+			<li><a class="dropdown-item" href="#" id="logoutButton">Logout</a></li>
+		</ul>`;
 
+	const rightContainer = document.getElementById("rightContainer");
+	rightContainer.removeChild(document.getElementById("discordLogin"));
 	rightContainer.appendChild(discordDropdown);
 
-	var logoutButton = document.getElementById("logoutButton");
+	const logoutButton = document.getElementById("logoutButton");
 	logoutButton.addEventListener("click", function () {
 		localStorage.removeItem("discordUser");
 		window.location.reload();
 	});
-} else {
-	// window.location.href = "/";
 }
 
-// Global variables to store mod data
 let currentModData = null;
 
-// Function to perform the actual upload
 async function performUpload() {
 	var fileInput = document.getElementById("ModFile");
 	var file = fileInput.files[0];
@@ -98,7 +92,6 @@ async function performUpload() {
 	}
 }
 
-// Function to show error message
 function showError(message) {
 	const errorDiv = document.createElement("div");
 	errorDiv.className = "alert alert-danger alert-dismissible fade show mt-3";
@@ -115,7 +108,6 @@ function showError(message) {
 	}, 5000);
 }
 
-// Function to show success message
 function showSuccess(message) {
 	const successDiv = document.createElement("div");
 	successDiv.className = "alert alert-success alert-dismissible fade show mt-3";
@@ -132,7 +124,6 @@ function showSuccess(message) {
 	}, 5000);
 }
 
-// Main upload handler function
 async function handleUpload() {
 	if (!currentModData || !currentModData.modID) {
 		showError("No valid mod selected or missing modID in modinfo.json");
