@@ -43,7 +43,7 @@ module.exports = {
 		};
 
 		let body = "";
-		req.on("data", (chunk) => body += chunk.toString());
+		req.on("data", (chunk) => (body += chunk.toString()));
 		req.on("end", async () => {
 			try {
 				var payload = await JSON.parse(body);
@@ -62,7 +62,7 @@ module.exports = {
 					checkError(uploadResult);
 
 					// Succesful upload as an update
-					await res.writeHead(200, { "Content-Type": "application/json" });
+					await res.writeHead(201, { "Content-Type": "application/json" });
 					await res.end(
 						JSON.stringify({
 							message: `File ${filename} uploaded successfully.`,
@@ -74,7 +74,7 @@ module.exports = {
 				}
 
 				// Successful upload of a new mod
-				await res.writeHead(200, { "Content-Type": "application/json" });
+				await res.writeHead(201, { "Content-Type": "application/json" });
 				await res.end(
 					JSON.stringify({
 						message: `File ${filename} uploaded successfully.`,

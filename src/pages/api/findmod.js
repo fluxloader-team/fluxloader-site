@@ -20,7 +20,7 @@ module.exports = {
 
 			// Check that atleast one of the endpoints will be used
 			if (querys["search"] == undefined && ((querys["modid"] == undefined && querys["modids"] == undefined) || querys["option"] == undefined)) {
-				res.writeHead(201, { "Content-Type": "application/json" });
+				res.writeHead(400, { "Content-Type": "application/json" });
 				res.end(
 					JSON.stringify({
 						error: "Missing required query parameters",
@@ -42,7 +42,7 @@ module.exports = {
 						try {
 							var modID = querys["modid"];
 							if (!modID) {
-								res.writeHead(201, { "Content-Type": "application/json" });
+								res.writeHead(400, { "Content-Type": "application/json" });
 								res.end(
 									JSON.stringify({
 										error: "ModID is required to download the mod.",
@@ -67,7 +67,7 @@ module.exports = {
 								})}`
 							);
 							if (!modData) {
-								res.writeHead(201, { "Content-Type": "application/json" });
+								res.writeHead(400, { "Content-Type": "application/json" });
 								res.end(
 									JSON.stringify({
 										error: "No mod version found for the specified mod ID and version.",
@@ -79,7 +79,7 @@ module.exports = {
 							}
 							if (!modData.modfile) {
 								logger.info(`Mod file data is missing for modID: ${modID}, version: ${querys["version"] || "latest"}`);
-								res.writeHead(201, { "Content-Type": "application/json" });
+								res.writeHead(400, { "Content-Type": "application/json" });
 								res.end(
 									JSON.stringify({
 										error: "Mod file data is missing for the specified mod version.",
@@ -109,7 +109,7 @@ module.exports = {
 								})}`
 							);
 
-							res.writeHead(201, { "Content-Type": "application/json" });
+							res.writeHead(500, { "Content-Type": "application/json" });
 							res.end(
 								JSON.stringify({
 									error: "An error occurred while processing the download.",
@@ -127,7 +127,7 @@ module.exports = {
 						try {
 							var modID = querys["modid"];
 							if (!modID) {
-								res.writeHead(201, { "Content-Type": "application/json" });
+								res.writeHead(400, { "Content-Type": "application/json" });
 								res.end(
 									JSON.stringify({
 										error: "ModID is required to fetch the mod information.",
@@ -152,7 +152,7 @@ module.exports = {
 							);
 
 							if (!modVersion) {
-								res.writeHead(201, { "Content-Type": "application/json" });
+								res.writeHead(400, { "Content-Type": "application/json" });
 								res.end(
 									JSON.stringify({
 										message: "No mod version found for the specified mod ID and version.",
@@ -163,7 +163,7 @@ module.exports = {
 								return;
 							}
 
-							res.writeHead(201, { "Content-Type": "application/json" });
+							res.writeHead(200, { "Content-Type": "application/json" });
 							res.end(JSON.stringify({ mod: modVersion }));
 						} catch (err) {
 							logger.info(`Error fetching mod info: ${err.message}`);
@@ -175,7 +175,7 @@ module.exports = {
 								})}`
 							);
 
-							res.writeHead(201, { "Content-Type": "application/json" });
+							res.writeHead(500, { "Content-Type": "application/json" });
 							res.end(
 								JSON.stringify({
 									error: "An internal server error occurred while fetching mod information.",
@@ -211,7 +211,7 @@ module.exports = {
 								// Check if full version data is requested
 								if (querys["data"] === "true") {
 									// This feature is not implemented for multiple mod IDs
-									res.writeHead(201, { "Content-Type": "application/json" });
+									res.writeHead(501, { "Content-Type": "application/json" });
 									res.end(
 										JSON.stringify({
 											error: "Full version data is not supported for multiple mod IDs. Use single modid parameter for full data.",
@@ -231,7 +231,7 @@ module.exports = {
 									})}`
 								);
 
-								res.writeHead(201, { "Content-Type": "application/json" });
+								res.writeHead(200, { "Content-Type": "application/json" });
 								res.end(JSON.stringify({ versions: versionsMap }));
 							}
 							// Handle single mod ID case (original behavior)
@@ -250,7 +250,7 @@ module.exports = {
 									);
 
 									if (versionsData.length === 0) {
-										res.writeHead(201, { "Content-Type": "application/json" });
+										res.writeHead(400, { "Content-Type": "application/json" });
 										res.end(
 											JSON.stringify({
 												message: "No versions found for the specified mod ID.",
@@ -260,7 +260,7 @@ module.exports = {
 										return;
 									}
 
-									res.writeHead(201, { "Content-Type": "application/json" });
+									res.writeHead(200, { "Content-Type": "application/json" });
 									res.end(JSON.stringify({ versions: versionsData }));
 								}
 
@@ -276,7 +276,7 @@ module.exports = {
 									);
 
 									if (versions.length === 0) {
-										res.writeHead(201, { "Content-Type": "application/json" });
+										res.writeHead(400, { "Content-Type": "application/json" });
 										res.end(
 											JSON.stringify({
 												message: "No versions found for the specified mod ID.",
@@ -286,12 +286,12 @@ module.exports = {
 										return;
 									}
 
-									res.writeHead(201, { "Content-Type": "application/json" });
+									res.writeHead(200, { "Content-Type": "application/json" });
 									res.end(JSON.stringify({ versions }));
 								}
 							} else {
 								// Neither modid nor modids parameter was provided
-								res.writeHead(201, { "Content-Type": "application/json" });
+								res.writeHead(400, { "Content-Type": "application/json" });
 								res.end(
 									JSON.stringify({
 										error: "Either modid or modids parameter is required to fetch versions.",
@@ -311,7 +311,7 @@ module.exports = {
 								})}`
 							);
 
-							res.writeHead(201, { "Content-Type": "application/json" });
+							res.writeHead(400, { "Content-Type": "application/json" });
 							res.end(
 								JSON.stringify({
 									error: "An internal server error occurred while fetching versions.",
@@ -339,7 +339,7 @@ module.exports = {
 						}
 					} catch (jsonError) {
 						logger.info("Invalid JSON search query: " + jsonError.message);
-						res.writeHead(201, { "Content-Type": "application/json" });
+						res.writeHead(400, { "Content-Type": "application/json" });
 						res.end(
 							JSON.stringify({
 								error: "Invalid search query format. Please provide a valid JSON query.",
@@ -374,7 +374,7 @@ module.exports = {
 					}
 
 					if (mods.length === 0) {
-						res.writeHead(201, { "Content-Type": "application/json" });
+						res.writeHead(400, { "Content-Type": "application/json" });
 						res.end(
 							JSON.stringify({
 								message: "No mods found matching your search query.",
@@ -384,7 +384,7 @@ module.exports = {
 						return;
 					}
 
-					res.writeHead(201, { "Content-Type": "application/json" });
+					res.writeHead(200, { "Content-Type": "application/json" });
 					res.end(
 						JSON.stringify({
 							message: "Search results successfully fetched",
@@ -395,7 +395,7 @@ module.exports = {
 				} catch (error) {
 					logger.info("Error occurred while searching mods:" + error);
 
-					res.writeHead(201, { "Content-Type": "application/json" });
+					res.writeHead(500, { "Content-Type": "application/json" });
 					res.end(
 						JSON.stringify({
 							error: "An error occurred while processing your search.",

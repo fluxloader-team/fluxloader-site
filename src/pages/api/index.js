@@ -1,8 +1,8 @@
 module.exports = {
-	paths: ["", "/", "/home"],
+	paths: ["/api"],
 
 	run: function (req, res) {
 		res.writeHead(200, { "Content-Type": "text/html" });
-		res.end(globalThis.public["home.html"]);
+		res.end("<h1>Why hello there</h1");
 	},
 };
