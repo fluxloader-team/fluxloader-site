@@ -3,13 +3,11 @@ const Utils = require("../common/utils.js");
 const { compress } = require("@mongodb-js/zstd");
 const JSZip = require("jszip");
 const sanitizeHTML = require("sanitize-html");
-const fs = require("fs");
 const { verifyDiscordUser } = require("./verifydiscorduser");
 
 const logger = new Utils.Log("common.db");
+var modInfoSchema = require("./schema.mod-info.json");
 
-var modInfoSchemaContent = fs.readFileSync("common/schema.mod-info.json", "utf8");
-var modInfoSchema = JSON.parse(modInfoSchemaContent);
 var mongoUri = globalThis.config.mongodb.uri;
 /** @type {import("mongodb").MongoClient | undefined} */
 let globalClient;
