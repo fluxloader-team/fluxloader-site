@@ -16,7 +16,9 @@ module.exports = {
 		.setDescription("Gets site actions from search request")
 		.addStringOption((option) => option.setName("query").setDescription("The search query (userID or action)").setRequired(true))
 		.addIntegerOption((option) => option.setName("page").setDescription("The page number to show")),
-
+	/**
+	 * @param {import("discord.js").ChatInputCommandInteraction} interaction 
+	 */
 	async execute(interaction) {
 		await interaction.deferReply();
 		logger.info(`getting site actions for ${interaction.options.getString("query")}`);

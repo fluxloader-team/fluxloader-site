@@ -23,6 +23,9 @@ module.exports = {
 		.addStringOption((option) => option.setName("modid").setDescription("The ID of the mod you want to fetch information for").setRequired(true))
 		.addStringOption((option) => option.setName("version").setDescription("The version of the mod").setRequired(true)),
 
+	/**
+	 * @param {import("discord.js").ChatInputCommandInteraction} interaction 
+	 */
 	async execute(interaction) {
 		await interaction.deferReply();
 		logger.info(`getting mod info for ${interaction.options.getString("modid")}`);

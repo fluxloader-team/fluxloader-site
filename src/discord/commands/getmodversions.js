@@ -9,7 +9,9 @@ module.exports = {
 		.setName("getmodversions")
 		.setDescription("Gets the specified mod version list")
 		.addStringOption((option) => option.setName("modid").setDescription("The ID of the mod you want to fetch versions for").setRequired(true)),
-
+	/**
+	 * @param {import("discord.js").ChatInputCommandInteraction} interaction 
+	 */
 	async execute(interaction) {
 		await interaction.deferReply();
 		logger.info(`getting mod versions for ${interaction.options.getString("modid")}`);
