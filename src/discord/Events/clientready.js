@@ -1,4 +1,5 @@
 const Utils = require("../../common/utils.js");
+const { REST, Routes } = require("discord.js");
 
 const logger = new Utils.Log("discordbot.event.clientready");
 
@@ -32,7 +33,7 @@ async function registerCommands() {
 
 	var rest = new REST({ version: "10" }).setToken(globalThis.config.discord.token);
 	try {
-		await rest.put(Routes.applicationGuildcommands(globalThis.discord.client.user.id, "1359169971611111736"), { body: commands });
+		await rest.put(Routes.applicationGuildCommands(globalThis.discord.client.user.id, "1359169971611111736"), { body: commands });
 		logger.info("commands registered to discord successfully.");
 	} catch (error) {
 		logger.info(`Error registering commands to discord: ${error.message}`);
