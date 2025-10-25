@@ -1,10 +1,11 @@
-const { Client, Events, GatewayIntentBits, REST, Routes, Collection } = require("discord.js");
+const { Client, Events, Collection } = require("discord.js");
 const fs = require("fs");
 const Utils = require("../common/utils.js");
 const path = require("path");
 
 const logger = new Utils.Log("discordbot.main");
 
+/** @type {import("discord.js").Collection<String,null>} */
 globalThis.botCommands = new Collection();
 globalThis.botEvents = {};
 
