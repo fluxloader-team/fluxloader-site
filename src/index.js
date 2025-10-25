@@ -15,6 +15,7 @@ const DEFAULT_CONFIG = {
 		serverLog: true,
 		serverLogChannel: "SERVER_LOG_CHANNEL",
 		serverActionsChannel: "SERVER_ACTIONS_CHANNEL",
+		server: "1359169971611111736",
 	},
 	mongodb: {
 		uri: "mongodb://localhost:27017/somejoinstring",
