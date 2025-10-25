@@ -16,10 +16,10 @@ function reloadEvents() {
 	// Use the name of the file as the event name, e.g. ready.js -> "ready" event
 	logger.info("Reloading events...");
 
-	var eventsPath = path.resolve(__dirname, "./discord/events");
+	var eventsPath = path.resolve(__dirname, "./events");
 
 	fs.readdirSync(eventsPath).forEach((file) => {
-		const filePath = path.join(__dirname, "./discord/events", file);
+		const filePath = path.join(__dirname, "./events", file);
 		const eventName = file.split(".")[0];
 		const eventEnum = Events[eventName];
 
@@ -38,7 +38,7 @@ function reloadCommands() {
 	// We later register these with the bot in the "clientready" event handler
 	logger.info("Reloading commands...");
 
-	var commandsPath = path.resolve(__dirname, "./discord/commands");
+	var commandsPath = path.resolve(__dirname, "./commands");
 
 	fs.readdirSync(commandsPath).forEach((file) => {
 		var filePath = path.join(commandsPath, file);
