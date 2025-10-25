@@ -11,7 +11,8 @@ const logger = new Utils.Log("common.db");
 var modInfoSchemaContent = fs.readFileSync("common/schema.mod-info.json", "utf8");
 var modInfoSchema = JSON.parse(modInfoSchemaContent);
 var mongoUri = globalThis.config.mongodb.uri;
-var globalClient = null;
+/** @type {import("mongodb").MongoClient | undefined} */
+let globalClient;
 
 class ModEntry {
 	modID = "";
@@ -78,7 +79,9 @@ class ActionEntry {
 	time = new Date();
 	logged = false;
 }
-
+/**
+ * @param {function(import("mongodb").MongoClient)} callback 
+ */
 async function runWithMongoClient(callback) {
 	if (!globalClient) {
 		globalClient = new MongoClient(mongoUri);
@@ -587,8 +590,8 @@ var users = {
 			var userCollection = db.collection("Users");
 			var query = search
 				? {
-						$or: [{ discordID: { $regex: search, $options: "i" } }, { discordUsername: { $regex: search, $options: "i" } }],
-				  }
+					$or: [{ discordID: { $regex: search, $options: "i" } }, { discordUsername: { $regex: search, $options: "i" } }],
+				}
 				: {};
 			var result = await userCollection.find(query).limit(limit).toArray();
 			return result;
