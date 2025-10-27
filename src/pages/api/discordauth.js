@@ -39,7 +39,10 @@ function makeRequest(host, path, method, headers, postData) {
 
 module.exports = {
 	paths: ["/auth/discord", "/auth/discord/callback"],
-
+	/**
+	 * @param {import("http").IncomingMessage} req 
+	 * @param {import("http").ServerResponse} res 
+	 */
 	run: async function (req, res) {
 		var urlSplit = req.url.split("?");
 		var pathname = urlSplit[0];

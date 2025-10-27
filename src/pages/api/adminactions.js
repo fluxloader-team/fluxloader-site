@@ -6,7 +6,10 @@ const logger = new Utils.Log("pages.adminactions");
 
 module.exports = {
 	paths: ["/api/admin/actions"],
-
+	/**
+	 * @param {import("http").IncomingMessage} req 
+	 * @param {import("http").ServerResponse} res 
+	 */
 	run: function (req, res) {
 		// Check if the method is POST
 		if (req.method !== "POST") {

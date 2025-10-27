@@ -5,7 +5,10 @@ const logger = new Utils.Log("pages.uploadmod");
 
 module.exports = {
 	paths: ["/api/uploadmod"],
-
+	/**
+	 * @param {import("http").IncomingMessage} req 
+	 * @param {import("http").ServerResponse} res 
+	 */
 	run: function (req, res) {
 		if (req.method !== "POST") {
 			res.writeHead(404, { "Content-Type": "text/html" });
