@@ -31,17 +31,12 @@ module.exports = {
 		logger.info(`getting mod info for ${interaction.options.getString("modid")}`);
 
 		var modID = interaction.options.getString("modid");
-		var version = interaction.options.getString("version");
+		var version = interaction.options.getString("version") || "";
 
 		logger.info(`modID: ${modID}, version: ${version}`);
 		logger.info("connecting to database");
 		try {
-			var modData = {};
-			if (version != "") {
-				modData = db.getMod.versions.one(modID, version, { modfile: 0 });
-			} else {
-				modData = db.getMod.versions.one(modID, "", { modfile: 0 });
-			}
+			modData = await db.mods.versions.one(modID, version, { modfile: 0 });
 
 			if (!modData) {
 				await interaction.editReply({ content: `Mod with ID \`${modID}\` and version \`${version}\` was not found!` });
