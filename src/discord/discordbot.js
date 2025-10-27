@@ -61,7 +61,8 @@ module.exports = {
 		try {
 			logger.info("Starting discord bot...");
 
-			const client = new Client({ intents: Object.values(GatewayIntentBits) });
+			// We don't need intents because the interaction event is sent no matter what
+			const client = new Client({ intents: [] });
 			globalThis.discord = { client };
 
 			reloadEvents();
