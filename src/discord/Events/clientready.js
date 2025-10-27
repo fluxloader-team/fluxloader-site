@@ -1,9 +1,10 @@
 const Utils = require("../../common/utils.js");
-const { REST, Routes } = require("discord.js");
+const { REST, Routes, Events } = require("discord.js");
 
 const logger = new Utils.Log("discordbot.event.clientready");
 
 module.exports = {
+	event: Events.ClientReady,
 	/**
 	 * @param {import("discord.js").Client} client
 	 */

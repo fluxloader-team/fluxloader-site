@@ -1,4 +1,4 @@
-const { Client, Events, Collection } = require("discord.js");
+const { Client, Collection } = require("discord.js");
 const fs = require("fs");
 const Utils = require("../common/utils.js");
 const path = require("path");
@@ -20,14 +20,13 @@ function reloadEvents() {
 
 	fs.readdirSync(eventsPath).forEach((file) => {
 		const filePath = path.join(__dirname, "./events", file);
-		const eventName = file.split(".")[0];
-		const eventEnum = Events[eventName];
+		const eventFile = require(filePath);
 
-		botEvents[eventName] = require(filePath);
-		discord.client.removeAllListeners(eventEnum);
-		discord.client.on(eventEnum, (event) => botEvents[eventName].run(event));
+		botEvents[eventFile.event] = require(filePath);
+		discord.client.removeAllListeners(eventFile.event);
+		discord.client.on(eventFile.event, (...args) => botEvents[eventFile.event].run(...args));
 
-		logger.info(`Event listener registered for: ${eventName}`);
+		logger.info(`Event listener registered for: ${eventFile.event}`);
 	});
 
 	logger.info("Events registered");

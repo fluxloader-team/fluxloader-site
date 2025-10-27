@@ -1,8 +1,10 @@
 const Utils = require("../../common/utils.js");
+const { Events } = require("discord.js");
 
 const logger = new Utils.Log("discordbot.event.interactioncreate");
 
 module.exports = {
+	event: Events.InteractionCreate,
 	/**
 	 * @param {import("discord.js").Interaction} interaction
 	 */
