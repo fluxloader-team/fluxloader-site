@@ -5,8 +5,6 @@ const path = require("path");
 
 const logger = new Utils.Log("discordbot.main");
 
-/** @type {import("discord.js").Collection<String,null>} */
-globalThis.botCommands = new Collection();
 globalThis.botEvents = {};
 
 // --------------------------------------------------------------------------------------
@@ -32,7 +30,10 @@ function reloadEvents() {
 	logger.info("Events registered");
 }
 
-function reloadCommands() {
+/**
+ * @param {import("discord.js").Client} client 
+ */
+function reloadCommands(client) {
 	// Just load the commands into the botCommands collection
 	// We later register these with the bot in the "clientready" event handler
 	logger.info("Reloading commands...");
@@ -44,14 +45,14 @@ function reloadCommands() {
 		const command = require(filePath);
 
 		if (command.data && command.execute) {
-			botCommands.set(command.data.name, command);
+			client.commands.set(command.data.name, command);
 			logger.info(`Command "${command.data.name}" successfully loaded.`);
 		} else {
 			logger.info(`Skipping file "${file}" as it's not a valid command.`);
 		}
 	});
 
-	logger.info(`Available commands: ${[...botCommands.keys()].join(", ")}`);
+	logger.info(`Available commands: ${[...client.commands.keys()].join(", ")}`);
 	logger.info("commands reloaded successfully.");
 }
 
@@ -63,10 +64,14 @@ module.exports = {
 
 			// We don't need intents because the interaction event is sent no matter what
 			const client = new Client({ intents: [] });
+
+			/** @type {import("discord.js").Collection<String,null>} */
+			client.commands = new Collection();
+
 			globalThis.discord = { client };
 
 			reloadEvents();
-			reloadCommands();
+			reloadCommands(client);
 
 			client.login(globalThis.config.discord.token);
 

@@ -13,12 +13,12 @@ module.exports = {
 		logger.info("Registering application commands...");
 
 		logger.info("commands stored in botCommands Collection:");
-		botCommands.forEach((cmd, key) => {
+		client.commands.forEach((cmd, key) => {
 			logger.info(`Command Key: ${key}, Command Details: ${JSON.stringify(cmd)}`);
 		});
 
 		const commands = [];
-		botCommands.forEach((cmd, key) => {
+		client.commands.forEach((cmd, key) => {
 			logger.info(`Processing command: ${key}`);
 			if (!cmd.data || !(cmd.data.toJSON instanceof Function)) {
 				logger.info(`Error: Command "${key}" does not provide a valid 'data.toJSON()'. Skipping it.`);
