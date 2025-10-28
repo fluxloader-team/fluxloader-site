@@ -10,10 +10,10 @@
 	"license": "ISC",
 	"description": "",
 	"dependencies": {
-		"@mongodb-js/zstd": "^2.0.1",
 		"color": "^5.0.0",
 		"colors": "^1.4.0",
 		"discord.js": "^14.18.0",
+		"fflate": "^0.8.2",
 		"jszip": "^3.10.1",
 		"mongodb": "^6.15.0",
 		"sanitize-html": "^2.15.0",
@@ -21,6 +21,6 @@
 		"ws": "^8.18.1"
 	},
 	"engines": {
-		"node": "22.14.0"
+		"node": ">=22.14.0"
 	}
 }

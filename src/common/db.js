@@ -1,6 +1,5 @@
 const { MongoClient } = require("mongodb");
 const Utils = require("../common/utils.js");
-const { compress } = require("@mongodb-js/zstd");
 const JSZip = require("jszip");
 const sanitizeHTML = require("sanitize-html");
 const { verifyDiscordUser } = require("./verifydiscorduser");
@@ -116,7 +115,7 @@ var mods = {
 					{
 						sort: { uploadTime: 1 },
 						projection: project,
-					},
+					}
 				);
 				return result;
 			});
@@ -477,13 +476,10 @@ var mods = {
 					await modsCollection.replaceOne({ modID: modID }, modEntry);
 				}
 
-				// Compress it back down for use in the version entry
-				var compressedZipBuffer = await compress(zipBuffer, 10);
-
 				// Create a new mod version entry
 				var modVersionEntry = {
 					modID: modEntry.modID,
-					modfile: compressedZipBuffer.toString("base64"),
+					modfile: zipBuffer.toString("base64"),
 					modData: modData,
 					uploadTime: uploadTime,
 					downloadCount: 0,
@@ -589,7 +585,7 @@ var users = {
 			var query = search
 				? {
 						$or: [{ discordID: { $regex: search, $options: "i" } }, { discordUsername: { $regex: search, $options: "i" } }],
-					}
+				  }
 				: {};
 			var result = await userCollection.find(query).limit(limit).toArray();
 			return result;
