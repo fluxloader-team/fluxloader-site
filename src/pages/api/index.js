@@ -3,6 +3,6 @@ module.exports = {
 
 	run: function (req, res) {
 		res.writeHead(200, { "Content-Type": "text/html" });
-		res.end("<h1>Why hello there</h1");
+		res.end("<h1>API base endpoint /api</h1>");
 	},
 };
