@@ -6,7 +6,10 @@ const logger = new Utils.Log("pages.search");
 
 module.exports = {
 	paths: ["/api/mods"],
-
+	/**
+	 * @param {import("http").IncomingMessage} req 
+	 * @param {import("http").ServerResponse} res 
+	 */
 	run: async function (req, res) {
 		try {
 			// Extract query parameters from the request URL

@@ -3,15 +3,14 @@ const Utils = require("../common/utils.js");
 const { compress } = require("@mongodb-js/zstd");
 const JSZip = require("jszip");
 const sanitizeHTML = require("sanitize-html");
-const fs = require("fs");
 const { verifyDiscordUser } = require("./verifydiscorduser");
 
 const logger = new Utils.Log("common.db");
+var modInfoSchema = require("./schema.mod-info.json");
 
-var modInfoSchemaContent = fs.readFileSync("common/schema.mod-info.json", "utf8");
-var modInfoSchema = JSON.parse(modInfoSchemaContent);
 var mongoUri = globalThis.config.mongodb.uri;
-var globalClient = null;
+/** @type {import("mongodb").MongoClient | undefined} */
+let globalClient;
 
 class ModEntry {
 	modID = "";
@@ -78,7 +77,9 @@ class ActionEntry {
 	time = new Date();
 	logged = false;
 }
-
+/**
+ * @param {function(import("mongodb").MongoClient)} callback 
+ */
 async function runWithMongoClient(callback) {
 	if (!globalClient) {
 		globalClient = new MongoClient(mongoUri);
@@ -587,8 +588,8 @@ var users = {
 			var userCollection = db.collection("Users");
 			var query = search
 				? {
-						$or: [{ discordID: { $regex: search, $options: "i" } }, { discordUsername: { $regex: search, $options: "i" } }],
-				  }
+					$or: [{ discordID: { $regex: search, $options: "i" } }, { discordUsername: { $regex: search, $options: "i" } }],
+				}
 				: {};
 			var result = await userCollection.find(query).limit(limit).toArray();
 			return result;

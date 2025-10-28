@@ -6,7 +6,10 @@ const logger = new Utils.Log("pages.admin");
 
 module.exports = {
 	paths: ["/api/admin/page"],
-
+	/**
+	 * @param {import("http").IncomingMessage} req 
+	 * @param {import("http").ServerResponse} res 
+	 */
 	run: function (req, res) {
 		// Check if the method is POST
 		logger.info(`Received request for /api/admin/page with method: ${req.method}`);

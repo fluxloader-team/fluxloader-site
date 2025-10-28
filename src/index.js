@@ -15,6 +15,7 @@ const DEFAULT_CONFIG = {
 		serverLog: true,
 		serverLogChannel: "SERVER_LOG_CHANNEL",
 		serverActionsChannel: "SERVER_ACTIONS_CHANNEL",
+		server: "1359169971611111736",
 	},
 	mongodb: {
 		uri: "mongodb://localhost:27017/somejoinstring",
@@ -82,6 +83,10 @@ function loadResources() {
 	logger.info(`Timers loaded: [ ${timerNames.join(", ")} ]`);
 }
 
+/**
+ * @param {import("http").IncomingMessage} req 
+ * @param {import("http").ServerResponse} res 
+ */
 function handleWebRequests(req, res) {
 	var url = req.url;
 	var urlSplit = url.split("?");

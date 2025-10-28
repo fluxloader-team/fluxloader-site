@@ -17,7 +17,10 @@ function verifySignature(req, body) {
 
 module.exports = {
 	paths: ["/api/reload"],
-
+	/**
+	 * @param {import("http").IncomingMessage} req 
+	 * @param {import("http").ServerResponse} res 
+	 */
 	run: function (req, res) {
 		logger.info("Received reload request");
 

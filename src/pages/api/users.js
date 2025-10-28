@@ -6,7 +6,10 @@ const logger = new Utils.Log("pages.users");
 
 module.exports = {
 	paths: ["/api/users"],
-
+	/**
+	 * @param {import("http").IncomingMessage} req 
+	 * @param {import("http").ServerResponse} res 
+	 */
 	run: async function (req, res) {
 		// Only allow POST requests with proper authentication
 		if (req.method !== "POST") {
