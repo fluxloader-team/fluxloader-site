@@ -24,7 +24,7 @@ module.exports = {
 		.addStringOption((option) => option.setName("version").setDescription("The version of the mod").setRequired(true)),
 
 	/**
-	 * @param {import("discord.js").ChatInputCommandInteraction} interaction 
+	 * @param {import("discord.js").ChatInputCommandInteraction} interaction
 	 */
 	async execute(interaction) {
 		await interaction.deferReply();
@@ -55,13 +55,13 @@ module.exports = {
 					{
 						name: "Dependencies",
 						value: formatDependencies(modData.modData.dependencies) || "None",
-					}
+					},
 				)
 				.addFields({ name: "Upload Time", value: new Date(modData.uploadTime).toLocaleString(), inline: true }, { name: "Downloads", value: modData.downloadCount.toString() || "0", inline: true })
 				.addFields(
 					{ name: "Electron Entrypoint", value: modData.modData.electronEntrypoint || "None", inline: false },
 					{ name: "Game Entrypoint", value: modData.modData.gameEntrypoint || "None", inline: true },
-					{ name: "Worker Entrypoint", value: modData.modData.workerEntrypoint || "None", inline: true }
+					{ name: "Worker Entrypoint", value: modData.modData.workerEntrypoint || "None", inline: true },
 				);
 
 			if (modData.modData.description) {

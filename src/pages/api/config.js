@@ -9,15 +9,15 @@ const logger = new Utils.Log("pages.config");
 module.exports = {
 	paths: ["/api/config"],
 	/**
-	 * @param {import("http").IncomingMessage} req 
-	 * @param {import("http").ServerResponse} res 
+	 * @param {import("http").IncomingMessage} req
+	 * @param {import("http").ServerResponse} res
 	 */
 	run: async function (req, res) {
 		// Only allow POST requests with proper authentication
 		try {
 			if (req.method === "POST") {
 				let body = "";
-				req.on("data", (chunk) => body += chunk.toString());
+				req.on("data", (chunk) => (body += chunk.toString()));
 				req.on("end", async () => {
 					try {
 						var data = JSON.parse(body);

@@ -17,7 +17,7 @@ module.exports = {
 		.addStringOption((option) => option.setName("query").setDescription("The search query (userID or action)").setRequired(true))
 		.addIntegerOption((option) => option.setName("page").setDescription("The page number to show")),
 	/**
-	 * @param {import("discord.js").ChatInputCommandInteraction} interaction 
+	 * @param {import("discord.js").ChatInputCommandInteraction} interaction
 	 */
 	async execute(interaction) {
 		await interaction.deferReply();

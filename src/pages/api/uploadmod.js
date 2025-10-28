@@ -6,8 +6,8 @@ const logger = new Utils.Log("pages.uploadmod");
 module.exports = {
 	paths: ["/api/uploadmod"],
 	/**
-	 * @param {import("http").IncomingMessage} req 
-	 * @param {import("http").ServerResponse} res 
+	 * @param {import("http").IncomingMessage} req
+	 * @param {import("http").ServerResponse} res
 	 */
 	run: function (req, res) {
 		if (req.method !== "POST") {
@@ -71,7 +71,7 @@ module.exports = {
 							message: `File ${filename} uploaded successfully.`,
 							isUpdate: true,
 							modID: modID,
-						})
+						}),
 					);
 					return;
 				}
@@ -81,7 +81,7 @@ module.exports = {
 				await res.end(
 					JSON.stringify({
 						message: `File ${filename} uploaded successfully.`,
-					})
+					}),
 				);
 			} catch (error) {
 				logger.error("Error in uploadmod API:" + error.stack ? error.stack : error.message);

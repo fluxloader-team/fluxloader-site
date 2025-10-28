@@ -7,15 +7,15 @@ const logger = new Utils.Log("pages.admin");
 module.exports = {
 	paths: ["/api/admin/page"],
 	/**
-	 * @param {import("http").IncomingMessage} req 
-	 * @param {import("http").ServerResponse} res 
+	 * @param {import("http").IncomingMessage} req
+	 * @param {import("http").ServerResponse} res
 	 */
 	run: function (req, res) {
 		// Check if the method is POST
 		logger.info(`Received request for /api/admin/page with method: ${req.method}`);
 		if (req.method === "POST") {
 			let body = "";
-			req.on("data", (chunk) => body += chunk.toString());
+			req.on("data", (chunk) => (body += chunk.toString()));
 			req.on("end", async () => {
 				try {
 					res.writeHead(200, { "Content-Type": "application/json" });

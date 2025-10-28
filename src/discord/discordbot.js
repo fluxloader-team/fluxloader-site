@@ -31,7 +31,7 @@ function reloadEvents() {
 }
 
 /**
- * @param {import("discord.js").Client} client 
+ * @param {import("discord.js").Client} client
  */
 function reloadCommands(client) {
 	// Just load the commands into the botCommands collection

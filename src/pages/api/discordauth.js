@@ -15,7 +15,7 @@ function makeRequest(host, path, method, headers, postData) {
 
 		var req = https.request(options, (res) => {
 			let body = "";
-			res.on("data", (chunk) => body += chunk.toString());
+			res.on("data", (chunk) => (body += chunk.toString()));
 			res.on("end", async () => {
 				try {
 					resolve(JSON.parse(body));
@@ -40,8 +40,8 @@ function makeRequest(host, path, method, headers, postData) {
 module.exports = {
 	paths: ["/auth/discord", "/auth/discord/callback"],
 	/**
-	 * @param {import("http").IncomingMessage} req 
-	 * @param {import("http").ServerResponse} res 
+	 * @param {import("http").IncomingMessage} req
+	 * @param {import("http").ServerResponse} res
 	 */
 	run: async function (req, res) {
 		var urlSplit = req.url.split("?");

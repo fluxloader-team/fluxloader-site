@@ -27,7 +27,7 @@ const DEFAULT_CONFIG = {
 		validationTime: 172800,
 	},
 	requireGithubSecretForReload: true,
-	githubSecret: null
+	githubSecret: null,
 };
 
 const logger = new Utils.Log("main");
@@ -84,8 +84,8 @@ function loadResources() {
 }
 
 /**
- * @param {import("http").IncomingMessage} req 
- * @param {import("http").ServerResponse} res 
+ * @param {import("http").IncomingMessage} req
+ * @param {import("http").ServerResponse} res
  */
 function handleWebRequests(req, res) {
 	var url = req.url;

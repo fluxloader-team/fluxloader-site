@@ -7,8 +7,8 @@ const logger = new Utils.Log("pages.users");
 module.exports = {
 	paths: ["/api/users"],
 	/**
-	 * @param {import("http").IncomingMessage} req 
-	 * @param {import("http").ServerResponse} res 
+	 * @param {import("http").IncomingMessage} req
+	 * @param {import("http").ServerResponse} res
 	 */
 	run: async function (req, res) {
 		// Only allow POST requests with proper authentication
@@ -18,7 +18,7 @@ module.exports = {
 		}
 
 		let body = "";
-		req.on("data", (chunk) => body += chunk.toString());
+		req.on("data", (chunk) => (body += chunk.toString()));
 		req.on("end", async () => {
 			try {
 				var data = JSON.parse(body);
@@ -68,7 +68,7 @@ module.exports = {
 								modName: mod.modData.name,
 								version: v,
 								uploadTime: mod.modData.uploadTime,
-							}))
+							})),
 						);
 					}
 
@@ -91,7 +91,7 @@ module.exports = {
 								modVersionsUploaded: modVersions.length,
 								modVersions: modVersions,
 							},
-						})
+						}),
 					);
 				} else if (data.action === "searchUsers") {
 					const search = data.search || "";

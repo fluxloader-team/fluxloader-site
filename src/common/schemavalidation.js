@@ -118,7 +118,7 @@ class SchemaValidation {
 				if (Object.hasOwn(schemaLeafValue, "step")) {
 					let min = Object.hasOwn(schemaLeafValue, "min") ? schemaLeafValue.min : 0;
 					const step = (targetValue - min) / schemaLeafValue.step;
-					if ((Math.abs(step) % 1) > SchemaValidation.FLOAT_EPSILON) {
+					if (Math.abs(step) % 1 > SchemaValidation.FLOAT_EPSILON) {
 						return { success: false, error: `Number ${targetValue} is not a valid step of ${schemaLeafValue.step} from ${min}`, source: "target" };
 					}
 				}

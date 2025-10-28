@@ -78,7 +78,7 @@ class ActionEntry {
 	logged = false;
 }
 /**
- * @param {function(import("mongodb").MongoClient)} callback 
+ * @param {function(import("mongodb").MongoClient)} callback
  */
 async function runWithMongoClient(callback) {
 	if (!globalClient) {
@@ -116,7 +116,7 @@ var mods = {
 					{
 						sort: { uploadTime: 1 },
 						projection: project,
-					}
+					},
 				);
 				return result;
 			});
@@ -588,8 +588,8 @@ var users = {
 			var userCollection = db.collection("Users");
 			var query = search
 				? {
-					$or: [{ discordID: { $regex: search, $options: "i" } }, { discordUsername: { $regex: search, $options: "i" } }],
-				}
+						$or: [{ discordID: { $regex: search, $options: "i" } }, { discordUsername: { $regex: search, $options: "i" } }],
+					}
 				: {};
 			var result = await userCollection.find(query).limit(limit).toArray();
 			return result;

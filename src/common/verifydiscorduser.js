@@ -14,7 +14,7 @@ module.exports = {
 
 			const req = https.request(options, (res) => {
 				let body = "";
-				res.on("data", (chunk) => body += chunk.toString());
+				res.on("data", (chunk) => (body += chunk.toString()));
 				res.on("end", () => {
 					try {
 						var userResponse = JSON.parse(body);

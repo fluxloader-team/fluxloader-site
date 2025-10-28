@@ -15,7 +15,7 @@ function getModifier(message = "") {
 			!line.includes("at Module") &&
 			!line.includes("Function.executeUserEntryPoint") &&
 			!line.includes("at node") &&
-			!line.includes("at Module._compile")
+			!line.includes("at Module._compile"),
 	);
 	var NameWithbcodeline = relevantLines[0].split("\\")[relevantLines[0].split("\\").length - 1];
 	var Name = NameWithbcodeline.split(":")[0];
