@@ -95,21 +95,21 @@ function handleWebRequests(req, res) {
 	var page = pages[urlName];
 	if (page) {
 		logger.debug(`Received request for page: ${url}`);
-		page.run(req, res);
-	} else {
-		var publicFile = public[urlName.replace("/", "")];
-		if (publicFile) {
-			const type = { ".html": "text/html", ".css": "text/css", ".js": "application/javascript" }[path.extname(urlName)] || "text/html";
-			logger.debug(`Received request for public file: ${url} (Content-Type: ${type})`);
-			res.writeHead(200, { "Content-Type": type });
-			res.end(publicFile);
-			return;
-		} else {
-			logger.debug(`Requested resource not found: ${url}`);
-			res.writeHead(404, { "Content-Type": "text/html" });
-			res.end("404");
-		}
+		return page.run(req, res);
 	}
+
+	var publicFile = public[urlName.replace("/", "")];
+	if (publicFile) {
+		const type = { ".html": "text/html", ".css": "text/css", ".js": "application/javascript" }[path.extname(urlName)] || "text/html";
+		logger.debug(`Received request for public file: ${url} (Content-Type: ${type})`);
+		res.writeHead(200, { "Content-Type": type });
+		res.end(publicFile);
+		return;
+	}
+
+	logger.debug(`Requested resource not found: ${url}`);
+	res.writeHead(404, { "Content-Type": "text/html" });
+	res.end("404");
 }
 
 function main() {
