@@ -15,7 +15,8 @@ module.exports = {
 		var queryParams = querystring.parse(urlSplit[1] || "");
 
 		if (pathname === "/auth/discord") {
-			var authURL = `https://discord.com/oauth2/authorize?client_id=${globalThis.config.discord.clientId}&redirect_uri=${encodeURIComponent(globalThis.config.discord.redirectUri)}&response_type=code&scope=identify`;
+			// Setting prompt to none means that if a user has already authed with our app they won't be asked again to authorise, unless we have modified what we are requesting such as a new scope 
+			var authURL = `https://discord.com/oauth2/authorize?client_id=${globalThis.config.discord.clientId}&redirect_uri=${encodeURIComponent(globalThis.config.discord.redirectUri)}&response_type=code&scope=identify&prompt=none`;
 			logger.info("Redirecting to discord Authorization URL...");
 			res.writeHead(302, { Location: authURL });
 			return res.end();
