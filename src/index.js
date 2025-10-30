@@ -51,10 +51,10 @@ function loadConfig() {
 
 function loadResources() {
 	let pageNames = [];
-	fs.readdirSync("./pages", { withFileTypes: true, recursive: true }).forEach((entry) => {
+	fs.readdirSync(path.join(__dirname, "./pages"), { withFileTypes: true, recursive: true }).forEach((entry) => {
 		if (entry.isDirectory()) return;
 		pageNames.push(entry.name);
-		const filePath = path.resolve(entry.path, entry.name);
+		const filePath = path.resolve(entry.parentPath, entry.name);
 		const fileModule = require(filePath);
 		fileModule.paths.forEach((path) => (pages[path] = fileModule));
 	});
@@ -62,20 +62,20 @@ function loadResources() {
 	logger.info(`pages loaded: [ ${pageNames.join(", ")} ]`);
 
 	let publicFileNames = [];
-	fs.readdirSync("./public", { withFileTypes: true, recursive: true }).forEach((entry) => {
+	fs.readdirSync(path.join(__dirname, "./public"), { withFileTypes: true, recursive: true }).forEach((entry) => {
 		if (entry.isDirectory()) return;
 		publicFileNames.push(entry.name);
-		const filePath = path.resolve(entry.path, entry.name);
+		const filePath = path.resolve(entry.parentPath, entry.name);
 		public[entry.name] = fs.readFileSync(filePath, "utf8");
 	});
 
 	logger.info(`public files loaded: [ ${publicFileNames.join(", ")} ]`);
 
 	let timerNames = [];
-	fs.readdirSync("./timers", { withFileTypes: true, recursive: true }).forEach((entry) => {
+	fs.readdirSync(path.join(__dirname, "./timers"), { withFileTypes: true, recursive: true }).forEach((entry) => {
 		if (entry.isDirectory()) return;
 		timerNames.push(entry.name);
-		const filePath = path.resolve(entry.path, entry.name);
+		const filePath = path.resolve(entry.parentPath, entry.name);
 		const fileModule = require(filePath);
 		timers.push(fileModule);
 	});
