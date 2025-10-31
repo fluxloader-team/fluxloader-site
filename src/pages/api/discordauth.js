@@ -15,7 +15,7 @@ module.exports = {
 		var queryParams = querystring.parse(urlSplit[1] || "");
 
 		if (pathname === "/auth/discord") {
-			// Setting prompt to none means that if a user has already authed with our app they won't be asked again to authorise, unless we have modified what we are requesting such as a new scope 
+			// Setting prompt to none means that if a user has already authed with our app they won't be asked again to authorise, unless we have modified what we are requesting such as a new scope
 			var authURL = `https://discord.com/oauth2/authorize?client_id=${globalThis.config.discord.clientId}&redirect_uri=${encodeURIComponent(globalThis.config.discord.redirectUri)}&response_type=code&scope=identify&prompt=none`;
 			logger.info("Redirecting to discord Authorization URL...");
 			res.writeHead(302, { Location: authURL });
@@ -39,13 +39,15 @@ module.exports = {
 					redirect_uri: globalThis.config.discord.redirectUri,
 				});
 
-				var tokenResponse = await (await fetch("https://discord.com/api/oauth2/token", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/x-www-form-urlencoded"
-					},
-					body: tokenData
-				})).json()
+				var tokenResponse = await (
+					await fetch("https://discord.com/api/oauth2/token", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/x-www-form-urlencoded",
+						},
+						body: tokenData,
+					})
+				).json();
 
 				logger.info(`Token Response: ${JSON.stringify(tokenResponse)}`);
 				if (!tokenResponse.access_token) {
@@ -53,14 +55,15 @@ module.exports = {
 					return res.end("<h1>Error: Failed to retrieve access token from discord.</h1>");
 				}
 
-
 				// https://discord.com/developers/docs/resources/user#get-current-user
-				const userResponse = await (await fetch("https://discord.com/api/users/@me", {
-					method: "GET",
-					headers: {
-						Authorization: `Bearer ${tokenResponse.access_token}`
-					}
-				})).json();
+				const userResponse = await (
+					await fetch("https://discord.com/api/users/@me", {
+						method: "GET",
+						headers: {
+							Authorization: `Bearer ${tokenResponse.access_token}`,
+						},
+					})
+				).json();
 
 				logger.info(`User Response: ${JSON.stringify(userResponse)}`);
 				userResponse.tokenResponse = tokenResponse;
