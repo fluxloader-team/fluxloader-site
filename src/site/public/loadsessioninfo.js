@@ -1,5 +1,4 @@
 function loadSessionInfo(containerId) {
-	// Grab element references
 	const container = document.getElementById(containerId);
 	if (!container) throw new Error(`Missing header container: ${containerId}`);
 
@@ -8,7 +7,8 @@ function loadSessionInfo(containerId) {
 	try {
 		cached = JSON.parse(localStorage.getItem("sessionInfoCache"));
 		if (cached && cached.expires > Date.now()) {
-			updateUIWithLoggedIn(container, cached.user);
+			console.log("Using cached session info");
+			updateUIWithLoggedIn(container, cached.info);
 		}
 	} catch {}
 
@@ -24,24 +24,26 @@ async function loadSessionInfoFromServer(container, cached) {
 
 		// Exit early if not authenticated
 		if (!data.authenticated) {
-			// If the cache exists clear it and update UI
-			if (cached) {
+			// Check we have an authenticated session cached
+			if (cached != null && cached.info.authenticated) {
+				console.log("Session no longer authenticated");
 				localStorage.removeItem("sessionInfoCache");
 				updateUIWithLoggedOut(container);
-				location.reload();
-				return;
+				// FUTURE: If you want the page to load up to date then reload here
 			}
-		}
-
-		// We are authenticated so cache the user info
-		localStorage.setItem("sessionInfoCache", JSON.stringify({ user: data, expires: Date.now() + 10 * 60 * 1000 }));
-
-		// If the cached user is different from the fetched user reload the page
-		if (!cached || cached.user.id !== data.id) {
-			location.reload();
 			return;
 		}
 
+		// We are authenticated so cache the info
+		localStorage.setItem("sessionInfoCache", JSON.stringify({ info: data, expires: Date.now() + 10 * 60 * 1000 }));
+
+		// Check if the local cache is out of date
+		if (cached == null || cached.info.id !== data.id) {
+			// FUTURE: If you want the page to load up to date then reload here
+		}
+
+		// Otherwise just update the UI
+		console.log("Session info refreshed from server and authenticated");
 		updateUIWithLoggedIn(container, data);
 	} catch (err) {
 		console.error("Failed to refresh session info:", err);
@@ -55,13 +57,13 @@ function updateUIWithLoggedOut(container) {
 		</a>`;
 }
 
-function updateUIWithLoggedIn(container, user) {
+function updateUIWithLoggedIn(container, info) {
 	container.innerHTML = `
 		<div class="dropdown">
 			<button class="btn dropdown-toggle" type="button" id="discordDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
-				<img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png"
+				<img src="https://cdn.discordapp.com/avatars/${info.id}/${info.avatar}.png"
 				     alt="n/a" class="rounded-circle" style="width:30px;height:30px;margin-right:5px;" />
-				${user.username}
+				${info.infoname}
 			</button>
 			<ul class="dropdown-menu" aria-labelledby="discordDropdownButton">
 				<li><a class="dropdown-item" href="/upload">Upload Mod</a></li>
