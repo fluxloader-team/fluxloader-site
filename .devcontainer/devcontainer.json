@@ -7,9 +7,7 @@
 	"service": "app",
 	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 	// Forward MongoDB port
-	"forwardPorts": [
-		27017
-	],
+	"forwardPorts": [27017],
 	// Automatically install dependencies after the container builds
 	"postCreateCommand": "npm ci",
 	// Speed up startup on subsequent runs by not re-pulling every time
@@ -17,11 +15,7 @@
 	// Enable useful VS Code extensions
 	"customizations": {
 		"vscode": {
-			"extensions": [
-				"mongodb.mongodb-vscode",
-				"ms-vscode.vscode-typescript-next",
-				"esbenp.prettier-vscode"
-			],
+			"extensions": ["mongodb.mongodb-vscode", "ms-vscode.vscode-typescript-next", "esbenp.prettier-vscode"],
 			"settings": {
 				"editor.formatOnSave": true,
 				"files.exclude": {

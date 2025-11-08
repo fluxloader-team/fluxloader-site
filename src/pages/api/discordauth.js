@@ -1,41 +1,7 @@
 const querystring = require("querystring");
-const https = require("https");
 const Utils = require("../../common/utils.js");
 
 const logger = new Utils.Log("pages.discord");
-
-function makeRequest(host, path, method, headers, postData) {
-	return new Promise((resolve, reject) => {
-		var options = {
-			host: host,
-			path: path,
-			method: method,
-			headers: headers,
-		};
-
-		var req = https.request(options, (res) => {
-			let body = "";
-			res.on("data", (chunk) => (body += chunk.toString()));
-			res.on("end", async () => {
-				try {
-					resolve(JSON.parse(body));
-				} catch (err) {
-					reject(new Error("Failed to parse JSON response: " + body));
-				}
-			});
-		});
-
-		req.on("error", (err) => {
-			reject(err);
-		});
-
-		if (postData) {
-			req.write(postData);
-		}
-
-		req.end();
-	});
-}
 
 module.exports = {
 	paths: ["/auth/discord", "/auth/discord/callback"],
@@ -49,7 +15,8 @@ module.exports = {
 		var queryParams = querystring.parse(urlSplit[1] || "");
 
 		if (pathname === "/auth/discord") {
-			var authURL = `https://discord.com/oauth2/authorize?client_id=${globalThis.config.discord.clientId}&redirect_uri=${encodeURIComponent(globalThis.config.discord.redirectUri)}&response_type=code&scope=identify`;
+			// Setting prompt to none means that if a user has already authed with our app they won't be asked again to authorise, unless we have modified what we are requesting such as a new scope
+			var authURL = `https://discord.com/oauth2/authorize?client_id=${globalThis.config.discord.clientId}&redirect_uri=${encodeURIComponent(globalThis.config.discord.redirectUri)}&response_type=code&scope=identify&prompt=none`;
 			logger.info("Redirecting to discord Authorization URL...");
 			res.writeHead(302, { Location: authURL });
 			return res.end();
@@ -72,7 +39,15 @@ module.exports = {
 					redirect_uri: globalThis.config.discord.redirectUri,
 				});
 
-				var tokenResponse = await makeRequest("discord.com", "/api/oauth2/token", "POST", { "Content-Type": "application/x-www-form-urlencoded" }, tokenData);
+				var tokenResponse = await (
+					await fetch("https://discord.com/api/oauth2/token", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/x-www-form-urlencoded",
+						},
+						body: tokenData,
+					})
+				).json();
 
 				logger.info(`Token Response: ${JSON.stringify(tokenResponse)}`);
 				if (!tokenResponse.access_token) {
@@ -80,7 +55,15 @@ module.exports = {
 					return res.end("<h1>Error: Failed to retrieve access token from discord.</h1>");
 				}
 
-				var userResponse = await makeRequest("discord.com", "/api/users/@me", "GET", { Authorization: `Bearer ${tokenResponse.access_token}` });
+				// https://discord.com/developers/docs/resources/user#get-current-user
+				const userResponse = await (
+					await fetch("https://discord.com/api/users/@me", {
+						method: "GET",
+						headers: {
+							Authorization: `Bearer ${tokenResponse.access_token}`,
+						},
+					})
+				).json();
 
 				logger.info(`User Response: ${JSON.stringify(userResponse)}`);
 				userResponse.tokenResponse = tokenResponse;
