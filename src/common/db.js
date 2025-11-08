@@ -8,6 +8,7 @@ const logger = new Utils.Log("common.db");
 var modInfoSchema = require("./schema.mod-info.json");
 
 var mongoUri = globalThis.config.mongodb.uri;
+
 /** @type {import("mongodb").MongoClient | undefined} */
 let globalClient;
 
@@ -76,6 +77,7 @@ class ActionEntry {
 	time = new Date();
 	logged = false;
 }
+
 /**
  * @param {function(import("mongodb").MongoClient)} callback
  */
@@ -115,7 +117,7 @@ var mods = {
 					{
 						sort: { uploadTime: 1 },
 						projection: project,
-					},
+					}
 				);
 				return result;
 			});
@@ -585,7 +587,7 @@ var users = {
 			var query = search
 				? {
 						$or: [{ discordID: { $regex: search, $options: "i" } }, { discordUsername: { $regex: search, $options: "i" } }],
-					}
+				  }
 				: {};
 			var result = await userCollection.find(query).limit(limit).toArray();
 			return result;
@@ -651,4 +653,26 @@ var actions = {
 	},
 };
 
-module.exports = { mods, users, actions };
+var sessions = {
+	one: async function (token = "") {
+		var endresult = await runWithMongoClient(async (client) => {
+			var db = client.db("SandustryMods");
+			var sessionsCollection = db.collection("Sessions");
+			var result = await sessionsCollection.findOne({ token: token });
+			return result;
+		});
+		return endresult;
+	},
+
+	add: async function (sessionData = { token: "", discordID: "", expires: Date.now() }) {
+		var endresult = await runWithMongoClient(async (client) => {
+			var db = client.db("SandustryMods");
+			var sessionsCollection = db.collection("Sessions");
+			var result = await sessionsCollection.insertOne(sessionData);
+			return result;
+		});
+		return endresult;
+	},
+};
+
+module.exports = { mods, users, actions, sessions };

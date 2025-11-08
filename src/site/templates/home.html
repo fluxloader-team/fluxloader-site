@@ -1,17 +1,23 @@
 <div class="pageContainer">
-	<div class="headerContainer" id="headerContainer">
-		<a class="btn btn-secondary headerButton" style="margin-left: 15px" href="/">Mod List</a>
-		<div class="input-group mb-3" style="width: 50%; padding-top: 15px">
+	<div class="headerContainer">
+		<a class="btn btn-secondary headerButton" href="/">Mod List</a>
+
+		<div class="input-group" style="width: 50%">
 			<input type="text" class="form-control" id="searchInput" placeholder="Search by name, author, or #tag1 #tag2 for multiple tags" onchange="globalThis.performSearch()" />
 			<button class="btn btn-outline-secondary" type="button" onclick="globalThis.performSearch()">Search</button>
 		</div>
-		<div id="rightContainer" style="display: flex; align-items: center; gap: 5px">
-			<a class="btn btn-primary" target="_blank" href="https://github.com/fluxloader-team/fluxloader/releases/latest/" title="Download the App"><i class="fa-solid fa-download"></i> Fluxloader</a>
-			<a href="/auth/discord" class="btn btn-primary" style="margin-right: 15px" id="discordLogin">
-				<img src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg" alt="discord Logo" title="Login with Discord" style="width: 100px; height: 20px; margin-right: 5px" />
-			</a>
+
+		<div class="rightContainer">
+			<a class="btn btn-primary" target="_blank" title="Download the App" href="https://github.com/fluxloader-team/fluxloader/releases/latest/">Fluxloader</a>
+
+			<div id="discordContainer">
+				<a href="/auth/discord" class="btn btn-primary" id="discordLogin">
+					<img alt="discord Logo" title="Login with Discord" style="width: 100px; height: 20px" src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg" />
+				</a>
+			</div>
 		</div>
 	</div>
+
 	<div class="modDisplayHolder">
 		<div class="modList" id="modList">
 			<div class="d-flex justify-content-center">
@@ -33,5 +39,6 @@
 	<div class="modDisplayActions" id="modDisplayActions"></div>
 </div>
 
+<script src="loadsessioninfo.js"></script>
 <script src="home.js"></script>
 

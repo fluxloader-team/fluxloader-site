@@ -1,13 +1,18 @@
 <div class="pageContainer">
-	<div class="headerContainer" id="headerContainer">
-		<a class="btn btn-secondary headerButton" style="margin-left: 15px" href="/">Mod List</a>
-		<div id="rightContainer" style="display: flex; align-items: center; gap: 5px">
-			<a class="btn btn-primary" href="https://github.com/fluxloader-team/fluxloader/releases/latest/" title="Download the App"><i class="fa-solid fa-download"></i> Fluxloader</a>
-			<a href="/auth/discord" class="btn btn-primary" target="_blank" style="margin-right: 15px" id="discordLogin">
-				<img src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg" alt="discord Logo" title="Login with Discord" style="width: 100px; height: 20px; margin-right: 5px" />
-			</a>
+	<div class="headerContainer">
+		<a class="btn btn-secondary headerButton" href="/">Mod List</a>
+
+		<div class="rightContainer">
+			<a class="btn btn-primary" target="_blank" title="Download the App" href="https://github.com/fluxloader-team/fluxloader/releases/latest/">Fluxloader</a>
+
+			<div id="discordContainer">
+				<a href="/auth/discord" class="btn btn-primary" id="discordLogin">
+					<img alt="discord Logo" title="Login with Discord" style="width: 100px; height: 20px" src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg" />
+				</a>
+			</div>
 		</div>
 	</div>
+
 	<div class="modUploadForm">
 		<div class="row mb-3">
 			<label for="ModFile" class="col-sm-2 col-form-label">Mod File</label>
