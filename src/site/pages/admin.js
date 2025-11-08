@@ -1,8 +1,10 @@
 const ejs = require("ejs");
-const { getUserFromRequest } = require("../../common/session");
+const { getUserFromRequest, userHasPermission } = require("../../common/session");
+const ejsExtensions = require("../../common/ejsExtensions");
 
 module.exports = {
 	paths: ["/admin"],
+
 	run: async function (req, res) {
 		const user = await getUserFromRequest(req);
 		if (!user) {
@@ -10,12 +12,13 @@ module.exports = {
 			return res.end();
 		}
 
-		if (!user.permissions.includes("admin")) {
-			res.writeHead(403, { "Content-Type": "text/html" });
-			return res.end("<h1>Access denied</h1>");
-		}
+		const hasAdminPermissions = !userHasPermission(user, "admin");
+		const tpl = globalThis.templates["admin.ejs"];
+		const html = ejs.render(tpl.content, { include: ejsExtensions.includeFromMemory, hasAdminPermissions }, { filename: tpl.path });
+
+		console.log(html);
 
 		res.writeHead(200, { "Content-Type": "text/html" });
-		res.end(ejs.render(globalThis.templates["template.ejs"], { data: ["", globalThis.templates["admin.html"]] }));
+		res.end(html);
 	},
 };

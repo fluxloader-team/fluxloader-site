@@ -1,6 +1,5 @@
 const Utils = require("../../../common/utils.js");
 const DB = require("../../../common/db");
-const { verifyDiscordUser } = require("../../../common/verifydiscorduser");
 
 const logger = new Utils.Log("pages.users");
 

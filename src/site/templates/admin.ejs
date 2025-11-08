@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+	<head>
+		<%- include("header") %>
+		<title>Fluxloader Site | Admin</title>
+	</head>
+
+	<body>
+		<link rel="stylesheet" href="admin.css" />
+
+		<% if (!hasAdminPermissions) { %>
+		<h1 style="text-align: center; margin-top: 50px">Access Denied</h1>
+		<p style="text-align: center">You do not have permission to access this page.</p>
+		<%- include("footer") %> <% } else { %>
+		<div class="pageContainer">
+			<div class="headerContainer">
+				<a class="btn btn-secondary headerButton" href="/">Mod List</a>
+
+				<a class="btn btn-secondary headerButton" onclick="globalThis.adminPages.Selection.action();">Selection menu</a>
+
+				<div class="rightContainer">
+					<a class="btn btn-primary" target="_blank" title="Download the App" href="https://github.com/fluxloader-team/fluxloader/releases/latest/">Fluxloader</a>
+
+					<div id="discordContainer">
+						<a href="/auth/discord" class="btn btn-primary" id="discordLogin">
+							<img alt="discord Logo" title="Login with Discord" style="width: 100px; height: 20px" src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg" />
+						</a>
+					</div>
+				</div>
+			</div>
+
+			<div id="adminPageContent" class="adminpage fullpage"></div>
+		</div>
+
+		<script src="loadsessioninfo.js"></script>
+		<script src="admin.js"></script>
+		<%- include("footer") %> <% } %>
+	</body>
+</html>

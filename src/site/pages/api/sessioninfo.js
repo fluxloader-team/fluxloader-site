@@ -18,8 +18,7 @@ module.exports = {
 				username: user.discordUsername,
 				avatar: user.avatar,
 				permissions: user.permissions,
-			})
+			}),
 		);
 	},
 };
-

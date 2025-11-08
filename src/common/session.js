@@ -16,5 +16,8 @@ async function getUserFromRequest(req) {
 	return user;
 }
 
-module.exports = { getUserFromRequest };
+async function userHasPermission(user, permission) {
+	return user && user.permissions && user.permissions.includes(permission);
+}
 
+module.exports = { getUserFromRequest, userHasPermission };

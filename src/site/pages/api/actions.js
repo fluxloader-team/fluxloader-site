@@ -1,4 +1,3 @@
-const { verifyDiscordUser } = require("../../../common/verifydiscorduser");
 const Utils = require("../../../common/utils.js");
 const DB = require("../../../common/db");
 
@@ -6,6 +5,7 @@ const logger = new Utils.Log("pages.actions");
 
 module.exports = {
 	paths: ["/api/actions"],
+
 	/**
 	 * @param {import("http").IncomingMessage} req
 	 * @param {import("http").ServerResponse} res

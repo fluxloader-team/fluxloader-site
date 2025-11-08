@@ -3,6 +3,7 @@ const fs = require("fs");
 const Utils = require("./common/utils.js");
 const path = require("path");
 const discord = require("./discord/discordbot.js");
+const { file } = require("jszip");
 
 const CONFIG_PATH = path.join(__dirname, "config.json");
 const DEFAULT_CONFIG = {
@@ -67,7 +68,7 @@ function loadResources() {
 		if (entry.isDirectory()) return;
 		templateFileNames.push(entry.name);
 		const filePath = path.resolve(entry.parentPath, entry.name);
-		templates[entry.name] = fs.readFileSync(filePath, "utf8");
+		templates[entry.name] = { content: fs.readFileSync(filePath, "utf8"), path: filePath };
 	});
 
 	logger.info(`templates loaded: [ ${templateFileNames.join(", ")} ]`);

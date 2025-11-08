@@ -2,7 +2,6 @@ const { MongoClient } = require("mongodb");
 const Utils = require("../common/utils.js");
 const JSZip = require("jszip");
 const sanitizeHTML = require("sanitize-html");
-const { verifyDiscordUser } = require("./verifydiscorduser");
 
 const logger = new Utils.Log("common.db");
 var modInfoSchema = require("./schema.mod-info.json");

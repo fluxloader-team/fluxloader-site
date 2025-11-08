@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+	<head>
+		<%- include("header") %>
+		<title>Fluxloader Site | Home</title>
+	</head>
+
+	<body>
+		<div class="pageContainer">
+			<div class="headerContainer">
+				<a class="btn btn-secondary headerButton" href="/">Mod List</a>
+
+				<div class="input-group" style="width: 50%">
+					<input type="text" class="form-control" id="searchInput" placeholder="Search by name, author, or #tag1 #tag2 for multiple tags" onchange="globalThis.performSearch()" />
+					<button class="btn btn-outline-secondary" type="button" onclick="globalThis.performSearch()">Search</button>
+				</div>
+
+				<div class="rightContainer">
+					<a class="btn btn-primary" target="_blank" title="Download the App" href="https://github.com/fluxloader-team/fluxloader/releases/latest/">Fluxloader</a>
+
+					<div id="discordContainer">
+						<a href="/auth/discord" class="btn btn-primary" id="discordLogin">
+							<img alt="discord Logo" title="Login with Discord" style="width: 100px; height: 20px" src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg" />
+						</a>
+					</div>
+				</div>
+			</div>
+
+			<div class="modDisplayHolder">
+				<div class="modList" id="modList">
+					<div class="d-flex justify-content-center">
+						<div class="spinner-border" role="status">
+							<span class="visually-hidden">Loading...</span>
+						</div>
+					</div>
+				</div>
+				<div class="modDisplay">
+					<div class="modDisplayData" id="modDisplay">
+						<div class="d-flex justify-content-center">
+							<div class="spinner-border" role="status">
+								<span class="visually-hidden">Loading...</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modDisplayActions" id="modDisplayActions"></div>
+		</div>
+
+		<script src="loadsessioninfo.js"></script>
+		<script src="home.js"></script>
+
+		<%- include("footer") %>
+	</body>
+</html>
+

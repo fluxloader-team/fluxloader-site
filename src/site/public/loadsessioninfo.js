@@ -72,4 +72,3 @@ function updateUIWithLoggedIn(container, info) {
 			</ul>
 		</div>`;
 }
-
