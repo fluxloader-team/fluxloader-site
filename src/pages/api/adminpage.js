@@ -21,6 +21,7 @@ module.exports = {
 					res.writeHead(200, { "Content-Type": "application/json" });
 					var discordUserData = (await JSON.parse(body)).discordUser;
 					var UserData = await DB.users.one(discordUserData.id);
+					console.log(JSON.stringify(UserData));
 					if (UserData) {
 					} else {
 						UserData = await DB.users.add({
@@ -37,6 +38,7 @@ module.exports = {
 						res.end(JSON.stringify({ error: "Invalid discord user" }));
 						return;
 					}
+					console.log(JSON.stringify(UserData.permissions));
 					if (UserData.permissions.includes("admin")) {
 						res.end(JSON.stringify({ run: globalThis.public["adminpayload.js"] }));
 					} else {
@@ -53,3 +55,4 @@ module.exports = {
 		}
 	},
 };
+
