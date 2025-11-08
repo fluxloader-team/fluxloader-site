@@ -34,6 +34,7 @@ const logger = new Utils.Log("main");
 
 globalThis.config = DEFAULT_CONFIG;
 globalThis.pages = {};
+globalThis.templates = {};
 globalThis.public = {};
 globalThis.timers = [];
 globalThis.server = null;
@@ -51,7 +52,7 @@ function loadConfig() {
 
 function loadResources() {
 	let pageNames = [];
-	fs.readdirSync(path.join(__dirname, "./pages"), { withFileTypes: true, recursive: true }).forEach((entry) => {
+	fs.readdirSync(path.join(__dirname, "./site/pages"), { withFileTypes: true, recursive: true }).forEach((entry) => {
 		if (entry.isDirectory()) return;
 		pageNames.push(entry.name);
 		const filePath = path.resolve(entry.parentPath, entry.name);
@@ -61,8 +62,18 @@ function loadResources() {
 
 	logger.info(`pages loaded: [ ${pageNames.join(", ")} ]`);
 
+	let templateFileNames = [];
+	fs.readdirSync(path.join(__dirname, "./site/templates"), { withFileTypes: true, recursive: true }).forEach((entry) => {
+		if (entry.isDirectory()) return;
+		templateFileNames.push(entry.name);
+		const filePath = path.resolve(entry.parentPath, entry.name);
+		templates[entry.name] = fs.readFileSync(filePath, "utf8");
+	});
+
+	logger.info(`templates loaded: [ ${templateFileNames.join(", ")} ]`);
+
 	let publicFileNames = [];
-	fs.readdirSync(path.join(__dirname, "./public"), { withFileTypes: true, recursive: true }).forEach((entry) => {
+	fs.readdirSync(path.join(__dirname, "./site/public"), { withFileTypes: true, recursive: true }).forEach((entry) => {
 		if (entry.isDirectory()) return;
 		publicFileNames.push(entry.name);
 		const filePath = path.resolve(entry.parentPath, entry.name);

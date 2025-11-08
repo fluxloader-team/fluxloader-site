@@ -1,4 +1,4 @@
-const Utils = require("../../common/utils.js");
+const Utils = require("../../../common/utils.js");
 const { Events } = require("discord.js");
 
 const logger = new Utils.Log("discordbot.event.interactioncreate");

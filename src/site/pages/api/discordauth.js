@@ -1,5 +1,5 @@
 const querystring = require("querystring");
-const Utils = require("../../common/utils.js");
+const Utils = require("../../../common/utils.js");
 
 const logger = new Utils.Log("pages.discord");
 

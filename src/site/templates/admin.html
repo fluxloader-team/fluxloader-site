@@ -1,0 +1,14 @@
+<link rel="stylesheet" href="admin.css" />
+
+<div class="pageContainer">
+	<div class="headerContainer" id="headerContainer">
+		<a class="btn btn-secondary headerButton" style="margin-left: 15px" href="/">Mod List</a>
+		<a class="btn btn-secondary headerButton" style="margin-left: 15px" onclick="globalThis.adminPages.Selection.action();">Selection menu</a>
+		<a href="/auth/discord" class="btn btn-primary" style="margin-right: 15px" id="discordLogin">
+			<img src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg" alt="discord Logo" title="Login with Discord" style="width: 100px; height: 20px; margin-right: 5px" />
+		</a>
+	</div>
+	<div id="adminPageContent" class="adminpage fullpage"></div>
+</div>
+
+<script src="admin.js"></script>

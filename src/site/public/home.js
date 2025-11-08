@@ -1,4 +1,5 @@
 const discordUser = JSON.parse(localStorage.getItem("discordUser"));
+
 if (discordUser) {
 	console.log("discord User:", discordUser);
 

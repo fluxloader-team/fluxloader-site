@@ -1,6 +1,6 @@
-const { verifyDiscordUser } = require("../../common/verifydiscorduser");
-const Utils = require("../../common/utils.js");
-const DB = require("../../common/db");
+const { verifyDiscordUser } = require("../../../common/verifydiscorduser");
+const Utils = require("../../../common/utils.js");
+const DB = require("../../../common/db");
 
 const logger = new Utils.Log("pages.actions");
 
@@ -78,7 +78,7 @@ module.exports = {
 								totalCount: totalCount,
 								totalPages: Math.ceil(totalCount / size),
 							},
-						}),
+						})
 					);
 				} catch (error) {
 					logger.info(`Error ${error}`);

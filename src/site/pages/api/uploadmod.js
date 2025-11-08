@@ -1,5 +1,5 @@
-const DB = require("../../common/db");
-const Utils = require("../../common/utils.js");
+const DB = require("../../../common/db");
+const Utils = require("../../../common/utils.js");
 
 const logger = new Utils.Log("pages.uploadmod");
 
@@ -71,7 +71,7 @@ module.exports = {
 							message: `File ${filename} uploaded successfully.`,
 							isUpdate: true,
 							modID: modID,
-						}),
+						})
 					);
 					return;
 				}
@@ -81,7 +81,7 @@ module.exports = {
 				await res.end(
 					JSON.stringify({
 						message: `File ${filename} uploaded successfully.`,
-					}),
+					})
 				);
 			} catch (error) {
 				logger.error("Error in uploadmod API:" + error.stack ? error.stack : error.message);

@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-const Utils = require("../../common/utils.js");
-const db = require("../../common/db");
+const Utils = require("../../../common/utils.js");
+const db = require("../../../common/db");
 
 const logger = new Utils.Log("discordbot.command.getmodinfo");
 
@@ -55,13 +55,13 @@ module.exports = {
 					{
 						name: "Dependencies",
 						value: formatDependencies(modData.modData.dependencies) || "None",
-					},
+					}
 				)
 				.addFields({ name: "Upload Time", value: new Date(modData.uploadTime).toLocaleString(), inline: true }, { name: "Downloads", value: modData.downloadCount.toString() || "0", inline: true })
 				.addFields(
 					{ name: "Electron Entrypoint", value: modData.modData.electronEntrypoint || "None", inline: false },
 					{ name: "Game Entrypoint", value: modData.modData.gameEntrypoint || "None", inline: true },
-					{ name: "Worker Entrypoint", value: modData.modData.workerEntrypoint || "None", inline: true },
+					{ name: "Worker Entrypoint", value: modData.modData.workerEntrypoint || "None", inline: true }
 				);
 
 			if (modData.modData.description) {

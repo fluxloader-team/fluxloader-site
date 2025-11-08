@@ -1,6 +1,6 @@
-const Utils = require("../../common/utils.js");
-const DB = require("../../common/db");
-const { verifyDiscordUser } = require("../../common/verifydiscorduser");
+const Utils = require("../../../common/utils.js");
+const DB = require("../../../common/db");
+const { verifyDiscordUser } = require("../../../common/verifydiscorduser");
 
 const logger = new Utils.Log("pages.users");
 
@@ -68,7 +68,7 @@ module.exports = {
 								modName: mod.modData.name,
 								version: v,
 								uploadTime: mod.modData.uploadTime,
-							})),
+							}))
 						);
 					}
 
@@ -91,7 +91,7 @@ module.exports = {
 								modVersionsUploaded: modVersions.length,
 								modVersions: modVersions,
 							},
-						}),
+						})
 					);
 				} else if (data.action === "searchUsers") {
 					const search = data.search || "";
