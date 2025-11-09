@@ -1,5 +1,5 @@
 const ejs = require("ejs");
-const { includeFromMemory } = require("../../common/ejsExtensions.js");
+const { includeFromMemory } = require("../../common/ejsextensions.js");
 
 module.exports = {
 	paths: ["", "/", "/home"],

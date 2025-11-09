@@ -21,7 +21,7 @@ function loadSessionInfo(containerId) {
 async function loadSessionInfoFromServer(container, sessionInfoCache) {
 	try {
 		// Revalidate session info in the background against the server
-		const res = await fetch("/api/session", { credentials: "include" });
+		const res = await fetch("/api/sessioninfo", { credentials: "include" });
 		let sessionInfo = await res.json();
 		console.log("Refreshed session info from server:", sessionInfo);
 

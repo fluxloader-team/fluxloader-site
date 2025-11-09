@@ -2,7 +2,7 @@ const { getSessionFromRequest } = require("../../../common/session");
 const DB = require("../../../common/db");
 
 module.exports = {
-	paths: ["/api/session"],
+	paths: ["/api/sessioninfo"],
 
 	run: async (req, res) => {
 		const session = await getSessionFromRequest(req);

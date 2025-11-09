@@ -1,7 +1,7 @@
 const ejs = require("ejs");
 const DB = require("../../common/db");
 const { getSessionFromRequest } = require("../../common/session");
-const ejsExtensions = require("../../common/ejsExtensions");
+const ejsextensions = require("../../common/ejsextensions");
 
 module.exports = {
 	paths: ["/admin"],
@@ -13,7 +13,7 @@ module.exports = {
 		if (user) hasAdminPermissions = user.permissions.includes("admin");
 
 		const tpl = globalThis.templates["admin.ejs"];
-		const html = ejs.render(tpl.content, { include: ejsExtensions.includeFromMemory, hasAdminPermissions }, { filename: tpl.path });
+		const html = ejs.render(tpl.content, { include: ejsextensions.includeFromMemory, hasAdminPermissions }, { filename: tpl.path });
 		res.writeHead(200, { "Content-Type": "text/html" });
 		res.end(html);
 	},
