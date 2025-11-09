@@ -1,5 +1,6 @@
 const Utils = require("../../../common/utils.js");
 const DB = require("../../../common/db");
+const { getSessionFromRequest } = require("../../../common/session");
 
 const logger = new Utils.Log("pages.actions");
 
@@ -27,8 +28,6 @@ module.exports = {
 			req.on("end", async () => {
 				try {
 					var data = JSON.parse(body);
-					var discordUserData = data.discordUser;
-					// TODO: Remove the usage of .discordUser here
 
 					// Get pagination parameters
 					const page = parseInt(data.page) || 1;
@@ -49,7 +48,7 @@ module.exports = {
 
 					// Log the action
 					var actionEntry = {
-						discordID: discordUserData.id,
+						discordID: user.discordID,
 						action: `Viewed site actions`,
 						time: new Date(),
 						logged: false,

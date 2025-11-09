@@ -2,6 +2,7 @@ const Utils = require("../../../common/utils.js");
 const fs = require("fs");
 const path = require("path");
 const DB = require("../../../common/db");
+const { getSessionFromRequest } = require("../../../common/session");
 
 const logger = new Utils.Log("pages.config");
 
@@ -29,9 +30,6 @@ module.exports = {
 				req.on("end", async () => {
 					try {
 						var data = JSON.parse(body);
-						// TODO: Remove the usage of .discordUser here
-						var discordUserData = data.discordUser;
-
 						// Handle different actions
 						if (data.action === "getConfig") {
 							// Get config.json content
@@ -39,13 +37,12 @@ module.exports = {
 							const configContent = fs.readFileSync(configPath, "utf8");
 
 							// Log the action
-							var actionEntry = {
-								discordID: discordUserData.id,
+							await DB.actions.add({
+								discordID: user.discordID,
 								action: `Viewed config.json`,
 								time: new Date(),
 								logged: false,
-							};
-							await DB.actions.add(actionEntry);
+							});
 
 							res.writeHead(200, { "Content-Type": "application/json" });
 							res.end(JSON.stringify({ config: configContent }));
@@ -67,13 +64,12 @@ module.exports = {
 							fs.writeFileSync(configPath, configContent, "utf8");
 
 							// Log the action
-							var actionEntry = {
-								discordID: discordUserData.id,
+							await DB.actions.add({
+								discordID: user.discordID,
 								action: `Updated config.json`,
 								time: new Date(),
 								logged: false,
-							};
-							await DB.actions.add(actionEntry);
+							});
 
 							res.writeHead(200, { "Content-Type": "application/json" });
 							res.end(JSON.stringify({ success: true }));

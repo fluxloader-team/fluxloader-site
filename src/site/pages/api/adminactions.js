@@ -1,5 +1,6 @@
 const Utils = require("../../../common/utils.js");
 const DB = require("../../../common/db");
+const { getSessionFromRequest } = require("../../../common/session");
 
 const logger = new Utils.Log("pages.adminactions");
 
@@ -31,8 +32,6 @@ module.exports = {
 			try {
 				res.writeHead(200, { "Content-Type": "application/json" });
 				var data = await JSON.parse(body);
-				// TODO: Remove the usage of .discordUser here
-				var discordUserData = data.discordUser;
 				var action = data.action;
 				var modID = data.modID;
 				var authorID = data.authorID;
@@ -58,7 +57,7 @@ module.exports = {
 
 						// Log the action
 						var actionEntry = {
-							discordID: discordUserData.id,
+							discordID: user.discordID,
 							action: `Verified mod ${mod.modData.name} (${modID})`,
 							time: new Date(),
 							logged: false,
@@ -86,7 +85,7 @@ module.exports = {
 
 						// Log the action
 						var actionEntry = {
-							discordID: discordUserData.id,
+							discordID: user.discordID,
 							action: `Denied and deleted mod ${mod.modData.name} (${modID})`,
 							time: new Date(),
 							logged: false,
@@ -107,7 +106,7 @@ module.exports = {
 
 						// Log the action
 						var actionEntry = {
-							discordID: discordUserData.id,
+							discordID: user.discordID,
 							action: `Banned author with ID ${authorID}`,
 							time: new Date(),
 							logged: false,
@@ -135,7 +134,7 @@ module.exports = {
 
 						// Log the action
 						var actionEntry = {
-							discordID: discordUserData.id,
+							discordID: user.discordID,
 							action: `Unbanned user with ID ${authorID}`,
 							time: new Date(),
 							logged: false,
@@ -165,7 +164,7 @@ module.exports = {
 
 						// Log the action
 						var actionEntry = {
-							discordID: discordUserData.id,
+							discordID: user.discordID,
 							action: `Set admin status for user with ID ${authorID}`,
 							time: new Date(),
 							logged: false,
@@ -195,7 +194,7 @@ module.exports = {
 
 						// Log the action
 						var actionEntry = {
-							discordID: discordUserData.id,
+							discordID: user.discordID,
 							action: `Removed admin status for user with ID ${authorID}`,
 							time: new Date(),
 							logged: false,

@@ -1,5 +1,6 @@
 const DB = require("../../../common/db");
 const Utils = require("../../../common/utils.js");
+const { getSessionFromRequest } = require("../../../common/session");
 
 const logger = new Utils.Log("pages.uploadmod");
 

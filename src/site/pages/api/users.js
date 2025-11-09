@@ -1,5 +1,6 @@
 const Utils = require("../../../common/utils.js");
 const DB = require("../../../common/db");
+const { getSessionFromRequest } = require("../../../common/session");
 
 const logger = new Utils.Log("pages.users");
 
@@ -60,7 +61,7 @@ module.exports = {
 
 					// Log the action
 					var actionEntry = {
-						discordID: discordUserData.id,
+						discordID: user.discordID,
 						action: `Viewed user details for ${user.discordUsername} (${userID})`,
 						time: new Date(),
 						logged: false,
@@ -87,7 +88,7 @@ module.exports = {
 
 					// Log the action
 					var actionEntry = {
-						discordID: discordUserData.id,
+						discordID: user.discordID,
 						action: `Searched for users with query: ${search}`,
 						time: new Date(),
 						logged: false,
@@ -102,7 +103,7 @@ module.exports = {
 
 					// Log the action
 					var actionEntry = {
-						discordID: discordUserData.id,
+						discordID: user.discordID,
 						action: `Listed all users`,
 						time: new Date(),
 						logged: false,
