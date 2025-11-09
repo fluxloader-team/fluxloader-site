@@ -11,6 +11,15 @@ module.exports = {
 	 * @param {import("http").ServerResponse} res
 	 */
 	run: async function (req, res) {
+		// Verify the user is authenticated and has admin permissions
+		const session = await getSessionFromRequest(req);
+		const user = session != null ? await DB.users.one(session.discordID) : null;
+		if (!user || !user.permissions.includes("admin")) {
+			res.writeHead(403, { "Content-Type": "application/json" });
+			res.end(JSON.stringify({ error: "Not authenticated" }));
+			return;
+		}
+
 		// Only allow POST requests with proper authentication
 		if (req.method === "POST") {
 			let body = "";
@@ -19,27 +28,7 @@ module.exports = {
 				try {
 					var data = JSON.parse(body);
 					var discordUserData = data.discordUser;
-
-					// Verify the user is authenticated and has admin permissions
-					var UserData = await DB.users.one(discordUserData.id);
-					if (!UserData) {
-						res.writeHead(403, { "Content-Type": "application/json" });
-						res.end(JSON.stringify({ error: "User not found" }));
-						return;
-					}
-
-					var isValidUser = await verifyDiscordUser(discordUserData.id, discordUserData.tokenResponse.access_token);
-					if (!isValidUser) {
-						res.writeHead(403, { "Content-Type": "application/json" });
-						res.end(JSON.stringify({ error: "Invalid discord user" }));
-						return;
-					}
-
-					if (!UserData.permissions.includes("admin")) {
-						res.writeHead(403, { "Content-Type": "application/json" });
-						res.end(JSON.stringify({ error: "User does not have admin permissions" }));
-						return;
-					}
+					// TODO: Remove the usage of .discordUser here
 
 					// Get pagination parameters
 					const page = parseInt(data.page) || 1;
@@ -78,7 +67,7 @@ module.exports = {
 								totalCount: totalCount,
 								totalPages: Math.ceil(totalCount / size),
 							},
-						}),
+						})
 					);
 				} catch (error) {
 					logger.info(`Error ${error}`);

@@ -1,5 +1,3 @@
-loadSessionInfo("discordContainer");
-
 let currentModData = null;
 
 async function performUpload() {
@@ -22,7 +20,6 @@ async function performUpload() {
 		const jsonPayload = JSON.stringify({
 			filename: file.name,
 			filedata: base64Data,
-			discordInfo: discordUser,
 		});
 
 		console.log("upload.html:");
@@ -34,9 +31,7 @@ async function performUpload() {
 
 		var response = await fetch("/api/uploadmod", {
 			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
+			headers: { "Content-Type": "application/json" },
 			body: jsonPayload,
 		});
 

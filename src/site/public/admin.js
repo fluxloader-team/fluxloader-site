@@ -1,5 +1,3 @@
-loadSessionInfo("discordContainer");
-
 globalThis.adminPageContent = document.getElementById("adminPageContent");
 globalThis.searchQuery = "";
 globalThis.modCache = {};

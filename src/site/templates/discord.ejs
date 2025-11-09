@@ -1,0 +1,20 @@
+<div id="discordContainer">
+	<% if (!user) { %>
+	<a href="/auth/discord" class="btn btn-primary">
+		<img src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg" alt="Discord Logo" title="Login with Discord" style="width: 100px; height: 20px; margin-right: 5px" />
+	</a>
+	<% } else { %> <% const avatarUrl = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : "https://cdn.discordapp.com/embed/avatars/0.png"; %>
+	<div class="dropdown">
+		<button class="btn dropdown-toggle" type="button" id="discordDropdownButton" data-bs-toggle="dropdown" aria-expanded="false" style="display: flex; align-items: center; gap: 0.5rem">
+			<img src="<%= avatarUrl %>" alt="n/a" class="rounded-circle" style="width: 30px; height: 30px" />
+			<%= user.discordUsername %>
+		</button>
+		<ul class="dropdown-menu" aria-labelledby="discordDropdownButton">
+			<li><a class="dropdown-item" href="/upload">Upload Mod</a></li>
+			<li><hr class="dropdown-divider" /></li>
+			<li><a class="dropdown-item" href="/logout">Logout</a></li>
+		</ul>
+	</div>
+	<% } %>
+</div>
+

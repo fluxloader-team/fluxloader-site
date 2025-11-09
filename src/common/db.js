@@ -325,41 +325,13 @@ var mods = {
 			return endresult;
 		},
 
-		upload: async function (payload = { filename: "", filedata: "", discordInfo: { id: "", tokenResponse: { access_token: "" } } }, discordBypass = false, bypassUpdateCheck = false) {
+		upload: async function (payload = { filename: "", filedata: "" }, bypassUpdateCheck = false) {
 			var endresult = await runWithMongoClient(async (client) => {
 				var db = client.db("SandustryMods");
 				var modsCollection = db.collection("Mods");
 				var versionsCollection = db.collection("ModVersions");
-				var { filename, filedata, discordInfo } = payload;
-				if (!filename || !filedata) {
-					return "Invalid payload";
-				}
-
-				if (!discordBypass) {
-					if (!discordInfo || !discordInfo.id || !discordInfo.tokenResponse || !discordInfo.tokenResponse.access_token) {
-						return "Invalid discordInfo";
-					}
-					var isValidUser = await verifyDiscordUser(discordInfo.id, discordInfo.tokenResponse.access_token);
-					if (!isValidUser) {
-						return "discord user validation failed";
-					} else {
-						var UserRecord = await users.one(discordInfo.id);
-						if (!UserRecord) {
-							var User = new UserEntry();
-							User.discordID = discordInfo.id;
-							User.discordUsername = discordInfo.username;
-							User.permissions = ["user"];
-							User.description = "new user";
-							User.joinedAt = new Date();
-							User.banned = false;
-							await users.add(User);
-						} else {
-							if (UserRecord.banned) {
-								return "User is banned";
-							}
-						}
-					}
-				}
+				var { filename, filedata } = payload;
+				if (!filename || !filedata) return "Invalid payload";
 
 				// Read as base64, read contents with JSZip, read files from JSZip
 				var zipBuffer = Buffer.from(filedata, "base64");
@@ -426,8 +398,6 @@ var mods = {
 				});
 
 				// Validate the modinfo.json against the schema
-				// HARDCODED FOR NOW
-
 				const res = Utils.SchemaValidation.validate(modInfo, modInfoSchema);
 				if (!res.success) return `modinfo.json invalid: ${res.source} : ${res.error}`;
 

@@ -20,12 +20,7 @@
 
 				<div class="rightContainer">
 					<a class="btn btn-primary" target="_blank" title="Download the App" href="https://github.com/fluxloader-team/fluxloader/releases/latest/">Fluxloader</a>
-
-					<div id="discordContainer">
-						<a href="/auth/discord" class="btn btn-primary" id="discordLogin">
-							<img alt="discord Logo" title="Login with Discord" style="width: 100px; height: 20px" src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d718355f9c89eb0fd350_Logo.svg" />
-						</a>
-					</div>
+					<%- include("discord", { user }) %>
 				</div>
 			</div>
 

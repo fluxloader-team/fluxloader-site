@@ -1,7 +1,7 @@
 const ejs = require("ejs");
-const { includeFromMemory } = require("../../common/ejsextensions.js");
-const DB = require("../../common/db.js");
-const { getSessionFromRequest } = require("../../common/session.js");
+const DB = require("../../common/db");
+const { includeFromMemory } = require("../../common/ejsextensions");
+const { getSessionFromRequest } = require("../../common/session");
 
 module.exports = {
 	paths: ["", "/", "/home"],

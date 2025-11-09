@@ -9,7 +9,16 @@ module.exports = {
 	 * @param {import("http").IncomingMessage} req
 	 * @param {import("http").ServerResponse} res
 	 */
-	run: function (req, res) {
+	run: async function (req, res) {
+		// Verify the user is authenticated and has admin permissions
+		const session = await getSessionFromRequest(req);
+		const user = session != null ? await DB.users.one(session.discordID) : null;
+		if (!user || !user.permissions.includes("admin")) {
+			res.writeHead(403, { "Content-Type": "application/json" });
+			res.end(JSON.stringify({ error: "Not authenticated" }));
+			return;
+		}
+
 		// Check if the method is POST
 		if (req.method !== "POST") {
 			res.writeHead(405, { "Content-Type": "application/json" });
@@ -22,28 +31,11 @@ module.exports = {
 			try {
 				res.writeHead(200, { "Content-Type": "application/json" });
 				var data = await JSON.parse(body);
+				// TODO: Remove the usage of .discordUser here
 				var discordUserData = data.discordUser;
 				var action = data.action;
 				var modID = data.modID;
 				var authorID = data.authorID;
-
-				// Verify the user is authenticated and has admin permissions
-				var UserData = await DB.users.one(discordUserData.id);
-				if (!UserData) {
-					res.end(JSON.stringify({ error: "User not found" }));
-					return;
-				}
-
-				var isValidUser = await verifyDiscordUser(discordUserData.id, discordUserData.tokenResponse.access_token);
-				if (!isValidUser) {
-					res.end(JSON.stringify({ error: "Invalid discord user" }));
-					return;
-				}
-
-				if (!UserData.permissions.includes("admin")) {
-					res.end(JSON.stringify({ error: "User does not have admin permissions" }));
-					return;
-				}
 
 				// Handle different admin actions
 				switch (action) {
