@@ -1,5 +1,3 @@
-loadSessionInfo("discordContainer");
-
 globalThis.pageGet = 1;
 globalThis.mods = {};
 globalThis.modCache = {};

@@ -64,6 +64,7 @@ class ModVersionEntry {
 class UserEntry {
 	discordID = "";
 	discordUsername = "";
+	avatar = "";
 	permissions = [""];
 	description = "";
 	joinedAt = new Date();
@@ -522,6 +523,10 @@ var mods = {
 };
 
 var users = {
+	/**
+	 * @param {string} discordID
+	 * @returns {Promise<UserEntry|null>}
+	 */
 	one: async function (discordID = "") {
 		var endresult = await runWithMongoClient(async (client) => {
 			var db = client.db("SandustryMods");
@@ -532,6 +537,10 @@ var users = {
 		return endresult;
 	},
 
+	/**
+	 * @param {UserEntry} userData
+	 * @returns {Promise<import("mongodb").InsertOneResult|UserEntry>}
+	 */
 	add: async function (userData = new UserEntry()) {
 		var endresult = await runWithMongoClient(async (client) => {
 			var db = client.db("SandustryMods");
