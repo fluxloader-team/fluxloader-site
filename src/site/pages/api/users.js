@@ -67,7 +67,7 @@ module.exports = {
 								modName: mod.modData.name,
 								version: v,
 								uploadTime: mod.modData.uploadTime,
-							}))
+							})),
 						);
 					}
 
@@ -90,7 +90,7 @@ module.exports = {
 								modVersionsUploaded: modVersions.length,
 								modVersions: modVersions,
 							},
-						})
+						}),
 					);
 				} else if (data.action === "searchUsers") {
 					const search = data.search || "";

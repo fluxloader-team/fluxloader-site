@@ -672,6 +672,16 @@ var sessions = {
 		});
 		return endresult;
 	},
+
+	remove: async function (token = "") {
+		var endresult = await runWithMongoClient(async (client) => {
+			var db = client.db("SandustryMods");
+			var sessionsCollection = db.collection("Sessions");
+			var result = await sessionsCollection.deleteOne({ token: token });
+			return result;
+		});
+		return endresult;
+	},
 };
 
 module.exports = { mods, users, actions, sessions };

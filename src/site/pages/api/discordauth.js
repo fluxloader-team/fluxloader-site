@@ -5,8 +5,23 @@ const crypto = require("crypto");
 
 const logger = new Utils.Log("pages.discord");
 
+function sendPopupErrorMessage(res, code, error) {
+	res.writeHead(code, { "Content-Type": "text/html" });
+	res.end(`
+		<script>
+			window.opener.postMessage({
+				type: "discordAuth",
+				authenticated: false,
+				error: "${error}"
+			}, "*");
+			window.close();
+		</script>
+	`);
+}
+
 module.exports = {
 	paths: ["/auth/discord", "/auth/discord/callback"],
+
 	/**
 	 * @param {import("http").IncomingMessage} req
 	 * @param {import("http").ServerResponse} res
@@ -29,12 +44,10 @@ module.exports = {
 		// The user has been redirected back from discord to our callback endpoint
 		if (pathname === "/auth/discord/callback") {
 			try {
-				// It should contain a "code" query parameter that we can exchange for an access token
+				// Discord will provide a code we can exchange for an access token
 				var code = queryParams.code;
-				logger.info(`Received code: ${code}`);
 				if (!code) {
-					res.writeHead(400, { "Content-Type": "text/html" });
-					return res.end('<h1>Error: Missing "code" parameter in the callback URL.</h1>');
+					return sendPopupErrorMessage(res, 400, "missing_code");
 				}
 
 				// Now go back to discord and exchange the code for an access token
@@ -45,17 +58,14 @@ module.exports = {
 					code: code,
 					redirect_uri: globalThis.config.discord.redirectUri,
 				});
-				var tokenResponse = await (
-					await fetch("https://discord.com/api/oauth2/token", {
-						method: "POST",
-						headers: { "Content-Type": "application/x-www-form-urlencoded" },
-						body: tokenData,
-					})
-				).json();
-				logger.info(`Token Response: ${JSON.stringify(tokenResponse)}`);
-				if (!tokenResponse.access_token) {
-					res.writeHead(500, { "Content-Type": "text/html" });
-					return res.end("<h1>Error: Failed to retrieve access token from discord.</h1>");
+				var tokenResponse = await fetch("https://discord.com/api/oauth2/token", {
+					method: "POST",
+					headers: { "Content-Type": "application/x-www-form-urlencoded" },
+					body: tokenData,
+				});
+				var tokenResponseJson = await tokenResponse.json();
+				if (!tokenResponseJson.access_token) {
+					return sendPopupErrorMessage(res, 400, "invalid_token_response");
 				}
 
 				// With the access token, we can now fetch the user's discord information
@@ -63,11 +73,12 @@ module.exports = {
 				const userResponse = await (
 					await fetch("https://discord.com/api/users/@me", {
 						method: "GET",
-						headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+						headers: { Authorization: `Bearer ${tokenResponseJson.access_token}` },
 					})
 				).json();
+				logger.info(`userResponse: ${JSON.stringify(userResponse)}`);
 
-				/// Check if the user exists in our database, if not create them
+				// Check if the user exists in our database, if not create them
 				const user = await DB.users.one(userResponse.id);
 				if (!user) {
 					user = await DB.users.add({
@@ -79,31 +90,44 @@ module.exports = {
 						banned: false,
 					});
 				}
-
-				logger.info(`User Response: ${JSON.stringify(userResponse)}`);
+				logger.info(`user: ${JSON.stringify(user)}`);
 
 				// generate a session token for the user and store it in the sessions database
 				const sessionToken = crypto.randomBytes(32).toString("hex");
+				const expires = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
 				await DB.sessions.add({
 					token: sessionToken,
+					expires: expires,
 					discordID: user.discordID,
-					expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
 				});
 
-				// Finally redirect the user back to the homepage with the session token set as a cookie
-				res.writeHead(302, {
-					Location: "/",
-					"Set-Cookie": `session=${sessionToken}; HttpOnly; Path=/; Max-Age=${7 * 24 * 60 * 60}`,
-				});
-				return res.end();
+				// Respond with JSON instead of redirect
+				const sessionInfo = {
+					authenticated: true,
+					token: sessionToken,
+					expires: expires,
+					user: {
+						id: user.discordID,
+						username: user.discordUsername,
+						avatar: user.avatar,
+					},
+				};
+				res.writeHead(200, { "Content-Type": "text/html" });
+				return res.end(`
+					<script>
+						window.opener.postMessage({
+							type: "discordAuth",
+							sessionInfo: ${JSON.stringify(sessionInfo)}
+						}, "*");
+						window.close();
+					</script>
+				`);
 			} catch (err) {
 				logger.info(`Error during discord OAuth2 process: ${err.message}`);
-				res.writeHead(500, { "Content-Type": "text/html" });
-				return res.end("<h1>Error: Something went wrong during the discord authentication process.</h1>");
+				return sendPopupErrorMessage(res, 500, "internal_error");
 			}
 		}
 
-		res.writeHead(404, { "Content-Type": "text/html" });
-		return res.end("<h1>404: Not Found</h1>");
+		return sendPopupErrorMessage(res, 404, "not_found");
 	},
 };

@@ -78,7 +78,7 @@ module.exports = {
 								totalCount: totalCount,
 								totalPages: Math.ceil(totalCount / size),
 							},
-						})
+						}),
 					);
 				} catch (error) {
 					logger.info(`Error ${error}`);

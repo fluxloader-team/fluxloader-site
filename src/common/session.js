@@ -1,6 +1,9 @@
 const DB = require("./db");
 
-async function getUserFromRequest(req) {
+/**
+ * @param {import("http").IncomingMessage} req
+ */
+async function getSessionFromRequest(req) {
 	const cookie = (req.headers.cookie || "")
 		.split(";")
 		.map((c) => c.trim())
@@ -10,14 +13,22 @@ async function getUserFromRequest(req) {
 
 	const token = cookie.split("=")[1];
 	const session = await DB.sessions.one(token);
-	if (!session || session.expires < Date.now()) return null;
 
-	const user = await DB.users.one(session.discordID);
-	return user;
+	if (!session) return null;
+
+	if (session.expires < Date.now()) {
+		await DB.sessions.remove(token);
+		return null;
+	}
+
+	return session;
 }
 
-async function userHasPermission(user, permission) {
-	return user && user.permissions && user.permissions.includes(permission);
+/**
+ * @param {string} token
+ */
+async function removeSession(token) {
+	await DB.sessions.remove(token);
 }
 
-module.exports = { getUserFromRequest, userHasPermission };
+module.exports = { getSessionFromRequest, removeSession };
