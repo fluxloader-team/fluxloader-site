@@ -112,7 +112,15 @@ function handleWebRequests(req, res) {
 
 	var publicFile = public[urlName.replace("/", "")];
 	if (publicFile) {
-		const type = { ".html": "text/html", ".css": "text/css", ".js": "application/javascript" }[path.extname(urlName)] || "text/html";
+		const type =
+			{
+				".html": "text/html",
+				".css": "text/css",
+				".js": "application/javascript",
+				".svg": "image/svg+xml",
+				".png": "image/png",
+				".jpg": "image/jpeg",
+			}[path.extname(urlName)] || "text/html";
 		logger.debug(`Received request for public file: ${url} (Content-Type: ${type})`);
 		res.writeHead(200, { "Content-Type": type });
 		res.end(publicFile);
