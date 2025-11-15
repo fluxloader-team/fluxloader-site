@@ -2,12 +2,12 @@ const { MongoClient } = require("mongodb");
 const Utils = require("../common/utils.js");
 const JSZip = require("jszip");
 const sanitizeHTML = require("sanitize-html");
-const { verifyDiscordUser } = require("./verifydiscorduser");
 
 const logger = new Utils.Log("common.db");
 var modInfoSchema = require("./schema.mod-info.json");
 
 var mongoUri = globalThis.config.mongodb.uri;
+
 /** @type {import("mongodb").MongoClient | undefined} */
 let globalClient;
 
@@ -64,6 +64,7 @@ class ModVersionEntry {
 class UserEntry {
 	discordID = "";
 	discordUsername = "";
+	avatar = "";
 	permissions = [""];
 	description = "";
 	joinedAt = new Date();
@@ -76,6 +77,7 @@ class ActionEntry {
 	time = new Date();
 	logged = false;
 }
+
 /**
  * @param {function(import("mongodb").MongoClient)} callback
  */
@@ -115,7 +117,7 @@ var mods = {
 					{
 						sort: { uploadTime: 1 },
 						projection: project,
-					},
+					}
 				);
 				return result;
 			});
@@ -323,41 +325,13 @@ var mods = {
 			return endresult;
 		},
 
-		upload: async function (payload = { filename: "", filedata: "", discordInfo: { id: "", tokenResponse: { access_token: "" } } }, discordBypass = false, bypassUpdateCheck = false) {
+		upload: async function (payload = { filename: "", filedata: "" }, bypassUpdateCheck = false) {
 			var endresult = await runWithMongoClient(async (client) => {
 				var db = client.db("SandustryMods");
 				var modsCollection = db.collection("Mods");
 				var versionsCollection = db.collection("ModVersions");
-				var { filename, filedata, discordInfo } = payload;
-				if (!filename || !filedata) {
-					return "Invalid payload";
-				}
-
-				if (!discordBypass) {
-					if (!discordInfo || !discordInfo.id || !discordInfo.tokenResponse || !discordInfo.tokenResponse.access_token) {
-						return "Invalid discordInfo";
-					}
-					var isValidUser = await verifyDiscordUser(discordInfo.id, discordInfo.tokenResponse.access_token);
-					if (!isValidUser) {
-						return "discord user validation failed";
-					} else {
-						var UserRecord = await users.one(discordInfo.id);
-						if (!UserRecord) {
-							var User = new UserEntry();
-							User.discordID = discordInfo.id;
-							User.discordUsername = discordInfo.username;
-							User.permissions = ["user"];
-							User.description = "new user";
-							User.joinedAt = new Date();
-							User.banned = false;
-							await users.add(User);
-						} else {
-							if (UserRecord.banned) {
-								return "User is banned";
-							}
-						}
-					}
-				}
+				var { filename, filedata } = payload;
+				if (!filename || !filedata) return "Invalid payload";
 
 				// Read as base64, read contents with JSZip, read files from JSZip
 				var zipBuffer = Buffer.from(filedata, "base64");
@@ -424,8 +398,6 @@ var mods = {
 				});
 
 				// Validate the modinfo.json against the schema
-				// HARDCODED FOR NOW
-
 				const res = Utils.SchemaValidation.validate(modInfo, modInfoSchema);
 				if (!res.success) return `modinfo.json invalid: ${res.source} : ${res.error}`;
 
@@ -521,6 +493,10 @@ var mods = {
 };
 
 var users = {
+	/**
+	 * @param {string} [discordID]
+	 * @returns {Promise<UserEntry|null>}
+	 */
 	one: async function (discordID = "") {
 		var endresult = await runWithMongoClient(async (client) => {
 			var db = client.db("SandustryMods");
@@ -531,6 +507,10 @@ var users = {
 		return endresult;
 	},
 
+	/**
+	 * @param {UserEntry} [userData]
+	 * @returns {Promise<import("mongodb").InsertOneResult|UserEntry>}
+	 */
 	add: async function (userData = new UserEntry()) {
 		var endresult = await runWithMongoClient(async (client) => {
 			var db = client.db("SandustryMods");
@@ -585,7 +565,7 @@ var users = {
 			var query = search
 				? {
 						$or: [{ discordID: { $regex: search, $options: "i" } }, { discordUsername: { $regex: search, $options: "i" } }],
-					}
+				  }
 				: {};
 			var result = await userCollection.find(query).limit(limit).toArray();
 			return result;
@@ -651,4 +631,36 @@ var actions = {
 	},
 };
 
-module.exports = { mods, users, actions };
+var sessions = {
+	one: async function (token = "") {
+		var endresult = await runWithMongoClient(async (client) => {
+			var db = client.db("SandustryMods");
+			var sessionsCollection = db.collection("Sessions");
+			var result = await sessionsCollection.findOne({ token: token });
+			return result;
+		});
+		return endresult;
+	},
+
+	add: async function (sessionData = { token: "", discordID: "", expires: Date.now() }) {
+		var endresult = await runWithMongoClient(async (client) => {
+			var db = client.db("SandustryMods");
+			var sessionsCollection = db.collection("Sessions");
+			var result = await sessionsCollection.insertOne(sessionData);
+			return result;
+		});
+		return endresult;
+	},
+
+	remove: async function (token = "") {
+		var endresult = await runWithMongoClient(async (client) => {
+			var db = client.db("SandustryMods");
+			var sessionsCollection = db.collection("Sessions");
+			var result = await sessionsCollection.deleteOne({ token: token });
+			return result;
+		});
+		return endresult;
+	},
+};
+
+module.exports = { mods, users, actions, sessions };

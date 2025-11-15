@@ -1,0 +1,1 @@
+mongosh SandustryMods /workspaces/fluxloader-site/scripts/clear-mongo-db.js

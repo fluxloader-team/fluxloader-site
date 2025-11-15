@@ -1,5 +1,5 @@
-const Utils = require("../../common/utils.js");
-const DB = require("../../common/db");
+const Utils = require("../../../common/utils.js");
+const DB = require("../../../common/db");
 
 const logger = new Utils.Log("pages.search");
 
@@ -31,7 +31,7 @@ module.exports = {
 							modids: querys["modids"] === undefined,
 							option: querys["option"] === undefined,
 						},
-					}),
+					})
 				);
 				return;
 			}
@@ -48,7 +48,7 @@ module.exports = {
 								res.end(
 									JSON.stringify({
 										error: "ModID is required to download the mod.",
-									}),
+									})
 								);
 								return;
 							}
@@ -66,7 +66,7 @@ module.exports = {
 									hasModData: !!modData,
 									hasModfile: modData && !!modData.modfile,
 									modDataKeys: modData ? Object.keys(modData) : [],
-								})}`,
+								})}`
 							);
 							if (!modData) {
 								res.writeHead(400, { "Content-Type": "application/json" });
@@ -75,7 +75,7 @@ module.exports = {
 										error: "No mod version found for the specified mod ID and version.",
 										modID,
 										version: querys["version"] || "latest",
-									}),
+									})
 								);
 								return;
 							}
@@ -87,7 +87,7 @@ module.exports = {
 										error: "Mod file data is missing for the specified mod version.",
 										modID,
 										version: querys["version"] || "latest",
-									}),
+									})
 								);
 								return;
 							}
@@ -107,7 +107,7 @@ module.exports = {
 									hasModfile: modData && !!modData.modfile,
 									modfileLength: modData && modData.modfile ? modData.modfile.length : 0,
 									modDataKeys: modData ? Object.keys(modData) : [],
-								})}`,
+								})}`
 							);
 
 							res.writeHead(500, { "Content-Type": "application/json" });
@@ -117,7 +117,7 @@ module.exports = {
 									details: error.message,
 									modID: modID,
 									version: querys["version"] || "latest",
-								}),
+								})
 							);
 						}
 
@@ -132,7 +132,7 @@ module.exports = {
 								res.end(
 									JSON.stringify({
 										error: "ModID is required to fetch the mod information.",
-									}),
+									})
 								);
 								return;
 							}
@@ -149,7 +149,7 @@ module.exports = {
 									version: querys["version"] || "latest",
 									hasModVersion: !!modVersion,
 									modVersionKeys: modVersion ? Object.keys(modVersion) : [],
-								})}`,
+								})}`
 							);
 
 							if (!modVersion) {
@@ -159,7 +159,7 @@ module.exports = {
 										message: "No mod version found for the specified mod ID and version.",
 										modID,
 										version: querys["version"] || "latest",
-									}),
+									})
 								);
 								return;
 							}
@@ -173,7 +173,7 @@ module.exports = {
 								`Error context: modID=${modID}, version=${querys["version"] || "latest"}, modVersion=${JSON.stringify({
 									exists: !!modVersion,
 									modVersionKeys: modVersion ? Object.keys(modVersion) : [],
-								})}`,
+								})}`
 							);
 
 							res.writeHead(500, { "Content-Type": "application/json" });
@@ -183,7 +183,7 @@ module.exports = {
 									details: err.message,
 									modID: modID,
 									version: querys["version"] || "latest",
-								}),
+								})
 							);
 						}
 
@@ -200,7 +200,7 @@ module.exports = {
 									modID: modID || null,
 									modIDs: modIDs || null,
 									data: querys["data"] || false,
-								})}`,
+								})}`
 							);
 
 							// Check if modids parameter is provided (for multiple mod IDs)
@@ -216,7 +216,7 @@ module.exports = {
 									res.end(
 										JSON.stringify({
 											error: "Full version data is not supported for multiple mod IDs. Use single modid parameter for full data.",
-										}),
+										})
 									);
 									return;
 								}
@@ -229,7 +229,7 @@ module.exports = {
 										requestedCount: modIDsArray.length,
 										returnedCount: Object.keys(versionsMap).length,
 										missingModIDs: modIDsArray.filter((id) => !versionsMap[id] || versionsMap[id].length === 0),
-									})}`,
+									})}`
 								);
 
 								res.writeHead(200, { "Content-Type": "application/json" });
@@ -247,7 +247,7 @@ module.exports = {
 										`Retrieved full version data for modID ${modID}: ${JSON.stringify({
 											count: versionsData.length,
 											versions: versionsData.length > 0 ? versionsData.map((v) => v.version) : [],
-										})}`,
+										})}`
 									);
 
 									if (versionsData.length === 0) {
@@ -256,7 +256,7 @@ module.exports = {
 											JSON.stringify({
 												message: "No versions found for the specified mod ID.",
 												modID: modID,
-											}),
+											})
 										);
 										return;
 									}
@@ -273,7 +273,7 @@ module.exports = {
 										`Retrieved version numbers for modID ${modID}: ${JSON.stringify({
 											count: versions.length,
 											versions: versions,
-										})}`,
+										})}`
 									);
 
 									if (versions.length === 0) {
@@ -282,7 +282,7 @@ module.exports = {
 											JSON.stringify({
 												message: "No versions found for the specified mod ID.",
 												modID: modID,
-											}),
+											})
 										);
 										return;
 									}
@@ -296,7 +296,7 @@ module.exports = {
 								res.end(
 									JSON.stringify({
 										error: "Either modid or modids parameter is required to fetch versions.",
-									}),
+									})
 								);
 								return;
 							}
@@ -309,7 +309,7 @@ module.exports = {
 									modIDs: modIDs || null,
 									modIDsArray: modIDs ? modIDsArray : null,
 									dataRequested: querys["data"] === "true",
-								})}`,
+								})}`
 							);
 
 							res.writeHead(400, { "Content-Type": "application/json" });
@@ -319,7 +319,7 @@ module.exports = {
 									details: err.message,
 									modID: modID || null,
 									modIDs: modIDs ? modIDsArray : null,
-								}),
+								})
 							);
 						}
 						break;
@@ -345,7 +345,7 @@ module.exports = {
 							JSON.stringify({
 								error: "Invalid search query format. Please provide a valid JSON query.",
 								details: jsonError.message,
-							}),
+							})
 						);
 						return;
 					}
@@ -380,7 +380,7 @@ module.exports = {
 							JSON.stringify({
 								message: "No mods found matching your search query.",
 								searchQuery,
-							}),
+							})
 						);
 						return;
 					}
@@ -391,7 +391,7 @@ module.exports = {
 							message: "Search results successfully fetched",
 							resultsCount: mods.length,
 							mods,
-						}),
+						})
 					);
 				} catch (error) {
 					logger.info("Error occurred while searching mods:" + error);
@@ -401,7 +401,7 @@ module.exports = {
 						JSON.stringify({
 							error: "An error occurred while processing your search.",
 							details: error.message,
-						}),
+						})
 					);
 				}
 			}

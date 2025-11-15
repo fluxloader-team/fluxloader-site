@@ -1,31 +1,3 @@
-const discordUser = JSON.parse(localStorage.getItem("discordUser"));
-if (discordUser) {
-	console.log("discord User:", discordUser);
-
-	const discordDropdown = document.createElement("div");
-	discordDropdown.className = "dropdown";
-	discordDropdown.innerHTML = `
-		<button class="btn dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-			<img src="https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png" alt="${discordUser.global_name}" class="rounded-circle" style="width: 30px; height: 30px; margin-right: 5px;">
-			${discordUser.global_name}
-		</button>
-		<ul class="dropdown-menu" aria-labelledby="userDropdown">
-			<li><a class="dropdown-item" href="/upload">Upload Mod</a></li>
-			<li><hr class="dropdown-divider"></li>
-			<li><a class="dropdown-item" href="#" id="logoutButton">Logout</a></li>
-		</ul>`;
-
-	const rightContainer = document.getElementById("rightContainer");
-	rightContainer.removeChild(document.getElementById("discordLogin"));
-	rightContainer.appendChild(discordDropdown);
-
-	const logoutButton = document.getElementById("logoutButton");
-	logoutButton.addEventListener("click", function () {
-		localStorage.removeItem("discordUser");
-		window.location.reload();
-	});
-}
-
 globalThis.pageGet = 1;
 globalThis.mods = {};
 globalThis.modCache = {};
@@ -251,7 +223,7 @@ globalThis.updateVersionsList = async function (modID, versions) {
 	});
 };
 
-function updateModList(onPage = 1) {
+globalThis.updateModList = function (onPage = 1) {
 	var modList = document.getElementById("modList");
 	var modItems = "";
 	var mods = Object.values(globalThis.mods);
@@ -308,7 +280,7 @@ function updateModList(onPage = 1) {
 		globalThis.displayMod(mods[0].modID);
 	}
 	globalThis.searching = false;
-}
+};
 
 modList.addEventListener("scroll", () => {
 	var isAtBottom = modList.scrollHeight - modList.scrollTop === modList.clientHeight;
@@ -321,6 +293,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	if (globalThis.searching === true) {
 		return;
 	}
+
 	globalThis.searching = true;
 	try {
 		var encodedQuery = encodeURIComponent(JSON.stringify({ "modData.name": { $regex: "", $options: "i" } }));
