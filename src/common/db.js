@@ -508,7 +508,7 @@ var users = {
 	},
 
 	/**
-	 * @param {UserEntry} userData
+	 * @param {UserEntry} [userData]
 	 * @returns {Promise<import("mongodb").InsertOneResult|UserEntry>}
 	 */
 	add: async function (userData = new UserEntry()) {
