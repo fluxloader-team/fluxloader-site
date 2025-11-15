@@ -494,7 +494,7 @@ var mods = {
 
 var users = {
 	/**
-	 * @param {string} discordID
+	 * @param {string} [discordID]
 	 * @returns {Promise<UserEntry|null>}
 	 */
 	one: async function (discordID = "") {
