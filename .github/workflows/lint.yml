@@ -21,7 +21,7 @@ jobs:
 
         steps:
             - name: Check out Git repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
 
             - name: Set up Node.js
               uses: actions/setup-node@v6
@@ -38,4 +38,6 @@ jobs:
               with:
                   continue_on_error: false
                   prettier: true
+                  # lets see if this works
+                  auto_fix: true
 
