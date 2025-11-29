@@ -15,7 +15,7 @@
 	// Enable useful VS Code extensions
 	"customizations": {
 		"vscode": {
-			"extensions": ["mongodb.mongodb-vscode", "ms-vscode.vscode-typescript-next", "esbenp.prettier-vscode"],
+			"extensions": ["mongodb.mongodb-vscode", "ms-vscode.vscode-typescript-next", "esbenp.prettier-vscode", "github.vscode-github-actions"],
 			"settings": {
 				"editor.formatOnSave": true,
 				"files.exclude": {
