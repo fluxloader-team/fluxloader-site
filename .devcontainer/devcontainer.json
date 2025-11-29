@@ -6,6 +6,9 @@
 	"dockerComposeFile": "docker-compose.yml",
 	"service": "app",
 	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+	"features": {
+		"ghcr.io/devcontainers/features/github-cli:1": {}
+	},
 	// Forward MongoDB port
 	"forwardPorts": [27017],
 	// Automatically install dependencies after the container builds
