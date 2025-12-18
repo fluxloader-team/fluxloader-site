@@ -529,7 +529,7 @@ var users = {
 
 	// Partial isn't built into JSDOC but comes from TS. https://www.typescriptlang.org/docs/handbook/utility-types.html#partialtype
 	/**
-	 * @description Update a user
+	 * @summary Update a user
 	 * @param {String} discordID The Discord user ID of the user
 	 * @param {import("mongodb").UpdateFilter<UserEntry>} userData
 	 * @returns {Promise<import("mongodb").UpdateResult<UserEntry>>}
