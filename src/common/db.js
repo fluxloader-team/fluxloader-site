@@ -325,7 +325,7 @@ var mods = {
 			return endresult;
 		},
 
-		upload: async function (payload = { filename: "", filedata: "" }, bypassUpdateCheck = false) {
+		upload: async function (payload = { filename: "", filedata: "" }, discordInfo, bypassUpdateCheck = false) {
 			var endresult = await runWithMongoClient(async (client) => {
 				var db = client.db("SandustryMods");
 				var modsCollection = db.collection("Mods");

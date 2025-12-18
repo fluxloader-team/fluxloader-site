@@ -64,7 +64,7 @@ module.exports = {
 				var { filename } = payload;
 
 				// Upload the payload
-				var uploadResult = await DB.mods.data.upload(payload);
+				var uploadResult = await DB.mods.data.upload(payload, user);
 				checkError(uploadResult);
 
 				// Check if this is an update to an existing mod
@@ -72,12 +72,12 @@ module.exports = {
 					const modID = uploadResult.split(":")[1];
 
 					// Upload the payload (as an update using 3rd parameter as true)
-					uploadResult = await DB.mods.data.upload(payload, false, true);
+					uploadResult = await DB.mods.data.upload(payload, user, false);
 					checkError(uploadResult);
 
 					// Succesful upload as an update
-					await res.writeHead(201, { "Content-Type": "application/json" });
-					await res.end(
+					res.writeHead(201, { "Content-Type": "application/json" });
+					res.end(
 						JSON.stringify({
 							message: `File ${filename} uploaded successfully.`,
 							isUpdate: true,
