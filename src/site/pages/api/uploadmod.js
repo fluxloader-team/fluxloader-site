@@ -15,7 +15,7 @@ module.exports = {
 		// Verify the user is authenticated and has admin permissions
 		const session = await getSessionFromRequest(req);
 		const user = session != null ? await DB.users.one(session.discordID) : null;
-		if (!user || !user.permissions.includes("admin")) {
+		if (!user) {
 			res.writeHead(403, { "Content-Type": "application/json" });
 			res.end(JSON.stringify({ error: "Not authenticated" }));
 			return;
