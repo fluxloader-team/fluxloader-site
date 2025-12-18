@@ -116,6 +116,7 @@ globalThis.adminPages = {
 			adminPageContent.innerHTML = adminPages.Config.content;
 
 			// Initialize Monaco Editor
+			// TODO: Change to static local copy of monaco editor
 			require.config({ paths: { vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs" } });
 			require(["vs/editor/editor.main"], function () {
 				globalThis.configEditor = monaco.editor.create(document.getElementById("configEditor"), {
@@ -618,17 +619,10 @@ globalThis.verifyMod = async function (modID) {
 	}
 
 	try {
-		var discordUser = JSON.parse(localStorage.getItem("discordUser"));
 		var response = await fetch("/api/admin/actions", {
 			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				discordUser: discordUser,
-				action: "verify",
-				modID: modID,
-			}),
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ action: "verify", modID: modID }),
 		});
 
 		var result = await response.json();
@@ -652,17 +646,10 @@ globalThis.denyMod = async function (modID) {
 	}
 
 	try {
-		var discordUser = JSON.parse(localStorage.getItem("discordUser"));
 		var response = await fetch("/api/admin/actions", {
 			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				discordUser: discordUser,
-				action: "deny",
-				modID: modID,
-			}),
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ action: "deny", modID: modID }),
 		});
 
 		var result = await response.json();
@@ -686,17 +673,10 @@ globalThis.banAuthor = async function (authorID) {
 	}
 
 	try {
-		var discordUser = JSON.parse(localStorage.getItem("discordUser"));
 		var response = await fetch("/api/admin/actions", {
 			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				discordUser: discordUser,
-				action: "banAuthor",
-				authorID: authorID,
-			}),
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ action: "banAuthor", authorID: authorID }),
 		});
 
 		var result = await response.json();
@@ -720,17 +700,10 @@ globalThis.performUserSearch = async function () {
 	var searchType = document.getElementById("userSearchType").value;
 
 	try {
-		var discordUser = JSON.parse(localStorage.getItem("discordUser"));
 		var response = await fetch("/api/users", {
 			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				discordUser: discordUser,
-				action: "searchUsers",
-				search: searchQuery,
-			}),
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ action: "searchUsers", search: searchQuery }),
 		});
 		var result = await response.json();
 
@@ -816,17 +789,10 @@ globalThis.displayUser = async function (discordID) {
 	if (globalThis.userCache[discordID]) {
 		await displayUserStats(globalThis.userCache[discordID]);
 	} else {
-		var discordUser = JSON.parse(localStorage.getItem("discordUser"));
 		var response = await fetch("/api/users", {
 			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				discordUser: discordUser,
-				action: "usersDetails",
-				userID: discordID,
-			}),
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ action: "usersDetails", userID: discordID }),
 		});
 		var result = await response.json();
 
@@ -908,17 +874,10 @@ globalThis.banUser = async function (discordID) {
 	}
 
 	try {
-		var discordUser = JSON.parse(localStorage.getItem("discordUser"));
 		var response = await fetch("/api/admin/actions", {
 			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				discordUser: discordUser,
-				action: "banAuthor",
-				authorID: discordID,
-			}),
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ action: "banAuthor", authorID: discordID }),
 		});
 
 		var result = await response.json();
@@ -943,17 +902,10 @@ globalThis.unbanUser = async function (discordID) {
 	}
 
 	try {
-		var discordUser = JSON.parse(localStorage.getItem("discordUser"));
 		var response = await fetch("/api/admin/actions", {
 			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				discordUser: discordUser,
-				action: "unbanUser",
-				authorID: discordID,
-			}),
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ action: "unbanUser", authorID: discordID }),
 		});
 
 		var result = await response.json();
@@ -978,17 +930,10 @@ globalThis.setAdmin = async function (discordID) {
 	}
 
 	try {
-		var discordUser = JSON.parse(localStorage.getItem("discordUser"));
 		var response = await fetch("/api/admin/actions", {
 			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				discordUser: discordUser,
-				action: "setAdmin",
-				authorID: discordID,
-			}),
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ action: "setAdmin", authorID: discordID }),
 		});
 
 		var result = await response.json();
@@ -1015,17 +960,10 @@ globalThis.removeAdmin = async function (discordID) {
 	}
 
 	try {
-		var discordUser = JSON.parse(localStorage.getItem("discordUser"));
 		var response = await fetch("/api/admin/actions", {
 			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				discordUser: discordUser,
-				action: "removeAdmin",
-				authorID: discordID,
-			}),
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ action: "removeAdmin", authorID: discordID }),
 		});
 
 		var result = await response.json();
@@ -1050,14 +988,12 @@ globalThis.loadActions = async function (page = 1) {
 	globalThis.currentPage = page;
 
 	try {
-		var discordUser = JSON.parse(localStorage.getItem("discordUser"));
 		var response = await fetch("/api/actions", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify({
-				discordUser: discordUser,
 				page: page,
 				size: globalThis.pageSize,
 			}),
@@ -1132,16 +1068,10 @@ globalThis.updateActionsList = function () {
 
 globalThis.loadBannedUsers = async function () {
 	try {
-		var discordUser = JSON.parse(localStorage.getItem("discordUser"));
 		var response = await fetch("/api/users", {
 			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				discordUser: discordUser,
-				action: "listUsers",
-			}),
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ action: "listUsers" }),
 		});
 		var result = await response.json();
 
@@ -1202,17 +1132,10 @@ globalThis.unbanUserFromList = async function (discordID) {
 	}
 
 	try {
-		var discordUser = JSON.parse(localStorage.getItem("discordUser"));
 		var response = await fetch("/api/admin/actions", {
 			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				discordUser: discordUser,
-				action: "unbanUser",
-				authorID: discordID,
-			}),
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ action: "unbanUser", authorID: discordID }),
 		});
 
 		var result = await response.json();
@@ -1234,16 +1157,10 @@ globalThis.unbanUserFromList = async function (discordID) {
 
 globalThis.loadConfig = async function () {
 	try {
-		var discordUser = JSON.parse(localStorage.getItem("discordUser"));
 		var response = await fetch("/api/config", {
 			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				discordUser: discordUser,
-				action: "getConfig",
-			}),
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ action: "getConfig" }),
 		});
 		var result = await response.json();
 
@@ -1284,16 +1201,10 @@ globalThis.saveConfig = async function () {
 			return;
 		}
 
-		var discordUser = JSON.parse(localStorage.getItem("discordUser"));
 		var response = await fetch("/api/config", {
 			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				discordUser: discordUser,
-				config: configContent,
-			}),
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ config: configContent }),
 		});
 
 		var result = await response.json();
@@ -1311,6 +1222,7 @@ globalThis.saveConfig = async function () {
 
 // ------------------------------------------ Initialization ------------------------------------------
 
-console.log("admin page loaded");
-
-globalThis.adminPages.Selection.action();
+document.addEventListener("DOMContentLoaded", async () => {
+	console.log("admin page loaded");
+	globalThis.adminPages.Selection.action();
+});

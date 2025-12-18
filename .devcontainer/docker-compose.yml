@@ -1,14 +1,14 @@
 version: "3.8"
 
 services:
-    db:
-        image: mongo:latest
-        restart: unless-stopped
-        volumes:
-            - mongodb-data:/data/db
-            - ./init-mongo-db.js:/docker-entrypoint-initdb.d/init-mongo-db.js:ro
-        environment:
-            MONGO_INITDB_DATABASE: SandustryMods
+  db:
+    image: mongo:latest
+    restart: unless-stopped
+    volumes:
+      - mongodb-data:/data/db
+      - ../scripts/init-mongo-db.js:/docker-entrypoint-initdb.d/init-mongo-db.js:ro
+    environment:
+      MONGO_INITDB_DATABASE: SandustryMods
 
     app:
         build:

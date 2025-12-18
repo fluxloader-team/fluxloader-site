@@ -1,15 +1,26 @@
-const DB = require("../../common/db");
-const Utils = require("../../common/utils.js");
+const DB = require("../../../common/db");
+const Utils = require("../../../common/utils.js");
+const { getSessionFromRequest } = require("../../../common/session");
 
 const logger = new Utils.Log("pages.uploadmod");
 
 module.exports = {
 	paths: ["/api/uploadmod"],
+
 	/**
 	 * @param {import("http").IncomingMessage} req
 	 * @param {import("http").ServerResponse} res
 	 */
-	run: function (req, res) {
+	run: async function (req, res) {
+		// Verify the user is authenticated and has admin permissions
+		const session = await getSessionFromRequest(req);
+		const user = session != null ? await DB.users.one(session.discordID) : null;
+		if (!user) {
+			res.writeHead(403, { "Content-Type": "application/json" });
+			res.end(JSON.stringify({ error: "Not authenticated" }));
+			return;
+		}
+
 		if (req.method !== "POST") {
 			res.writeHead(404, { "Content-Type": "text/html" });
 			res.end("This is an API endpoint.");
@@ -53,7 +64,7 @@ module.exports = {
 				var { filename } = payload;
 
 				// Upload the payload
-				var uploadResult = await DB.mods.data.upload(payload);
+				var uploadResult = await DB.mods.data.upload(payload, user);
 				checkError(uploadResult);
 
 				// Check if this is an update to an existing mod
@@ -61,17 +72,17 @@ module.exports = {
 					const modID = uploadResult.split(":")[1];
 
 					// Upload the payload (as an update using 3rd parameter as true)
-					uploadResult = await DB.mods.data.upload(payload, false, true);
+					uploadResult = await DB.mods.data.upload(payload, user, false);
 					checkError(uploadResult);
 
 					// Succesful upload as an update
-					await res.writeHead(201, { "Content-Type": "application/json" });
-					await res.end(
+					res.writeHead(201, { "Content-Type": "application/json" });
+					res.end(
 						JSON.stringify({
 							message: `File ${filename} uploaded successfully.`,
 							isUpdate: true,
 							modID: modID,
-						}),
+						})
 					);
 					return;
 				}
@@ -81,7 +92,7 @@ module.exports = {
 				await res.end(
 					JSON.stringify({
 						message: `File ${filename} uploaded successfully.`,
-					}),
+					})
 				);
 			} catch (error) {
 				logger.error("Error in uploadmod API:" + error.stack ? error.stack : error.message);

@@ -1,6 +1,6 @@
-const Utils = require("../../common/utils.js");
-const DB = require("../../common/db");
-const { verifyDiscordUser } = require("../../common/verifydiscorduser");
+const Utils = require("../../../common/utils.js");
+const DB = require("../../../common/db");
+const { getSessionFromRequest } = require("../../../common/session");
 
 const logger = new Utils.Log("pages.users");
 
@@ -11,6 +11,15 @@ module.exports = {
 	 * @param {import("http").ServerResponse} res
 	 */
 	run: async function (req, res) {
+		// Verify the user is authenticated and has admin permissions
+		const session = await getSessionFromRequest(req);
+		const user = session != null ? await DB.users.one(session.discordID) : null;
+		if (!user || !user.permissions.includes("admin")) {
+			res.writeHead(403, { "Content-Type": "application/json" });
+			res.end(JSON.stringify({ error: "Not authenticated" }));
+			return;
+		}
+
 		// Only allow POST requests with proper authentication
 		if (req.method !== "POST") {
 			res.writeHead(405, { "Content-Type": "application/json" });
@@ -22,28 +31,6 @@ module.exports = {
 		req.on("end", async () => {
 			try {
 				var data = JSON.parse(body);
-				var discordUserData = data.discordUser;
-
-				// Verify the user is authenticated and has admin permissions
-				var UserData = await DB.users.one(discordUserData.id);
-				if (!UserData) {
-					res.writeHead(403, { "Content-Type": "application/json" });
-					res.end(JSON.stringify({ error: "User not found" }));
-					return;
-				}
-
-				var isValidUser = await verifyDiscordUser(discordUserData.id, discordUserData.tokenResponse.access_token);
-				if (!isValidUser) {
-					res.writeHead(403, { "Content-Type": "application/json" });
-					res.end(JSON.stringify({ error: "Invalid discord user" }));
-					return;
-				}
-
-				if (!UserData.permissions.includes("admin")) {
-					res.writeHead(403, { "Content-Type": "application/json" });
-					res.end(JSON.stringify({ error: "User does not have admin permissions" }));
-					return;
-				}
 
 				// Handle different actions
 				if (data.action === "usersDetails") {
@@ -68,13 +55,13 @@ module.exports = {
 								modName: mod.modData.name,
 								version: v,
 								uploadTime: mod.modData.uploadTime,
-							})),
+							}))
 						);
 					}
 
 					// Log the action
 					var actionEntry = {
-						discordID: discordUserData.id,
+						discordID: user.discordID,
 						action: `Viewed user details for ${user.discordUsername} (${userID})`,
 						time: new Date(),
 						logged: false,
@@ -91,7 +78,7 @@ module.exports = {
 								modVersionsUploaded: modVersions.length,
 								modVersions: modVersions,
 							},
-						}),
+						})
 					);
 				} else if (data.action === "searchUsers") {
 					const search = data.search || "";
@@ -101,7 +88,7 @@ module.exports = {
 
 					// Log the action
 					var actionEntry = {
-						discordID: discordUserData.id,
+						discordID: user.discordID,
 						action: `Searched for users with query: ${search}`,
 						time: new Date(),
 						logged: false,
@@ -116,7 +103,7 @@ module.exports = {
 
 					// Log the action
 					var actionEntry = {
-						discordID: discordUserData.id,
+						discordID: user.discordID,
 						action: `Listed all users`,
 						time: new Date(),
 						logged: false,

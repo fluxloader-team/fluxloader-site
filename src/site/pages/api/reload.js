@@ -1,4 +1,4 @@
-const Utils = require("../../common/utils.js");
+const Utils = require("../../../common/utils.js");
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");

@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-const Utils = require("../../common/utils.js");
-const db = require("../../common/db");
+const Utils = require("../../../common/utils.js");
+const db = require("../../../common/db");
 
 const logger = new Utils.Log("discordbot.command.getmodinfo");
 
