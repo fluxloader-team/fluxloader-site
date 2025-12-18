@@ -66,7 +66,7 @@ module.exports = {
 				).json();
 
 				// Check if the user exists in our database, if not create them
-				const user = await DB.users.one(userResponse.id);
+				let user = await DB.users.one(userResponse.id);
 				if (!user) {
 					user = await DB.users.add({
 						discordID: userResponse.id,
