@@ -77,6 +77,21 @@ module.exports = {
 						joinedAt: new Date(),
 						banned: false,
 					});
+				} else {
+					// Checking if the user info has changed so we update it
+					if (user.avatar !== userResponse.avatar || user.discordUsername !== userResponse.username) {
+						await DB.users.update(user.discordID, {
+							$set: {
+								discordUsername: userResponse.username,
+								avatar: userResponse.avatar,
+							}
+						})
+						// Updating the user obj
+						user = Object.assign(user, {
+							discordUsername: userResponse.username,
+							avatar: userResponse.avatar,
+						})
+					}
 				}
 
 				// generate a session token for the user and store it in the sessions database

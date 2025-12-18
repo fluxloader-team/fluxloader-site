@@ -527,6 +527,20 @@ var users = {
 		return endresult;
 	},
 
+	// Partial isn't built into JSDOC but comes from TS. https://www.typescriptlang.org/docs/handbook/utility-types.html#partialtype
+	/**
+	 * @description Update a user
+	 * @param {String} discordID The Discord user ID of the user
+	 * @param {import("mongodb").UpdateFilter<UserEntry>} userData
+	 * @returns {Promise<import("mongodb").UpdateResult<UserEntry>>}
+	 */
+	update: async function name(discordID, userData = new UserEntry()) {
+		return runWithMongoClient(async (client) => {
+			const userCollection = client.db("SandustryMods").collection("Users");
+			return userCollection.updateOne({ discordID: discordID }, userData);
+		});
+	},
+
 	ban: async function (discordID = "") {
 		var endresult = await runWithMongoClient(async (client) => {
 			var db = client.db("SandustryMods");
@@ -564,8 +578,8 @@ var users = {
 			var userCollection = db.collection("Users");
 			var query = search
 				? {
-						$or: [{ discordID: { $regex: search, $options: "i" } }, { discordUsername: { $regex: search, $options: "i" } }],
-				  }
+					$or: [{ discordID: { $regex: search, $options: "i" } }, { discordUsername: { $regex: search, $options: "i" } }],
+				}
 				: {};
 			var result = await userCollection.find(query).limit(limit).toArray();
 			return result;
