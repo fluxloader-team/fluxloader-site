@@ -2,6 +2,7 @@ const DB = require("./db");
 
 /**
  * @param {import("http").IncomingMessage} req
+ * @returns {Promise<import("./db").Session | null>}
  */
 async function getSessionFromRequest(req) {
 	const cookie = (req.headers.cookie || "")
