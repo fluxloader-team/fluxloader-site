@@ -1,6 +1,6 @@
 const ejs = require("ejs");
 const DB = require("../../common/db");
-const { includeFromMemory } = require("../../common/ejsextensions");
+const { includeFromMemory } = require("../../common/ejsExtensions");
 const { getSessionFromRequest } = require("../../common/session");
 
 module.exports = {

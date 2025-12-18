@@ -532,7 +532,6 @@ var users = {
 		return endresult;
 	},
 
-	// Partial isn't built into JSDOC but comes from TS. https://www.typescriptlang.org/docs/handbook/utility-types.html#partialtype
 	/**
 	 * @summary Update a user
 	 * @param {String} discordID The Discord user ID of the user
@@ -583,8 +582,8 @@ var users = {
 			var userCollection = db.collection("Users");
 			var query = search
 				? {
-					$or: [{ discordID: { $regex: search, $options: "i" } }, { discordUsername: { $regex: search, $options: "i" } }],
-				}
+						$or: [{ discordID: { $regex: search, $options: "i" } }, { discordUsername: { $regex: search, $options: "i" } }],
+				  }
 				: {};
 			var result = await userCollection.find(query).limit(limit).toArray();
 			return result;
@@ -681,7 +680,7 @@ var sessions = {
 			var sessionsCollection = db.collection("Sessions");
 
 			// Setting the expiration date just incase it wasn't passed to the function
-			sessionData = Object.assign({ expires: Date.now() }, sessionData)
+			sessionData = Object.assign({ expires: Date.now() }, sessionData);
 
 			var result = await sessionsCollection.insertOne(sessionData);
 			return result;
