@@ -91,7 +91,7 @@ async function runWithMongoClient(callback) {
 			return await callback(globalClient);
 		}
 	} catch (err) {
-		logger.err(err);
+		logger.error(err);
 		throw err;
 	}
 }
