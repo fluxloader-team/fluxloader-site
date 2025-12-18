@@ -666,11 +666,18 @@ var sessions = {
 		});
 		return endresult;
 	},
-
-	add: async function (sessionData = { token: "", discordID: "", expires: Date.now() }) {
+	/**
+	 * @param {Session} sessionData
+	 * @returns {Promise<Session>} The Session assoicated with the token
+	 */
+	add: async function (sessionData) {
 		var endresult = await runWithMongoClient(async (client) => {
 			var db = client.db("SandustryMods");
 			var sessionsCollection = db.collection("Sessions");
+
+			// Setting the expiration date just incase it wasn't passed to the function
+			sessionData = Object.assign({ expires: Date.now() }, sessionData)
+
 			var result = await sessionsCollection.insertOne(sessionData);
 			return result;
 		});
