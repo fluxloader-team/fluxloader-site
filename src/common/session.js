@@ -1,8 +1,10 @@
 const DB = require("./db");
 
 /**
+ * @summary Function to extract the session out of the http request
+ * Function to extract the session token out of the http request. Fetch the session from the database and check if its vaild
  * @param {import("http").IncomingMessage} req
- * @returns {Promise<import("./db").Session | null>}
+ * @returns {Promise<import("./db").Session | null>} Null if the session doesn't exist or is invaild
  */
 async function getSessionFromRequest(req) {
 	const cookie = (req.headers.cookie || "")
