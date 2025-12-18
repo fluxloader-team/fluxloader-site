@@ -645,7 +645,18 @@ var actions = {
 	},
 };
 
+/**
+ * @typedef {object} Session
+ * @property {string} token The token assoicated with the session
+ * @property {string} discordID The user id the token is linked to
+ * @property {number} expires When the token expires
+ */
+
 var sessions = {
+	/**
+	 * @param {Session["token"]} token The token assoicated with the session
+	 * @returns {Promise<Session | null>} The Session assoicated with the token
+	 */
 	one: async function (token = "") {
 		var endresult = await runWithMongoClient(async (client) => {
 			var db = client.db("SandustryMods");
