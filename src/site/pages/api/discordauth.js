@@ -71,6 +71,7 @@ module.exports = {
 					user = await DB.users.add({
 						discordID: userResponse.id,
 						discordUsername: userResponse.username,
+						avatar: userResponse.avatar,
 						permissions: ["user"],
 						description: "new user",
 						joinedAt: new Date(),
