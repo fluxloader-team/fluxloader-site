@@ -84,13 +84,13 @@ module.exports = {
 							$set: {
 								discordUsername: userResponse.username,
 								avatar: userResponse.avatar,
-							},
-						});
+							}
+						})
 						// Updating the user obj
 						user = Object.assign(user, {
 							discordUsername: userResponse.username,
 							avatar: userResponse.avatar,
-						});
+						})
 					}
 				}
 

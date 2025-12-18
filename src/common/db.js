@@ -117,7 +117,7 @@ var mods = {
 					{
 						sort: { uploadTime: 1 },
 						projection: project,
-					},
+					}
 				);
 				return result;
 			});
@@ -583,7 +583,7 @@ var users = {
 			var query = search
 				? {
 						$or: [{ discordID: { $regex: search, $options: "i" } }, { discordUsername: { $regex: search, $options: "i" } }],
-					}
+				  }
 				: {};
 			var result = await userCollection.find(query).limit(limit).toArray();
 			return result;
