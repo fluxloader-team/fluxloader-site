@@ -333,6 +333,8 @@ var mods = {
 				var { filename, filedata } = payload;
 				if (!filename || !filedata) return "Invalid payload";
 
+				if (discordInfo.banned) return "User is banned";
+
 				// Read as base64, read contents with JSZip, read files from JSZip
 				var zipBuffer = Buffer.from(filedata, "base64");
 				var content = await JSZip.loadAsync(zipBuffer);
