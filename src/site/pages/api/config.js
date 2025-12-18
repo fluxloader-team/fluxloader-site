@@ -1,8 +1,8 @@
-const Utils = require("../../common/utils.js");
+const Utils = require("../../../common/utils.js");
 const fs = require("fs");
 const path = require("path");
-const { verifyDiscordUser } = require("../../common/verifydiscorduser");
-const DB = require("../../common/db");
+const DB = require("../../../common/db");
+const { getSessionFromRequest } = require("../../../common/session");
 
 const logger = new Utils.Log("pages.config");
 
@@ -13,6 +13,15 @@ module.exports = {
 	 * @param {import("http").ServerResponse} res
 	 */
 	run: async function (req, res) {
+		// Verify the user is authenticated and has admin permissions
+		const session = await getSessionFromRequest(req);
+		const user = session != null ? await DB.users.one(session.discordID) : null;
+		if (!user || !user.permissions.includes("admin")) {
+			res.writeHead(403, { "Content-Type": "application/json" });
+			res.end(JSON.stringify({ error: "Not authenticated" }));
+			return;
+		}
+
 		// Only allow POST requests with proper authentication
 		try {
 			if (req.method === "POST") {
@@ -21,29 +30,6 @@ module.exports = {
 				req.on("end", async () => {
 					try {
 						var data = JSON.parse(body);
-						var discordUserData = data.discordUser;
-
-						// Verify the user is authenticated and has admin permissions
-						var UserData = await DB.users.one(discordUserData.id);
-						if (!UserData) {
-							res.writeHead(403, { "Content-Type": "application/json" });
-							res.end(JSON.stringify({ error: "User not found" }));
-							return;
-						}
-
-						var isValidUser = await verifyDiscordUser(discordUserData.id, discordUserData.tokenResponse.access_token);
-						if (!isValidUser) {
-							res.writeHead(403, { "Content-Type": "application/json" });
-							res.end(JSON.stringify({ error: "Invalid discord user" }));
-							return;
-						}
-
-						if (!UserData.permissions.includes("admin")) {
-							res.writeHead(403, { "Content-Type": "application/json" });
-							res.end(JSON.stringify({ error: "User does not have admin permissions" }));
-							return;
-						}
-
 						// Handle different actions
 						if (data.action === "getConfig") {
 							// Get config.json content
@@ -51,13 +37,12 @@ module.exports = {
 							const configContent = fs.readFileSync(configPath, "utf8");
 
 							// Log the action
-							var actionEntry = {
-								discordID: discordUserData.id,
+							await DB.actions.add({
+								discordID: user.discordID,
 								action: `Viewed config.json`,
 								time: new Date(),
 								logged: false,
-							};
-							await DB.actions.add(actionEntry);
+							});
 
 							res.writeHead(200, { "Content-Type": "application/json" });
 							res.end(JSON.stringify({ config: configContent }));
@@ -79,13 +64,12 @@ module.exports = {
 							fs.writeFileSync(configPath, configContent, "utf8");
 
 							// Log the action
-							var actionEntry = {
-								discordID: discordUserData.id,
+							await DB.actions.add({
+								discordID: user.discordID,
 								action: `Updated config.json`,
 								time: new Date(),
 								logged: false,
-							};
-							await DB.actions.add(actionEntry);
+							});
 
 							res.writeHead(200, { "Content-Type": "application/json" });
 							res.end(JSON.stringify({ success: true }));

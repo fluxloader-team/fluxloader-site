@@ -6,7 +6,7 @@ services:
     restart: unless-stopped
     volumes:
       - mongodb-data:/data/db
-      - ./init-mongo-db.js:/docker-entrypoint-initdb.d/init-mongo-db.js:ro
+      - ../scripts/init-mongo-db.js:/docker-entrypoint-initdb.d/init-mongo-db.js:ro
     environment:
       MONGO_INITDB_DATABASE: SandustryMods
 
