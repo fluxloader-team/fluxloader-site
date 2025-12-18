@@ -325,6 +325,9 @@ var mods = {
 			return endresult;
 		},
 
+		/**
+		 * @param {UserEntry} discordInfo
+		 */
 		upload: async function (payload = { filename: "", filedata: "" }, discordInfo, bypassUpdateCheck = false) {
 			var endresult = await runWithMongoClient(async (client) => {
 				var db = client.db("SandustryMods");
@@ -360,7 +363,7 @@ var mods = {
 				// If all files are in 1 common directory then make a new zip with them all moved up 1 level
 				if (!someWithoutDirs && topLevelDirs.size == 1) {
 					var newContent = new JSZip();
-					for ([path, file] of Object.entries(content.files)) {
+					for (let [path, file] of Object.entries(content.files)) {
 						let standardized = path.replace(/\\/g, "/");
 						let split = standardized.split("/");
 						let newPath = split.slice(1).join("/");
@@ -433,8 +436,8 @@ var mods = {
 						modID: modID,
 						modData: modData,
 						Author: {
-							discordID: discordInfo.id,
-							discordUsername: discordInfo.username,
+							discordID: discordInfo.discordID,
+							discordUsername: discordInfo.discordUsername,
 						},
 						votes: 0,
 						uploadTime: uploadTime,
@@ -462,7 +465,7 @@ var mods = {
 				await versionsCollection.insertOne(modVersionEntry);
 				var action = new ActionEntry();
 				action.action = `Uploaded mod ${modData.name} ID ${modID} version ${modData.version}`;
-				action.discordID = discordInfo.id;
+				action.discordID = discordInfo.discordID;
 				actions.add(action);
 				return modID;
 			});
