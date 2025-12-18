@@ -418,7 +418,7 @@ var mods = {
 
 				// If mod exists, check ownership (unless bypassUpdateCheck is true)
 				if (existingMod && !bypassUpdateCheck) {
-					if (existingMod.Author.discordID !== discordInfo.id) {
+					if (existingMod.Author.discordID !== discordInfo.discordID) {
 						return "A mod with this modID already exists and belongs to another user. Please use a different modID.";
 					} else {
 						if (existingMod.modData.version === modData.version) {
