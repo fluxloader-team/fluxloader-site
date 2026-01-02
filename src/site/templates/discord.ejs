@@ -1,7 +1,8 @@
 <div id="discordContainer">
 	<% if (!user) { %>
 	<a href="/auth/discord" class="btn btn-primary">
-		<img src="discordlogo.svg" alt="Discord Logo" title="Login with Discord" style="width: 100px; height: 20px; margin-right: 5px" />
+		<img src="discordlogo.svg" alt="Discord Logo" title="Login with Discord" style="width: 20px; height: 20px; margin-right: 5px" />
+		Login
 	</a>
 	<!-- Change to stored in the `user` object and in the DB -->
 	<% } else { %> <% const avatarUrl = user.avatar ? `https://cdn.discordapp.com/avatars/${user.discordID}/${user.avatar}.png` : "https://cdn.discordapp.com/embed/avatars/0.png"; %>
