@@ -126,7 +126,7 @@ globalThis.performSearch = async function (pageToget = 1, perPage = 5000) {
 
 globalThis.downloadMod = async function (modID, version) {
 	var mod = globalThis.mods[modID];
-	console.log(`Downloading mod: ${JSON.stringify(mod)} (v${version})`);
+	console.log(`Downloading mod: ${JSON.stringify(mod)}`);
 	var response = await fetch(`/api/mods?modid=${mod.modID}&version=${version}&option=download`);
 	var result = await response.blob();
 	var url = window.URL.createObjectURL(new Blob([result]));
