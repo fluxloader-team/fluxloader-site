@@ -124,10 +124,10 @@ globalThis.performSearch = async function (pageToget = 1, perPage = 5000) {
 	}
 };
 
-globalThis.downloadMod = async function (modID) {
+globalThis.downloadMod = async function (modID, version) {
 	var mod = globalThis.mods[modID];
-	console.log(`Downloading mod: ${JSON.stringify(mod)}`);
-	var response = await fetch(`/api/mods?modid=${mod.modID}&option=download`);
+	console.log(`Downloading mod: ${JSON.stringify(mod)} (v${version})`);
+	var response = await fetch(`/api/mods?modid=${mod.modID}&version=${version}&option=download`);
 	var result = await response.blob();
 	var url = window.URL.createObjectURL(new Blob([result]));
 	var link = document.createElement("a");
@@ -140,11 +140,11 @@ globalThis.downloadMod = async function (modID) {
 };
 
 globalThis.updateModDisplayActions = async function (modID) {
-	var mod = globalThis.mods[modID];
+	var mod = globalThis.modCache[modID];
 	var modDisplayActions = document.getElementById("modDisplayActions");
 	modDisplayActions.innerHTML = `
 						<div class="btn-group" role="group" style="padding-left: 15px;margin-top:5px; height: 40px;">
-							<button class="btn btn-primary" onclick='globalThis.downloadMod("${modID}")'>Download</button>
+							<button class="btn btn-primary" onclick='globalThis.downloadMod("${modID}","${mod.modData.version}")'>Download</button>
 							<button class="btn btn-success" onclick="navigator.clipboard.writeText('${modID}')">Copy ID</button>
 						</div>
 						<select class="form-select" id="versionSelection" style="padding-left: 15px;margin-top:5px; height: 40px;width: 230px" onchange='globalThis.getModVersion("${modID}",this.value)'>
