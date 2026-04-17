@@ -64,7 +64,7 @@ const AdminPage = (() => {
 	// -------------------- Pages --------------------
 
 	const pageControl = {
-		"dashboard": {
+		dashboard: {
 			activate() {
 				loadTemplate("tpl-dashboard", "admin-page-dashboard");
 				getAdminPageContent().addEventListener("click", (e) => {
@@ -95,12 +95,12 @@ const AdminPage = (() => {
 				await actionsPage.load(1);
 			},
 		},
-		"bans": {
+		bans: {
 			async activate() {
 				loadTemplate("tpl-bans", "admin-page-bans");
 				await bansPage.load();
 			},
-		}
+		},
 	};
 
 	const modsPage = {
@@ -110,15 +110,14 @@ const AdminPage = (() => {
 			const queryParam = encodeURIComponent(JSON.stringify(query));
 
 			const verifiedType = document.getElementById("modSearchType")?.value ?? "all";
-			const verifiedParam =
-				verifiedType === "verified" ? "true" :
-					verifiedType === "unverified" ? "false" :
-						"null";
+			const verifiedParam = verifiedType === "verified" ? "true" : verifiedType === "unverified" ? "false" : "null";
 
 			try {
 				const result = await apiFetch(`/api/mods?search=${queryParam}&verified=${verifiedParam}`);
 				state.mods = {};
-				(result.mods ?? []).forEach((m) => { state.mods[m.modID] = m; });
+				(result.mods ?? []).forEach((m) => {
+					state.mods[m.modID] = m;
+				});
 				modsPage.renderModTable();
 			} catch (err) {
 				console.error("Mod search failed:", err);
@@ -144,13 +143,17 @@ const AdminPage = (() => {
 				<table class="item-table">
 					<thead><tr><th>Name</th><th>Author</th><th>Version</th></tr></thead>
 					<tbody>
-						${entries.map((m) => `
+						${entries
+							.map(
+								(m) => `
 							<tr class="item-table-row" data-modid="${m.modID}">
 								<td>${m.modData.name}</td>
 								<td>${m.modData.author}</td>
 								<td>${m.modData.version}</td>
 							</tr>
-						`).join("")}
+						`,
+							)
+							.join("")}
 					</tbody>
 				</table>`;
 
@@ -173,9 +176,7 @@ const AdminPage = (() => {
 
 			const { name = "Unknown", version = "Unknown", author = "Unknown", shortDescription = "", tags = [] } = mod.modData;
 
-			const tagsHtml = tags.length
-				? tags.map((t) => `<span class="badge text-bg-primary">${t}</span>`).join(" ")
-				: `<span class="badge text-bg-secondary">No tags</span>`;
+			const tagsHtml = tags.length ? tags.map((t) => `<span class="badge text-bg-primary">${t}</span>`).join(" ") : `<span class="badge text-bg-secondary">No tags</span>`;
 
 			modDetails.innerHTML = `
 				<div class="detail-inner">
@@ -233,9 +234,7 @@ const AdminPage = (() => {
 
 			const { name = "Unknown", version = "Unknown", author = "Unknown", shortDescription = "", description = "", tags = [] } = mod.modData;
 
-			const tagsHtml = tags.length
-				? tags.map((t) => `<span class="badge text-bg-primary">${t}</span>`).join(" ")
-				: `<span class="badge text-bg-secondary">No tags</span>`;
+			const tagsHtml = tags.length ? tags.map((t) => `<span class="badge text-bg-primary">${t}</span>`).join(" ") : `<span class="badge text-bg-secondary">No tags</span>`;
 
 			const nameEl = document.getElementById("modDetails-name");
 			if (nameEl) nameEl.textContent = name;
@@ -248,8 +247,11 @@ const AdminPage = (() => {
 
 			const descEl = document.getElementById("modDisplayDescription");
 			if (descEl) {
-				try { descEl.innerHTML = marked.parse(description); }
-				catch { descEl.textContent = description; }
+				try {
+					descEl.innerHTML = marked.parse(description);
+				} catch {
+					descEl.textContent = description;
+				}
 			}
 
 			if (mod.modID) {
@@ -290,7 +292,9 @@ const AdminPage = (() => {
 				selectionEl.appendChild(opt);
 				return;
 			}
-			versions.forEach((v) => { if (v) selectionEl.appendChild(new Option(v, v)); });
+			versions.forEach((v) => {
+				if (v) selectionEl.appendChild(new Option(v, v));
+			});
 		},
 
 		async updateActionsBar(modID) {
@@ -315,7 +319,10 @@ const AdminPage = (() => {
 				</div>`;
 
 			document.getElementById("btnDownloadMod").addEventListener("click", () => modsPage.downloadMod(modID));
-			document.getElementById("btnCopyModId").addEventListener("click", () => { navigator.clipboard.writeText(modID); addAlert("ID copied!", "success"); });
+			document.getElementById("btnCopyModId").addEventListener("click", () => {
+				navigator.clipboard.writeText(modID);
+				addAlert("ID copied!", "success");
+			});
 			document.getElementById("versionSelection").addEventListener("change", (e) => modsPage.getVersion(modID, e.target.value));
 			document.getElementById("btnVerifyMod").addEventListener("click", () => modsPage.verifyMod(modID));
 			document.getElementById("btnDenyMod").addEventListener("click", () => modsPage.denyMod(modID));
@@ -336,7 +343,10 @@ const AdminPage = (() => {
 
 		async downloadMod(modID) {
 			const mod = state.mods[modID];
-			if (!mod?.modID) { addAlert("Mod not found.", "error"); return; }
+			if (!mod?.modID) {
+				addAlert("Mod not found.", "error");
+				return;
+			}
 			try {
 				const res = await fetch(`/api/mods?modid=${mod.modID}&option=download`);
 				if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -355,10 +365,13 @@ const AdminPage = (() => {
 		},
 
 		async verifyMod(modID) {
-			if (!await confirmAction("Verify this mod?")) return;
+			if (!(await confirmAction("Verify this mod?"))) return;
 			try {
 				const result = await apiPost("/api/admin/actions", { action: "verify", modID });
-				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+				if (result.error) {
+					addAlert("Error: " + result.error, "error");
+					return;
+				}
 				addAlert("Mod verified!", "success");
 				await modsPage.search();
 			} catch (err) {
@@ -368,10 +381,13 @@ const AdminPage = (() => {
 		},
 
 		async denyMod(modID) {
-			if (!await confirmAction("Deny and permanently delete this mod? This cannot be undone.")) return;
+			if (!(await confirmAction("Deny and permanently delete this mod? This cannot be undone."))) return;
 			try {
 				const result = await apiPost("/api/admin/actions", { action: "deny", modID });
-				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+				if (result.error) {
+					addAlert("Error: " + result.error, "error");
+					return;
+				}
 				addAlert("Mod denied and deleted.", "success");
 				await modsPage.search();
 			} catch (err) {
@@ -388,7 +404,10 @@ const AdminPage = (() => {
 
 			try {
 				const result = await apiPost("/api/users", { action: "searchUsers", search: query });
-				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+				if (result.error) {
+					addAlert("Error: " + result.error, "error");
+					return;
+				}
 
 				state.users = {};
 				(result.users ?? []).forEach((u) => {
@@ -417,13 +436,12 @@ const AdminPage = (() => {
 				<table class="item-table">
 					<thead><tr><th>Username</th><th>Status</th></tr></thead>
 					<tbody>
-						${entries.map((u) => {
-				const badges = [
-					u.banned ? `<span class="badge bg-danger">Banned</span>` : "",
-					u.permissions.includes("admin") ? `<span class="badge bg-success">Admin</span>` : "",
-				].join(" ");
-				return `<tr class="item-table-row" data-userid="${u.discordID}"><td>${u.discordUsername}</td><td>${badges}</td></tr>`;
-			}).join("")}
+						${entries
+							.map((u) => {
+								const badges = [u.banned ? `<span class="badge bg-danger">Banned</span>` : "", u.permissions.includes("admin") ? `<span class="badge bg-success">Admin</span>` : ""].join(" ");
+								return `<tr class="item-table-row" data-userid="${u.discordID}"><td>${u.discordUsername}</td><td>${badges}</td></tr>`;
+							})
+							.join("")}
 					</tbody>
 				</table>`;
 
@@ -461,7 +479,10 @@ const AdminPage = (() => {
 					usersPage.populateUserDetailsStats(state.userCache[discordID]);
 				} else {
 					const result = await apiPost("/api/users", { action: "usersDetails", userID: discordID });
-					if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+					if (result.error) {
+						addAlert("Error: " + result.error, "error");
+						return;
+					}
 					state.userCache[discordID] = result;
 					usersPage.populateUserDetailsStats(result);
 				}
@@ -477,21 +498,29 @@ const AdminPage = (() => {
 			if (!statsEl) return;
 			const { stats } = userData;
 
-			const versionsHtml = (stats.modVersions ?? []).map((v) => `
+			const versionsHtml = (stats.modVersions ?? [])
+				.map(
+					(v) => `
 				<tr>
 					<td>${v.modName}</td>
 					<td>${v.version.modData.version}</td>
 					<td>${new Date(v.version.uploadTime).toLocaleString()}</td>
-				</tr>`).join("");
+				</tr>`,
+				)
+				.join("");
 
 			statsEl.innerHTML = `
 				<p>Mods uploaded: <strong>${stats.modsUploaded}</strong></p>
 				<p>Mod versions uploaded: <strong>${stats.modVersionsUploaded}</strong></p>
-				${stats.modVersionsUploaded > 0 ? `
+				${
+					stats.modVersionsUploaded > 0
+						? `
 					<table class="item-table table-sm">
 						<thead><tr><th>Mod Name</th><th>Version</th><th>Upload Time</th></tr></thead>
 						<tbody>${versionsHtml}</tbody>
-					</table>` : ""}`;
+					</table>`
+						: ""
+				}`;
 		},
 
 		async updateActionsBar(discordID) {
@@ -504,15 +533,14 @@ const AdminPage = (() => {
 					<button class="btn btn-success btn-sm" id="btnCopyUserId">Copy ID</button>
 				</div>
 				<div class="details-action-group">
-					${user.banned
-					? `<button class="btn btn-success btn-sm" id="btnUnbanUser">Unban User</button>`
-					: `<button class="btn btn-danger btn-sm" id="btnBanUser">Ban User</button>`}
-					${user.permissions.includes("admin")
-					? `<button class="btn btn-warning btn-sm" id="btnRemoveAdmin">Remove Admin</button>`
-					: `<button class="btn btn-primary btn-sm" id="btnSetAdmin">Set as Admin</button>`}
+					${user.banned ? `<button class="btn btn-success btn-sm" id="btnUnbanUser">Unban User</button>` : `<button class="btn btn-danger btn-sm" id="btnBanUser">Ban User</button>`}
+					${user.permissions.includes("admin") ? `<button class="btn btn-warning btn-sm" id="btnRemoveAdmin">Remove Admin</button>` : `<button class="btn btn-primary btn-sm" id="btnSetAdmin">Set as Admin</button>`}
 				</div>`;
 
-			document.getElementById("btnCopyUserId").addEventListener("click", () => { navigator.clipboard.writeText(discordID); addAlert("ID copied!", "success"); });
+			document.getElementById("btnCopyUserId").addEventListener("click", () => {
+				navigator.clipboard.writeText(discordID);
+				addAlert("ID copied!", "success");
+			});
 
 			if (user.banned) {
 				document.getElementById("btnUnbanUser").addEventListener("click", () => usersPage.unbanUser(discordID));
@@ -528,71 +556,107 @@ const AdminPage = (() => {
 		},
 
 		async banUser(discordID) {
-			if (!await confirmAction("Ban this user? They will be prevented from uploading mods.")) return;
+			if (!(await confirmAction("Ban this user? They will be prevented from uploading mods."))) return;
 			try {
 				const result = await apiPost("/api/admin/actions", { action: "banAuthor", authorID: discordID });
-				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+				if (result.error) {
+					addAlert("Error: " + result.error, "error");
+					return;
+				}
 				state.users[discordID].banned = true;
 				delete state.userCache[discordID];
 				addAlert("User banned.", "success");
 				await usersPage.inspectUserDetails(discordID);
-			} catch (err) { console.error(err); addAlert("Failed to ban user.", "error"); }
+			} catch (err) {
+				console.error(err);
+				addAlert("Failed to ban user.", "error");
+			}
 		},
 
 		async unbanUser(discordID) {
-			if (!await confirmAction("Unban this user?")) return;
+			if (!(await confirmAction("Unban this user?"))) return;
 			try {
 				const result = await apiPost("/api/admin/actions", { action: "unbanUser", authorID: discordID });
-				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+				if (result.error) {
+					addAlert("Error: " + result.error, "error");
+					return;
+				}
 				state.users[discordID].banned = false;
 				delete state.userCache[discordID];
 				addAlert("User unbanned.", "success");
 				await usersPage.inspectUserDetails(discordID);
-			} catch (err) { console.error(err); addAlert("Failed to unban user.", "error"); }
+			} catch (err) {
+				console.error(err);
+				addAlert("Failed to unban user.", "error");
+			}
 		},
 
 		async setUserAdmin(discordID) {
-			if (!await confirmAction("Grant admin to this user?")) return;
+			if (!(await confirmAction("Grant admin to this user?"))) return;
 			try {
 				const result = await apiPost("/api/admin/actions", { action: "setAdmin", authorID: discordID });
-				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+				if (result.error) {
+					addAlert("Error: " + result.error, "error");
+					return;
+				}
 				if (!state.users[discordID].permissions.includes("admin")) state.users[discordID].permissions.push("admin");
 				delete state.userCache[discordID];
 				addAlert("Admin granted.", "success");
 				await usersPage.inspectUserDetails(discordID);
-			} catch (err) { console.error(err); addAlert("Failed to set admin.", "error"); }
+			} catch (err) {
+				console.error(err);
+				addAlert("Failed to set admin.", "error");
+			}
 		},
 
 		async removeUserAdmin(discordID) {
-			if (!await confirmAction("Remove admin from this user?")) return;
+			if (!(await confirmAction("Remove admin from this user?"))) return;
 			try {
 				const result = await apiPost("/api/admin/actions", { action: "removeAdmin", authorID: discordID });
-				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+				if (result.error) {
+					addAlert("Error: " + result.error, "error");
+					return;
+				}
 				state.users[discordID].permissions = state.users[discordID].permissions.filter((p) => p !== "admin");
 				delete state.userCache[discordID];
 				addAlert("Admin removed.", "success");
 				await usersPage.inspectUserDetails(discordID);
-			} catch (err) { console.error(err); addAlert("Failed to remove admin.", "error"); }
+			} catch (err) {
+				console.error(err);
+				addAlert("Failed to remove admin.", "error");
+			}
 		},
 
 		async banUser(authorID) {
-			if (!await confirmAction("Ban this author?")) return;
+			if (!(await confirmAction("Ban this author?"))) return;
 			try {
 				const result = await apiPost("/api/admin/actions", { action: "banAuthor", authorID });
-				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+				if (result.error) {
+					addAlert("Error: " + result.error, "error");
+					return;
+				}
 				addAlert("Author banned.", "success");
-			} catch (err) { console.error(err); addAlert("Failed to ban author.", "error"); }
+			} catch (err) {
+				console.error(err);
+				addAlert("Failed to ban author.", "error");
+			}
 		},
 
 		// Called from the Bans page
 		async unbanFromList(discordID) {
-			if (!await confirmAction("Unban this user?")) return;
+			if (!(await confirmAction("Unban this user?"))) return;
 			try {
 				const result = await apiPost("/api/admin/actions", { action: "unbanUser", authorID: discordID });
-				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+				if (result.error) {
+					addAlert("Error: " + result.error, "error");
+					return;
+				}
 				addAlert("User unbanned.", "success");
 				await bansPage.load();
-			} catch (err) { console.error(err); addAlert("Failed to unban user.", "error"); }
+			} catch (err) {
+				console.error(err);
+				addAlert("Failed to unban user.", "error");
+			}
 		},
 	};
 
@@ -601,7 +665,10 @@ const AdminPage = (() => {
 			state.currentPage = page;
 			try {
 				const result = await apiPost("/api/actions", { page, size: state.pageSize });
-				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+				if (result.error) {
+					addAlert("Error: " + result.error, "error");
+					return;
+				}
 				state.actions = result.actions;
 				state.totalPages = result.pagination.totalAdminPages;
 				actionsPage.render();
@@ -619,12 +686,16 @@ const AdminPage = (() => {
 				<table class="item-table table table-striped">
 					<thead><tr><th>User ID</th><th>Action</th><th>Time</th></tr></thead>
 					<tbody>
-						${state.actions.map((a) => `
+						${state.actions
+							.map(
+								(a) => `
 							<tr>
 								<td><code>${a.discordID}</code></td>
 								<td>${a.action}</td>
 								<td>${new Date(a.time).toLocaleString()}</td>
-							</tr>`).join("")}
+							</tr>`,
+							)
+							.join("")}
 					</tbody>
 				</table>`;
 
@@ -659,7 +730,10 @@ const AdminPage = (() => {
 		async load() {
 			try {
 				const result = await apiPost("/api/users", { action: "listUsers" });
-				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+				if (result.error) {
+					addAlert("Error: " + result.error, "error");
+					return;
+				}
 				const banned = (result.users ?? []).filter((u) => u.banned);
 				bansPage.render(banned);
 			} catch (err) {
@@ -681,13 +755,17 @@ const AdminPage = (() => {
 				<table class="item-table table table-striped">
 					<thead><tr><th>Username</th><th>Discord ID</th><th>Joined</th><th>Actions</th></tr></thead>
 					<tbody>
-						${bannedUsers.map((u) => `
+						${bannedUsers
+							.map(
+								(u) => `
 							<tr>
 								<td>${u.discordUsername}</td>
 								<td><code>${u.discordID}</code></td>
 								<td>${new Date(u.joinedAt).toLocaleString()}</td>
 								<td><button class="btn btn-success btn-sm" data-unban="${u.discordID}">Unban</button></td>
-							</tr>`).join("")}
+							</tr>`,
+							)
+							.join("")}
 					</tbody>
 				</table>`;
 
