@@ -95,7 +95,7 @@ module.exports = {
 					}),
 				);
 			} catch (error) {
-				logger.error("Error in uploadmod API:" + error.stack ? error.stack : error.message);
+				logger.error("Unhandled error in uploadmod API:" + error.stack ? error.stack : error.message);
 				await res.writeHead(400, { "Content-Type": "application/json" });
 				await res.end(JSON.stringify({ error: error.message }));
 			}

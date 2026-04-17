@@ -77,7 +77,7 @@ module.exports = {
 
 			logger.info("discord bot started");
 		} catch (error) {
-			logger.info(`Error initializing or starting discord bot: ${error.stack}`);
+			logger.error(`Unhandled error initializing or starting discord bot: ${error.stack}`);
 		}
 	},
 };

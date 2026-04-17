@@ -209,7 +209,7 @@ module.exports = {
 						res.end(JSON.stringify({ error: "Invalid action" }));
 				}
 			} catch (error) {
-				logger.info(`Error ${error}`);
+				logger.error(`Unhandled Error: ${error}`);
 				res.end(JSON.stringify({ error: "Invalid JSON format or server error" }));
 			}
 		});

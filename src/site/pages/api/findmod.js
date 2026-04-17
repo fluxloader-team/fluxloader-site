@@ -100,9 +100,9 @@ module.exports = {
 							});
 							res.end(zipBuffer);
 						} catch (error) {
-							logger.info(`Error processing mod download: ${error.message}`);
-							logger.info(`Error stack: ${error.stack}`);
-							logger.info(
+							logger.error(`Unhandled error processing mod download: ${error.message}`);
+							logger.error(`Error stack: ${error.stack}`);
+							logger.error(
 								`Error context: modID=${modID}, version=${querys["version"] || "latest"}, modData=${JSON.stringify({
 									exists: !!modData,
 									hasModfile: modData && !!modData.modfile,
@@ -168,9 +168,9 @@ module.exports = {
 							res.writeHead(200, { "Content-Type": "application/json" });
 							res.end(JSON.stringify({ mod: modVersion }));
 						} catch (err) {
-							logger.info(`Error fetching mod info: ${err.message}`);
-							logger.info(`Error stack: ${err.stack}`);
-							logger.info(
+							logger.error(`Unhandled error fetching mod info: ${err.message}`);
+							logger.error(`Error stack: ${err.stack}`);
+							logger.error(
 								`Error context: modID=${modID}, version=${querys["version"] || "latest"}, modVersion=${JSON.stringify({
 									exists: !!modVersion,
 									modVersionKeys: modVersion ? Object.keys(modVersion) : [],
@@ -302,9 +302,9 @@ module.exports = {
 								return;
 							}
 						} catch (err) {
-							logger.info(`Error fetching versions: ${err.message}`);
-							logger.info(`Error stack: ${err.stack}`);
-							logger.info(
+							logger.error(`Unhandled error fetching versions: ${err.message}`);
+							logger.error(`Error stack: ${err.stack}`);
+							logger.error(
 								`Error context: ${JSON.stringify({
 									modID: modID || null,
 									modIDs: modIDs || null,
@@ -395,7 +395,7 @@ module.exports = {
 						}),
 					);
 				} catch (error) {
-					logger.info("Error occurred while searching mods:" + error);
+					logger.error(`Unhandled error occurred while searching mods: ${error}`);
 
 					res.writeHead(500, { "Content-Type": "application/json" });
 					res.end(

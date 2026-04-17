@@ -12,7 +12,7 @@ const AdminPage = (() => {
 
 	// -------------------- Utility --------------------
 
-	const spinnerHtml = `<div class="spinner-holder"><div class="spinner-border" role="status"><span class="visually-hidden">Loading…</span></div></div>`;
+	const spinnerHtml = `<div class="spinner-holder"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
 
 	const getAdminPageContent = () => document.getElementById("adminPageContent");
 
@@ -100,26 +100,7 @@ const AdminPage = (() => {
 				loadTemplate("tpl-bans", "admin-page-bans");
 				await bansPage.load();
 			},
-		},
-		"config": {
-			async activate() {
-				loadTemplate("tpl-config", "admin-page-config");
-				document.getElementById("btnSaveConfig").addEventListener("click", () => configPage.save());
-				document.getElementById("btnReloadConfig").addEventListener("click", () => configPage.load());
-
-				// TODO: Check works
-				require.config({ paths: { vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs" } });
-				require(["vs/editor/editor.main"], () => {
-					state.configEditor = monaco.editor.create(document.getElementById("configEditor"), {
-						value: "// Loading config…",
-						language: "json",
-						theme: "vs-dark",
-						automaticLayout: true,
-					});
-					configPage.load();
-				});
-			},
-		},
+		}
 	};
 
 	const modsPage = {
@@ -713,35 +694,6 @@ const AdminPage = (() => {
 			list.querySelectorAll("[data-unban]").forEach((btn) => {
 				btn.addEventListener("click", () => usersPage.unbanFromList(btn.dataset.unban));
 			});
-		},
-	};
-
-	const configPage = {
-		async load() {
-			try {
-				const result = await apiPost("/api/config", { action: "getConfig" });
-				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
-				const formatted = JSON.stringify(JSON.parse(result.config), null, 2);
-				state.configEditor?.setValue(formatted);
-			} catch (err) {
-				console.error("Error loading config:", err);
-				state.configEditor?.setValue("// Error loading config: " + err.message);
-			}
-		},
-
-		async save() {
-			if (!await confirmAction("Save changes to the config? This could affect site functionality.")) return;
-			const content = state.configEditor?.getValue() ?? "";
-			try { JSON.parse(content); } catch (e) { addAlert("Invalid JSON: " + e.message, "error"); return; }
-
-			try {
-				const result = await apiPost("/api/config", { config: content });
-				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
-				addAlert("Config saved! A server restart may be required.", "success");
-			} catch (err) {
-				console.error("Error saving config:", err);
-				addAlert("Failed to save config: " + err.message, "error");
-			}
 		},
 	};
 

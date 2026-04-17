@@ -57,7 +57,7 @@ module.exports = {
 
 			await interaction.editReply({ embeds: [embed] });
 		} catch (error) {
-			logger.info(`Error searching mods: ${error}`);
+			logger.error(`Unhandled Error: ${error}`);
 			await interaction.editReply({ content: "An error occurred while searching for mods. Please try again later." });
 		}
 	},

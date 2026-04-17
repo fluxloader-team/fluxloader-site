@@ -69,7 +69,7 @@ module.exports = {
 						}),
 					);
 				} catch (error) {
-					logger.info(`Error ${error}`);
+					logger.error(`Unhandled Error: ${error}`);
 					res.writeHead(500, { "Content-Type": "application/json" });
 					res.end(JSON.stringify({ error: "Server error" }));
 				}

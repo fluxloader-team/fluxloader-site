@@ -31,7 +31,7 @@ module.exports = {
 				commands.push(jsonData);
 				logger.info(`Command "${key}" added to commands array.`);
 			} catch (err) {
-				logger.info(`Error while generating JSON for command "${key}": ${err.message}`);
+				logger.error(`Unhandled error while generating JSON for command "${key}": ${err.message}`);
 			}
 		});
 
@@ -42,7 +42,7 @@ module.exports = {
 			await rest.put(Routes.applicationGuildCommands(client.user.id, globalThis.config.discord.server), { body: commands });
 			logger.info("commands registered to discord successfully.");
 		} catch (error) {
-			logger.info(`Error registering commands to discord: ${error.message}`);
+			logger.error(`Unhandled error registering commands to discord: ${error.message}`);
 		}
 	},
 };

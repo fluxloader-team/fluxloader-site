@@ -40,7 +40,7 @@ module.exports = {
 			});
 			await interaction.editReply({ embeds: [embed] });
 		} catch (e) {
-			logger.info(`Error fetching site actions: ${e}`);
+			logger.error(`Unhandled Error: ${e}`);
 			await interaction.editReply({ content: "An error occurred while fetching the site actions. Please try again later." });
 		}
 	},
