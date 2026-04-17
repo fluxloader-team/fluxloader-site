@@ -1,1228 +1,763 @@
-globalThis.adminPageContent = document.getElementById("adminPageContent");
-globalThis.searchQuery = "";
-globalThis.modCache = {};
-globalThis.users = {};
-globalThis.userCache = {};
-globalThis.actions = [];
-globalThis.currentPage = 1;
-globalThis.pageSize = 50;
-globalThis.totalAdminPages = 1;
+const AdminPage = (() => {
+	const state = {
+		mods: {},
+		modCache: {},
+		users: {},
+		userCache: {},
+		actions: [],
+		currentPage: 1,
+		pageSize: 50,
+		totalPages: 1,
+	};
 
-globalThis.adminPages = {
-	Selection: {
-		content: `
-			<div class="adminpageColumn" style="width: 100%;gap:10px">
-				<button class="btn btn-primary" onclick="adminPages.ModManagement.action()">Mod Management</button>
-				<button class="btn btn-primary" onclick="adminPages.UserManagement.action()">User Management</button>
-				<button class="btn btn-primary" onclick="adminPages.SiteActions.action()">Site Actions</button>
-				<button class="btn btn-primary" onclick="adminPages.Bans.action()">Bans</button>
-				<button class="btn btn-primary" onclick="adminPages.Config.action()">Config</button>
-			</div>
-			`,
-		action: function () {
-			adminPageContent.innerHTML = adminPages.Selection.content;
-		},
-	},
-	UserManagement: {
-		content: `
-			<div class="adminpageColumn" style="width: 500px;">
-				<div id="Searchholder">
-					<input type="text" id="userSearchInput" placeholder="Search Users" style="width: 370px;" onchange="globalThis.performUserSearch()"/>
-					<select id="userSearchType" onchange="globalThis.performUserSearch()">
-						<option value="all">All</option>
-						<option value="admin">Admins</option>
-						<option value="banned">Banned</option>
-					</select>
-				</div>
-				<div id="userList">
+	// -------------------- Utility --------------------
 
-				</div>
-			</div>
-			<div class="adminpageColumn" style="width: calc(100% - 500px);height: calc(100% - 90px)">
-			<div class="userDisplay">
-					<div class="userDisplayData" id="userDisplay">
-						<div class="d-flex justify-content-center">
-							<div class="spinner-border" role="status">
-								<span class="visually-hidden">Loading...</span>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="userDisplayActions" id="userDisplayActions">
-			</div>
-        	`,
-		action: async function () {
-			adminPageContent.classList = "adminpage adminpage-user-management";
-			adminPageContent.innerHTML = adminPages.UserManagement.content;
-			await globalThis.performUserSearch();
-		},
-	},
-	SiteActions: {
-		content: `
-			<div class="adminpageColumn" style="width: 100%;">
-				<h3>Site Actions</h3>
-				<div id="actionsList">
-					<div class="d-flex justify-content-center">
-						<div class="spinner-border" role="status">
-							<span class="visually-hidden">Loading...</span>
-						</div>
-					</div>
-				</div>
-				<nav aria-label="Actions pagination">
-					<ul class="pagination" id="actionsPagination">
-					</ul>
-				</nav>
-			</div>
-			`,
-		action: async function () {
-			adminPageContent.classList = "adminpage adminpage-site-actions";
-			adminPageContent.innerHTML = adminPages.SiteActions.content;
-			await globalThis.loadActions();
-		},
-	},
-	Bans: {
-		content: `
-			<div class="adminpageColumn" style="width: 100%;">
-				<h3>Banned Users</h3>
-				<div id="bannedUsersList">
-					<div class="d-flex justify-content-center">
-						<div class="spinner-border" role="status">
-							<span class="visually-hidden">Loading...</span>
-						</div>
-					</div>
-				</div>
-			</div>
-			`,
-		action: async function () {
-			adminPageContent.classList = "adminpage adminpage-bans";
-			adminPageContent.innerHTML = adminPages.Bans.content;
-			await globalThis.loadBannedUsers();
-		},
-	},
-	Config: {
-		content: `
-			<div class="adminpageColumn" style="width: 100%;">
-				<h3>Config Editor</h3>
-				<div id="configEditor" style="width: 100%; height: 500px; border: 1px solid #ccc;"></div>
-				<div style="margin-top: 20px;">
-					<button class="btn btn-primary" onclick="globalThis.saveConfig()">Save Config</button>
-					<button class="btn btn-secondary" onclick="globalThis.loadConfig()">Reload Config</button>
-				</div>
-			</div>
-			`,
-		action: async function () {
-			adminPageContent.classList = "adminpage adminpage-config";
-			adminPageContent.innerHTML = adminPages.Config.content;
+	const spinnerHtml = `<div class="spinner-holder"><div class="spinner-border" role="status"><span class="visually-hidden">Loading…</span></div></div>`;
 
-			// Initialize Monaco Editor
-			// TODO: Change to static local copy of monaco editor
-			require.config({ paths: { vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs" } });
-			require(["vs/editor/editor.main"], function () {
-				globalThis.configEditor = monaco.editor.create(document.getElementById("configEditor"), {
-					value: "// Loading config...",
-					language: "json",
-					theme: "vs-dark",
-					automaticLayout: true,
-				});
+	const getAdminPageContent = () => document.getElementById("adminPageContent");
 
-				globalThis.loadConfig();
-			});
-		},
-	},
-	ModManagement: {
-		content: `
-			<div class="adminpageColumn" style="width: 500px;">
-				<div id="Searchholder">
-					<input type="text" id="searchInput" placeholder="Search mods" style="width: 370px;" onchange="globalThis.performSearch()"/>
-					<select id="searchtype" onchange="globalThis.performSearch()">
-						<option value="all">All</option>
-						<option value="verified">Verified</option>
-						<option value="unverified">Unverified</option>
-					</select>
-				</div>
-				<div id="modList"></div>
-			</div>
-			<div class="adminpageColumn" style="width: calc(100% - 500px);height: calc(100% - 90px)">
-			<div class="modDisplay">
-					<div class="modDisplayData" id="modDisplay">
-						<div class="d-flex justify-content-center">
-							<div class="spinner-border" role="status">
-								<span class="visually-hidden">Loading...</span>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="modDisplayActions" id="modDisplayActions"></div>
-        	`,
-		action: async function () {
-			adminPageContent.classList = "adminpage adminpage-mods";
-			adminPageContent.innerHTML = adminPages.ModManagement.content;
-			switch (document.getElementById("searchtype").value) {
-				case "verified":
-					verifiedOnly = "true";
-					break;
-				case "unverified":
-					verifiedOnly = "false";
-					break;
-				default:
-					verifiedOnly = "null";
-					break;
-			}
-
-			// Initialize with an empty search query (returns all mods)
-			let searchQuery = {};
-
-			// Convert the query object to a JSON string and encode it for URL
-			globalThis.searchQuery = encodeURIComponent(JSON.stringify(searchQuery));
-
-			var response = await fetch(`/api/mods?search=${globalThis.searchQuery}&verified=${verifiedOnly}`);
-			var result = await response.json();
-			console.log(result.mods);
-			globalThis.mods = {};
-			if (result.mods && Array.isArray(result.mods)) {
-				result.mods.forEach((mod) => {
-					globalThis.mods[mod.modID] = mod;
-				});
-			}
-			console.log("Response:", result.mods);
-			updateModList();
-		},
-	},
-};
-
-// ------------------------------------------ Manage Mod ------------------------------------------
-
-globalThis.updateModList = function () {
-	var modList = document.getElementById("modList");
-	var modItems = "";
-	Object.values(globalThis.mods).forEach((mod) => {
-		modItems += `<tr class="modListItem" onclick='globalThis.displayMod("${mod.modID}")'><td>${mod.modData.name}</td><td>${mod.modData.author}</td><td>${mod.modData.version}</td></tr>`;
-	});
-	modList.innerHTML = `<table class="displayInner"><tr><th width="200">Name</th><th width="200">Author</th><th width="100">Version</th></tr> ${modItems}`;
-	modList.innerHTML += "</table>";
-
-	// Check if there are any mods before trying to display the first one
-	if (Object.values(globalThis.mods).length > 0) {
-		globalThis.displayMod(Object.values(globalThis.mods)[0].modID);
-	} else {
-		// Display a message when no mods are found
-		var modDisplay = document.getElementById("modDisplay");
-		if (modDisplay) {
-			modDisplay.innerHTML = `<div class="displayInner">
-                <h3>No mods found</h3>
-                <p>Try changing your search criteria or verification filter.</p>
-            </div>`;
+	function loadTemplate(id, pageClass) {
+		const tpl = document.getElementById(`${id}`);
+		if (!tpl) {
+			console.error(`Template #${id} not found`);
+			return;
 		}
 
-		// Clear the actions panel
-		var modDisplayActions = document.getElementById("modDisplayActions");
-		if (modDisplayActions) {
-			modDisplayActions.innerHTML = "";
-		}
-	}
-};
-
-globalThis.performSearch = async function () {
-	var searchInput = document.getElementById("searchInput");
-	var searchText = searchInput.value;
-	var verifiedOnly = "";
-	switch (document.getElementById("searchtype").value) {
-		case "verified":
-			verifiedOnly = "true";
-			break;
-		case "unverified":
-			verifiedOnly = "false";
-			break;
-		default:
-			verifiedOnly = "null";
-			break;
+		const el = getAdminPageContent();
+		el.className = `admin-page ${pageClass ?? ""}`;
+		el.replaceChildren(tpl.content.cloneNode(true));
 	}
 
-	// Create a MongoDB query object based on the search text
-	let searchQuery;
-	if (searchText && searchText.trim() !== "") {
-		// Create a regex search for the mod name
-		searchQuery = {
-			"modData.name": {
-				$regex: searchText,
-				$options: "i", // case-insensitive
+	async function apiFetch(url, options = {}) {
+		const res = await fetch(url, options);
+		if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
+		return res.json();
+	}
+
+	async function apiPost(url, body) {
+		return apiFetch(url, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(body),
+		});
+	}
+
+	function addAlert(message, type = "info") {
+		const area = document.getElementById("alertArea");
+		const t = document.createElement("div");
+		t.className = `admin-alert admin-alert-${type}`;
+		t.textContent = message;
+		area.appendChild(t);
+		// Trigger animation then remove
+		requestAnimationFrame(() => t.classList.add("admin-alert-show"));
+		setTimeout(() => {
+			t.classList.remove("admin-alert-show");
+			t.addEventListener("transitionend", () => t.remove(), { once: true });
+		}, 3500);
+	}
+
+	async function confirmAction(message) {
+		// Uses native confirm for now; can be swapped for a modal later
+		return window.confirm(message);
+	}
+
+	// -------------------- Pages --------------------
+
+	const pageControl = {
+		"dashboard": {
+			activate() {
+				loadTemplate("tpl-dashboard", "admin-page-dashboard");
+				getAdminPageContent().addEventListener("click", (e) => {
+					const card = e.target.closest("[data-page]");
+					if (card) pageControl[card.dataset.page]?.activate();
+				});
 			},
-		};
-	} else {
-		// Empty search returns all mods
-		searchQuery = {};
-	}
+		},
+		"mod-management": {
+			async activate() {
+				loadTemplate("tpl-mod-management", "admin-page-mods");
+				await modsPage.search();
+				document.getElementById("modSearchInput").addEventListener("input", () => modsPage.search());
+				document.getElementById("modSearchType").addEventListener("change", () => modsPage.search());
+			},
+		},
+		"user-management": {
+			async activate() {
+				loadTemplate("tpl-user-management", "admin-page-user-management");
+				await usersPage.search();
+				document.getElementById("userSearchInput").addEventListener("input", () => usersPage.search());
+				document.getElementById("userSearchType").addEventListener("change", () => usersPage.search());
+			},
+		},
+		"site-actions": {
+			async activate() {
+				loadTemplate("tpl-site-actions", "admin-page-site-actions");
+				await actionsPage.load(1);
+			},
+		},
+		"bans": {
+			async activate() {
+				loadTemplate("tpl-bans", "admin-page-bans");
+				await bansPage.load();
+			},
+		},
+		"config": {
+			async activate() {
+				loadTemplate("tpl-config", "admin-page-config");
+				document.getElementById("btnSaveConfig").addEventListener("click", () => configPage.save());
+				document.getElementById("btnReloadConfig").addEventListener("click", () => configPage.load());
 
-	// Convert the query object to a JSON string and encode it for URL
-	globalThis.searchQuery = encodeURIComponent(JSON.stringify(searchQuery));
+				// TODO: Check works
+				require.config({ paths: { vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs" } });
+				require(["vs/editor/editor.main"], () => {
+					state.configEditor = monaco.editor.create(document.getElementById("configEditor"), {
+						value: "// Loading config…",
+						language: "json",
+						theme: "vs-dark",
+						automaticLayout: true,
+					});
+					configPage.load();
+				});
+			},
+		},
+	};
 
-	var response = await fetch(`/api/mods?search=${globalThis.searchQuery}&verified=${verifiedOnly}`);
-	var result = await response.json();
-	console.log(result.mods);
-	globalThis.mods = {};
-	if (result.mods && Array.isArray(result.mods)) {
-		result.mods.forEach((mod) => {
-			globalThis.mods[mod.modID] = mod;
-		});
-	}
-	console.log("Response:", result.mods);
-	updateModList();
-};
+	const modsPage = {
+		async search() {
+			const text = document.getElementById("modSearchInput")?.value?.trim() ?? "";
+			const query = text ? { "modData.name": { $regex: text, $options: "i" } } : {};
+			const queryParam = encodeURIComponent(JSON.stringify(query));
 
-globalThis.displayMod = async function (modID) {
-	// Check if the mod exists
-	var mod = globalThis.mods[modID];
-	if (!mod) {
-		console.error(`Mod with ID ${modID} not found`);
-		var modDisplay = document.getElementById("modDisplay");
-		modDisplay.innerHTML = `<div class="displayInner">
-            <h3>Mod not found</h3>
-            <p>The requested mod could not be found. It may have been removed or the ID is incorrect.</p>
-        </div>`;
+			const verifiedType = document.getElementById("modSearchType")?.value ?? "all";
+			const verifiedParam =
+				verifiedType === "verified" ? "true" :
+					verifiedType === "unverified" ? "false" :
+						"null";
 
-		// Clear the actions panel
-		var modDisplayActions = document.getElementById("modDisplayActions");
-		if (modDisplayActions) {
-			modDisplayActions.innerHTML = "";
-		}
-		return;
-	}
-
-	// Check if the mod has the required properties
-	if (!mod.modData) {
-		console.error(`Mod with ID ${modID} has no modData property`);
-		var modDisplay = document.getElementById("modDisplay");
-		modDisplay.innerHTML = `<div class="displayInner">
-            <h3>Invalid mod data</h3>
-            <p>The mod data is invalid or incomplete.</p>
-        </div>`;
-		return;
-	}
-
-	var modDisplay = document.getElementById("modDisplay");
-
-	// Safely access mod properties with fallbacks for missing data
-	const name = mod.modData.name || "Unknown";
-	const version = mod.modData.version || "Unknown";
-	const author = mod.modData.author || "Unknown";
-	const shortDescription = mod.modData.shortDescription || "No description available";
-	const tags = Array.isArray(mod.modData.tags) ? mod.modData.tags : [];
-	const tagsHtml = tags.length > 0 ? `<span class="badge text-bg-primary">${tags.join('</span><a> </a><span class="badge text-bg-primary">')}</span>` : '<span class="badge text-bg-secondary">No tags</span>';
-
-	modDisplay.innerHTML = `<div class="displayInner">
-<h3 id="modDisplayModName">${name}<a> </a><span class="badge text-bg-info">${version}</span><a> </a><span class="badge text-bg-warning">${author}</span></h3>
-<h6 id="modDisplayshortDescription">${shortDescription}</h6>
-<h6 id="modDisplayTags">${tagsHtml}</h6>
-<br>
-<h5>Dependencies</h5>
-<div id="dependencies">
-
-</div>
-<br>
-<h5>Mod Readme file</h5>
-<hr>
-<p id="modDisplayDescription">
-</p>
-<h6></h6>
-</div>`;
-	var dependenciesList = document.getElementById("dependencies");
-	var dependencies = "";
-	if (mod.modData.dependencies && typeof mod.modData.dependencies === "object") {
-		Object.keys(mod.modData.dependencies).forEach((dependency) => {
-			dependencies += `<tr><td>${dependency}</td><td>${mod.modData.dependencies[dependency]}</td></tr>`;
-		});
-	}
-	dependenciesList.innerHTML = `<table><tr><th style="width: 250px">Name</th><th style="width: 250px">Version</th></tr> ${dependencies}`;
-	dependenciesList.innerHTML += "</table>";
-
-	try {
-		if (globalThis.modCache[mod.modID]) {
-			await globalThis.displayModAPI(globalThis.modCache[mod.modID]);
-		} else {
-			var response = await fetch(`/api/mods?modid=${mod.modID}&option=info`);
-			var result = await response.json();
-			console.log("Response:", result.mod);
-			if (result.mod) {
-				globalThis.modCache[result.mod.modID] = result.mod;
-				await globalThis.displayModAPI(globalThis.modCache[result.mod.modID]);
-			} else {
-				console.error(`API returned no mod data for ID ${mod.modID}`);
-				document.getElementById("modDisplayDescription").innerHTML = "Failed to load detailed mod information.";
-			}
-		}
-	} catch (error) {
-		console.error(`Error fetching mod details: ${error.message}`);
-		document.getElementById("modDisplayDescription").innerHTML = "An error occurred while loading mod details.";
-	}
-};
-
-globalThis.displayModAPI = async function (mod) {
-	try {
-		// Check if mod and modData exist
-		if (!mod || !mod.modData) {
-			console.error("Invalid mod data provided to displayModAPI");
-			document.getElementById("modDisplayDescription").innerHTML = "Error: Invalid mod data";
-			return;
-		}
-
-		// Safely access mod properties with fallbacks
-		const name = mod.modData.name || "Unknown";
-		const version = mod.modData.version || "Unknown";
-		const author = mod.modData.author || "Unknown";
-		const shortDescription = mod.modData.shortDescription || "No description available";
-		const description = mod.modData.description || "No detailed description available";
-		const tags = Array.isArray(mod.modData.tags) ? mod.modData.tags : [];
-		const tagsHtml = tags.length > 0 ? `<span class="badge text-bg-primary">${tags.join('</span><a> </a><span class="badge text-bg-primary">')}</span>` : '<span class="badge text-bg-secondary">No tags</span>';
-
-		// Update the DOM elements
-		document.getElementById("modDisplayModName").innerHTML = `${name}<a> </a><span class="badge text-bg-info">${version}</span><a> </a><span class="badge text-bg-warning">${author}</span>`;
-		document.getElementById("modDisplayshortDescription").innerHTML = `${shortDescription}`;
-		document.getElementById("modDisplayTags").innerHTML = tagsHtml;
-
-		// Use marked.parse safely
-		try {
-			document.getElementById("modDisplayDescription").innerHTML = marked.parse(description);
-		} catch (parseError) {
-			console.error("Error parsing markdown:", parseError);
-			document.getElementById("modDisplayDescription").innerHTML = description;
-		}
-
-		// Update mod display actions
-		if (mod.modID) {
-			await globalThis.updateModDisplayActions(mod.modID);
-
-			// Fetch versions
 			try {
-				var response = await fetch(`/api/mods?modid=${mod.modID}&option=versions`);
-				var result = await response.json();
-				console.log("Response:", result);
-
-				if (result.versions) {
-					await globalThis.updateVersionsList(mod.modID, result.versions);
-				} else {
-					console.warn("No versions found for mod:", mod.modID);
-				}
-			} catch (versionError) {
-				console.error("Error fetching versions:", versionError);
+				const result = await apiFetch(`/api/mods?search=${queryParam}&verified=${verifiedParam}`);
+				state.mods = {};
+				(result.mods ?? []).forEach((m) => { state.mods[m.modID] = m; });
+				modsPage.renderModTable();
+			} catch (err) {
+				console.error("Mod search failed:", err);
+				addAlert("Failed to load mods.", "error");
 			}
-		} else {
-			console.error("Mod ID is missing, cannot update actions or fetch versions");
-		}
-	} catch (error) {
-		console.error("Error in DisplayModApi:", error);
-		document.getElementById("modDisplayDescription").innerHTML = "An error occurred while displaying mod details.";
-	}
-};
+		},
 
-globalThis.getModVersion = async function (modID, version) {
-	try {
-		// Check if modID and version are valid
-		if (!modID) {
-			console.error("Invalid mod ID provided to getModVersion");
-			alert("Error: Invalid mod ID");
-			return;
-		}
+		renderModTable() {
+			const modTableContainer = document.getElementById("modTableContainer");
+			if (!modTableContainer) return;
 
-		if (!version || version === "Change Version") {
-			console.warn("No version selected");
-			return;
-		}
-
-		try {
-			var response = await fetch(`/api/mods?modid=${modID}&option=info&version=${version}`);
-
-			if (!response.ok) {
-				throw new Error(`HTTP error! status: ${response.status}`);
-			}
-
-			var result = await response.json();
-			console.log("Response:", result.mod);
-
-			if (!result.mod) {
-				console.error("API returned no mod data");
-				alert("Error: Could not retrieve mod version data");
+			const entries = Object.values(state.mods);
+			if (entries.length === 0) {
+				modTableContainer.innerHTML = `<p class="empty-message">No mods found. Try adjusting your filters.</p>`;
+				const display = document.getElementById("modDetails");
+				if (display) display.innerHTML = `<p class="empty-message">No mods to display.</p>`;
+				const actions = document.getElementById("modDetailsActions");
+				if (actions) actions.innerHTML = "";
 				return;
 			}
 
-			// Cache the mod data and display it
-			globalThis.modCache[result.mod.modID] = result.mod;
-			await globalThis.displayModAPI(globalThis.modCache[result.mod.modID]);
-		} catch (fetchError) {
-			console.error("Error fetching mod version:", fetchError);
-			alert("Failed to retrieve mod version. Please try again later.");
-		}
-	} catch (error) {
-		console.error("Error in getModVersion:", error);
-		alert("An unexpected error occurred while retrieving the mod version.");
-	}
-};
+			modTableContainer.innerHTML = `
+				<table class="item-table">
+					<thead><tr><th>Name</th><th>Author</th><th>Version</th></tr></thead>
+					<tbody>
+						${entries.map((m) => `
+							<tr class="item-table-row" data-modid="${m.modID}">
+								<td>${m.modData.name}</td>
+								<td>${m.modData.author}</td>
+								<td>${m.modData.version}</td>
+							</tr>
+						`).join("")}
+					</tbody>
+				</table>`;
 
-globalThis.updateVersionsList = async function (modID, versions) {
-	try {
-		// Check if modID is valid
-		if (!modID) {
-			console.error("Invalid mod ID provided to UpdateVersionsList");
-			return;
-		}
-
-		var versionSelection = document.getElementById("versionSelection");
-		if (!versionSelection) {
-			console.error("versionSelection element not found");
-			return;
-		}
-
-		// Clear existing options except the first one (Change Version)
-		while (versionSelection.options.length > 1) {
-			versionSelection.remove(1);
-		}
-
-		// Check if versions is valid
-		if (!versions || !Array.isArray(versions) || versions.length === 0) {
-			console.warn(`No versions found for mod ${modID}`);
-			var noVersionOption = document.createElement("option");
-			noVersionOption.value = "";
-			noVersionOption.innerHTML = "No versions available";
-			noVersionOption.disabled = true;
-			versionSelection.appendChild(noVersionOption);
-			return;
-		}
-
-		console.log("Versions: " + JSON.stringify(versions));
-
-		// Add each version as an option
-		versions.forEach((version) => {
-			if (version) {
-				// Only add non-null/undefined versions
-				var versionOption = document.createElement("option");
-				versionOption.value = version;
-				versionOption.innerHTML = version;
-				versionSelection.appendChild(versionOption);
-			}
-		});
-	} catch (error) {
-		console.error("Error in UpdateVersionsList:", error);
-	}
-};
-
-globalThis.updateModDisplayActions = async function (modID) {
-	try {
-		// Check if modID is valid
-		if (!modID) {
-			console.error("Invalid mod ID provided to UpdateModDisplayActions");
-			return;
-		}
-
-		var modDisplayActions = document.getElementById("modDisplayActions");
-		if (!modDisplayActions) {
-			console.error("modDisplayActions element not found");
-			return;
-		}
-
-		var mod = globalThis.mods[modID];
-
-		// Basic actions that don't require mod data
-		var actionsHtml = `<div class="btn-group" role="group" style="padding-left: 15px;margin-top:5px; height: 40px;">
-<button class="btn btn-primary" onclick='globalThis.downloadMod("${modID}")'>Download</button>
-<button class="btn btn-success" onclick="navigator.clipboard.writeText('${modID}')">Copy ID</button>
-</div>
-<select class="form-select" id="versionSelection" style="padding-left: 15px;margin-top:5px; height: 40px;width: 230px" onchange='globalThis.getModVersion("${modID}",this.value)'>
-<option selected>Change Version</option>
-</select>`;
-
-		// Admin actions that require mod data
-		if (mod) {
-			// Check if mod has Author property with discordID
-			var authorId = mod.Author && mod.Author.discordID ? mod.Author.discordID : null;
-
-			actionsHtml += `<div class="btn-group" role="group" style="padding-left: 15px;margin-top:5px; height: 40px;">
-<button class="btn btn-success" onclick='globalThis.verifyMod("${modID}")'>Verify</button>
-<button class="btn btn-danger" onclick='globalThis.denyMod("${modID}")'>Deny</button>`;
-
-			// Only add Ban Author button if we have a valid author ID
-			if (authorId) {
-				actionsHtml += `<button class="btn btn-danger" onclick='globalThis.banAuthor("${authorId}")'>Ban Author</button>`;
-			}
-
-			actionsHtml += `</div>`;
-		} else {
-			console.warn(`Mod with ID ${modID} not found in globalThis.mods`);
-		}
-
-		modDisplayActions.innerHTML = actionsHtml;
-	} catch (error) {
-		console.error("Error in UpdateModDisplayActions:", error);
-	}
-};
-
-// ------------------------------------------ Download Mod ------------------------------------------
-
-globalThis.downloadMod = async function (modID) {
-	try {
-		// Check if modID is valid
-		if (!modID) {
-			console.error("Invalid mod ID provided to DownloadMod");
-			alert("Error: Invalid mod ID");
-			return;
-		}
-
-		var mod = globalThis.mods[modID];
-		if (!mod) {
-			console.error(`Mod with ID ${modID} not found`);
-			alert("Error: Mod not found");
-			return;
-		}
-
-		// Make sure mod has required properties
-		if (!mod.modID) {
-			console.error("Mod is missing modID property");
-			alert("Error: Invalid mod data");
-			return;
-		}
-
-		try {
-			var response = await fetch(`/api/mods?modid=${mod.modID}&option=download`);
-
-			if (!response.ok) {
-				throw new Error(`HTTP error! status: ${response.status}`);
-			}
-
-			var result = await response.blob();
-			var url = window.URL.createObjectURL(new Blob([result]));
-			var link = document.createElement("a");
-			link.href = url;
-			link.style.display = "none";
-
-			// Use mod name if available, otherwise use mod ID
-			var fileName = `${mod.modID}.zip`;
-			link.setAttribute("download", fileName);
-
-			document.body.appendChild(link);
-			link.click();
-			document.body.removeChild(link);
-		} catch (fetchError) {
-			console.error("Error downloading mod:", fetchError);
-			alert("Failed to download mod. Please try again later.");
-		}
-	} catch (error) {
-		console.error("Error in DownloadMod:", error);
-		alert("An unexpected error occurred while downloading the mod.");
-	}
-};
-
-// ------------------------------------------ Admin Action ------------------------------------------
-
-globalThis.verifyMod = async function (modID) {
-	if (!confirm("Are you sure you want to verify this mod?")) {
-		return;
-	}
-
-	try {
-		var response = await fetch("/api/admin/actions", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ action: "verify", modID: modID }),
-		});
-
-		var result = await response.json();
-		if (result.error) {
-			alert("Error: " + result.error);
-			return;
-		}
-
-		alert("Mod verified successfully!");
-		// Refresh the mod list to show the updated status
-		await globalThis.performSearch();
-	} catch (error) {
-		console.error("Error verifying mod:", error);
-		alert("An error occurred while verifying the mod.");
-	}
-};
-
-globalThis.denyMod = async function (modID) {
-	if (!confirm("Are you sure you want to deny and delete this mod? This action cannot be undone.")) {
-		return;
-	}
-
-	try {
-		var response = await fetch("/api/admin/actions", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ action: "deny", modID: modID }),
-		});
-
-		var result = await response.json();
-		if (result.error) {
-			alert("Error: " + result.error);
-			return;
-		}
-
-		alert("Mod denied and deleted successfully!");
-		// Refresh the mod list
-		await globalThis.performSearch();
-	} catch (error) {
-		console.error("Error denying mod:", error);
-		alert("An error occurred while denying the mod.");
-	}
-};
-
-globalThis.banAuthor = async function (authorID) {
-	if (!confirm("Are you sure you want to ban this author? This will prevent them from uploading mods.")) {
-		return;
-	}
-
-	try {
-		var response = await fetch("/api/admin/actions", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ action: "banAuthor", authorID: authorID }),
-		});
-
-		var result = await response.json();
-		if (result.error) {
-			alert("Error: " + result.error);
-			return;
-		}
-
-		alert("Author banned successfully!");
-	} catch (error) {
-		console.error("Error banning author:", error);
-		alert("An error occurred while banning the author.");
-	}
-};
-
-// ------------------------------------------ User Management ------------------------------------------
-
-globalThis.performUserSearch = async function () {
-	var searchInput = document.getElementById("userSearchInput");
-	var searchQuery = searchInput.value;
-	var searchType = document.getElementById("userSearchType").value;
-
-	try {
-		var response = await fetch("/api/users", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ action: "searchUsers", search: searchQuery }),
-		});
-		var result = await response.json();
-
-		if (result.error) {
-			console.error("Error searching users:", result.error);
-			alert("Error: " + result.error);
-			return;
-		}
-
-		globalThis.users = {};
-
-		if (result.users && result.users.length > 0) {
-			result.users.forEach((user) => {
-				// Filter by search type if needed
-				if (searchType === "admin" && !user.permissions.includes("admin")) {
-					return;
-				}
-				if (searchType === "banned" && !user.banned) {
-					return;
-				}
-
-				globalThis.users[user.discordID] = user;
+			modTableContainer.querySelectorAll(".item-table-row").forEach((row) => {
+				row.addEventListener("click", () => modsPage.inspectModDetails(row.dataset.modid));
 			});
-		}
-	} catch (e) {
-		console.error("Error processing users:", e);
-	}
 
-	updateUserList();
-};
+			modsPage.inspectModDetails(entries[0].modID);
+		},
 
-globalThis.updateUserList = function () {
-	var userList = document.getElementById("userList");
-	var userItems = "";
+		async inspectModDetails(modID) {
+			const modDetails = document.getElementById("modDetails");
+			if (!modDetails) return;
 
-	Object.values(globalThis.users).forEach((user) => {
-		var statusBadge = "";
-		if (user.banned) {
-			statusBadge = '<span class="badge bg-danger">Banned</span>';
-		}
-		if (user.permissions.includes("admin")) {
-			statusBadge += ' <span class="badge bg-success">Admin</span>';
-		}
-
-		userItems += `<tr class="userListItem" onclick='globalThis.displayUser("${user.discordID}")'>
-            <td>${user.discordUsername}</td>
-            <td>${statusBadge}</td>
-        </tr>`;
-	});
-
-	userList.innerHTML = `<table class="displayInner">
-        <tr>
-            <th width="300">Username</th>
-            <th width="200">Status</th>
-        </tr>
-        ${userItems}
-    </table>`;
-
-	if (Object.values(globalThis.users).length > 0) {
-		globalThis.displayUser(Object.values(globalThis.users)[0].discordID);
-	}
-};
-
-globalThis.displayUser = async function (discordID) {
-	var user = globalThis.users[discordID];
-	var userDisplay = document.getElementById("userDisplay");
-
-	userDisplay.innerHTML = `<div class="displayInner">
-        <h3 id="userDisplayName">${user.discordUsername}</h3>
-        <p>discord ID: <span id="userdiscordID">${user.discordID}</span></p>
-        <p>Joined: ${new Date(user.joinedAt).toLocaleString()}</p>
-        <p>Status: 
-            <span id="userBanStatus" class="badge ${user.banned ? "bg-danger" : "bg-success"}">${user.banned ? "Banned" : "Active"}</span>
-            <span id="userAdminStatus" class="badge ${user.permissions.includes("admin") ? "bg-success" : "bg-secondary"}">${user.permissions.includes("admin") ? "Admin" : "User"}</span>
-        </p>
-        <h4>User Stats</h4>
-        <div id="userStats">
-            <p>Loading stats...</p>
-        </div>
-    </div>`;
-
-	// Get user stats
-	if (globalThis.userCache[discordID]) {
-		await displayUserStats(globalThis.userCache[discordID]);
-	} else {
-		var response = await fetch("/api/users", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ action: "usersDetails", userID: discordID }),
-		});
-		var result = await response.json();
-
-		if (result.error) {
-			console.error("Error getting user details:", result.error);
-			alert("Error: " + result.error);
-			return;
-		}
-
-		globalThis.userCache[discordID] = result;
-		await displayUserStats(result);
-	}
-
-	await updateUserDisplayActions(discordID);
-};
-
-globalThis.displayUserStats = async function (userData) {
-	var userStats = document.getElementById("userStats");
-	var stats = userData.stats;
-
-	var modVersionsHtml = "";
-	if (stats.modVersions && stats.modVersions.length > 0) {
-		stats.modVersions.forEach((version) => {
-			modVersionsHtml += `<tr>
-                <td>${version.modName}</td>
-                <td>${version.version.modData.version}</td>
-                <td>${new Date(version.version.uploadTime).toLocaleString()}</td>
-            </tr>`;
-		});
-	}
-
-	userStats.innerHTML = `
-        <p>mods Uploaded: ${stats.modsUploaded}</p>
-        <p>Mod Versions Uploaded: ${stats.modVersionsUploaded}</p>
-        ${
-			stats.modVersionsUploaded > 0
-				? `
-        <h5>Mod Versions</h5>
-        <table class="table table-sm">
-            <thead>
-                <tr>
-                    <th>Mod Name</th>
-                    <th>Version</th>
-                    <th>Upload Time</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${modVersionsHtml}
-            </tbody>
-        </table>
-        `
-				: ""
-		}
-    `;
-};
-
-globalThis.updateUserDisplayActions = async function (discordID) {
-	var user = globalThis.users[discordID];
-	var userDisplayActions = document.getElementById("userDisplayActions");
-
-	userDisplayActions.innerHTML = `
-        <div class="btn-group" role="group" style="padding-left: 15px;margin-top:5px; height: 40px;">
-            <button class="btn btn-success" onclick="navigator.clipboard.writeText('${discordID}')">Copy ID</button>
-        </div>
-        <div class="btn-group" role="group" style="padding-left: 15px;margin-top:5px; height: 40px;">
-            ${user.banned ? `<button class="btn btn-success" onclick='globalThis.unbanUser("${discordID}")'>Unban User</button>` : `<button class="btn btn-danger" onclick='globalThis.banUser("${discordID}")'>Ban User</button>`}
-            ${
-				user.permissions.includes("admin")
-					? `<button class="btn btn-warning" onclick='globalThis.removeAdmin("${discordID}")'>Remove Admin</button>`
-					: `<button class="btn btn-primary" onclick='globalThis.setAdmin("${discordID}")'>Set as Admin</button>`
+			const mod = state.mods[modID];
+			if (!mod?.modData) {
+				modDetails.innerHTML = `<p class="empty-message">Mod data unavailable.</p>`;
+				return;
 			}
-        </div>
-    `;
-};
 
-globalThis.banUser = async function (discordID) {
-	if (!confirm("Are you sure you want to ban this user? This will prevent them from uploading mods.")) {
-		return;
-	}
+			const { name = "Unknown", version = "Unknown", author = "Unknown", shortDescription = "", tags = [] } = mod.modData;
 
-	try {
-		var response = await fetch("/api/admin/actions", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ action: "banAuthor", authorID: discordID }),
+			const tagsHtml = tags.length
+				? tags.map((t) => `<span class="badge text-bg-primary">${t}</span>`).join(" ")
+				: `<span class="badge text-bg-secondary">No tags</span>`;
+
+			modDetails.innerHTML = `
+				<div class="detail-inner">
+					<div class="detail-header">
+						<h3 class="detail-name" id="modDetails-name">${name}</h3>
+						<div class="detail-meta">
+							<span class="badge text-bg-info">${version}</span>
+							<span class="badge text-bg-warning">${author}</span>
+						</div>
+					</div>
+					<p class="detail-short-desc" id="modDetails-short-desc">${shortDescription}</p>
+					<div class="detail-tags" id="modDetails-tags">${tagsHtml}</div>
+
+					<h5 class="section-title">Dependencies</h5>
+					<div id="modDependencies" class="actions-table"></div>
+
+					<h5 class="section-title">Readme</h5>
+					<hr>
+					<div id="modDisplayDescription" class="markdown-content"></div>
+				</div>`;
+
+			const modDeps = mod.modData.dependencies ?? {};
+			const modDepsKeys = Object.keys(modDeps);
+			document.getElementById("modDependencies").innerHTML = modDepsKeys.length
+				? `<table class="item-table"><thead><tr><th>Name</th><th>Version</th></tr></thead><tbody>
+					${modDepsKeys.map((k) => `<tr><td>${k}</td><td>${modDeps[k]}</td></tr>`).join("")}
+				  </tbody></table>`
+				: `<p class="empty-message">No dependencies.</p>`;
+
+			await modsPage.updateActionsBar(modID);
+
+			// Grab full mod details
+			try {
+				if (state.modCache[modID]) {
+					await modsPage.populateModDetails(state.modCache[modID]);
+				} else {
+					const result = await apiFetch(`/api/mods?modid=${modID}&option=info`);
+					if (result.mod) {
+						state.modCache[result.mod.modID] = result.mod;
+						await modsPage.populateModDetails(result.mod);
+					}
+				}
+			} catch (err) {
+				console.error("Error fetching mod detail:", err);
+				const desc = document.getElementById("modDisplayDescription");
+				if (desc) desc.innerHTML = `<em>Failed to load mod detail.</em>`;
+			}
+		},
+
+		async populateModDetails(mod) {
+			if (!mod?.modData) {
+				modDetails.innerHTML = `<p class="empty-message">Mod data unavailable.</p>`;
+				return;
+			}
+
+			const { name = "Unknown", version = "Unknown", author = "Unknown", shortDescription = "", description = "", tags = [] } = mod.modData;
+
+			const tagsHtml = tags.length
+				? tags.map((t) => `<span class="badge text-bg-primary">${t}</span>`).join(" ")
+				: `<span class="badge text-bg-secondary">No tags</span>`;
+
+			const nameEl = document.getElementById("modDetails-name");
+			if (nameEl) nameEl.textContent = name;
+
+			const shortEl = document.getElementById("modDetails-short-desc");
+			if (shortEl) shortEl.textContent = shortDescription;
+
+			const tagsEl = document.getElementById("modDetails-tags");
+			if (tagsEl) tagsEl.innerHTML = tagsHtml;
+
+			const descEl = document.getElementById("modDisplayDescription");
+			if (descEl) {
+				try { descEl.innerHTML = marked.parse(description); }
+				catch { descEl.textContent = description; }
+			}
+
+			if (mod.modID) {
+				await modsPage.updateActionsBar(mod.modID);
+				try {
+					const result = await apiFetch(`/api/mods?modid=${mod.modID}&option=versions`);
+					if (result.versions) modsPage.updateVersionSelect(mod.modID, result.versions);
+				} catch (err) {
+					console.error("Error fetching versions:", err);
+				}
+			}
+		},
+
+		async getVersion(modID, version) {
+			if (!version || version === "Change Version") return;
+			try {
+				const result = await apiFetch(`/api/mods?modid=${modID}&option=info&version=${version}`);
+				if (result.mod) {
+					state.modCache[result.mod.modID] = result.mod;
+					await modsPage.populateModDetails(result.mod);
+				}
+			} catch (err) {
+				console.error("Error fetching version:", err);
+				addAlert("Failed to load version.", "error");
+			}
+		},
+
+		updateVersionSelect(modID, versions) {
+			const selectionEl = document.getElementById("versionSelection");
+			if (!selectionEl) return;
+
+			// Remove all except the first placeholder option
+			while (selectionEl.options.length > 1) selectionEl.remove(1);
+
+			if (!Array.isArray(versions) || versions.length === 0) {
+				const opt = new Option("No versions available", "");
+				opt.disabled = true;
+				selectionEl.appendChild(opt);
+				return;
+			}
+			versions.forEach((v) => { if (v) selectionEl.appendChild(new Option(v, v)); });
+		},
+
+		async updateActionsBar(modID) {
+			const bar = document.getElementById("modDetailsActions");
+			if (!bar) return;
+
+			const mod = state.mods[modID];
+			const authorId = mod?.Author?.discordID ?? null;
+
+			bar.innerHTML = `
+				<div class="details-action-group">
+					<button class="btn btn-primary btn-sm" id="btnDownloadMod">Download</button>
+					<button class="btn btn-success btn-sm" id="btnCopyModId">Copy ID</button>
+					<select class="form-select form-select-sm" id="versionSelection">
+						<option>Change Version</option>
+					</select>
+				</div>
+				<div class="details-action-group">
+					<button class="btn btn-success btn-sm" id="btnVerifyMod">Verify</button>
+					<button class="btn btn-danger btn-sm" id="btnDenyMod">Deny</button>
+					${authorId ? `<button class="btn btn-danger btn-sm" id="btnBanAuthor">Ban Author</button>` : ""}
+				</div>`;
+
+			document.getElementById("btnDownloadMod").addEventListener("click", () => modsPage.downloadMod(modID));
+			document.getElementById("btnCopyModId").addEventListener("click", () => { navigator.clipboard.writeText(modID); addAlert("ID copied!", "success"); });
+			document.getElementById("versionSelection").addEventListener("change", (e) => modsPage.getVersion(modID, e.target.value));
+			document.getElementById("btnVerifyMod").addEventListener("click", () => modsPage.verifyMod(modID));
+			document.getElementById("btnDenyMod").addEventListener("click", () => modsPage.denyMod(modID));
+			if (authorId) document.getElementById("btnBanAuthor").addEventListener("click", () => usersPage.banUser(authorId));
+
+			// Now that the select exists, populate it if we have a cached version list
+			const cached = state.modCache[modID];
+			if (cached) {
+				try {
+					const result = await apiFetch(`/api/mods?modid=${modID}&option=versions`);
+					if (result.versions) modsPage.updateVersionSelect(modID, result.versions);
+				} catch (e) {
+					// silently continue, versions are non-critical
+					console.error(e);
+				}
+			}
+		},
+
+		async downloadMod(modID) {
+			const mod = state.mods[modID];
+			if (!mod?.modID) { addAlert("Mod not found.", "error"); return; }
+			try {
+				const res = await fetch(`/api/mods?modid=${mod.modID}&option=download`);
+				if (!res.ok) throw new Error(`HTTP ${res.status}`);
+				const blob = await res.blob();
+				const url = URL.createObjectURL(blob);
+				const a = Object.assign(document.createElement("a"), { href: url, download: `${mod.modID}.zip` });
+				a.style.display = "none";
+				document.body.appendChild(a);
+				a.click();
+				document.body.removeChild(a);
+				URL.revokeObjectURL(url);
+			} catch (err) {
+				console.error("Download failed:", err);
+				addAlert("Download failed.", "error");
+			}
+		},
+
+		async verifyMod(modID) {
+			if (!await confirmAction("Verify this mod?")) return;
+			try {
+				const result = await apiPost("/api/admin/actions", { action: "verify", modID });
+				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+				addAlert("Mod verified!", "success");
+				await modsPage.search();
+			} catch (err) {
+				console.error(err);
+				addAlert("Failed to verify mod.", "error");
+			}
+		},
+
+		async denyMod(modID) {
+			if (!await confirmAction("Deny and permanently delete this mod? This cannot be undone.")) return;
+			try {
+				const result = await apiPost("/api/admin/actions", { action: "deny", modID });
+				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+				addAlert("Mod denied and deleted.", "success");
+				await modsPage.search();
+			} catch (err) {
+				console.error(err);
+				addAlert("Failed to deny mod.", "error");
+			}
+		},
+	};
+
+	const usersPage = {
+		async search() {
+			const query = document.getElementById("userSearchInput")?.value ?? "";
+			const type = document.getElementById("userSearchType")?.value ?? "all";
+
+			try {
+				const result = await apiPost("/api/users", { action: "searchUsers", search: query });
+				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+
+				state.users = {};
+				(result.users ?? []).forEach((u) => {
+					if (type === "admin" && !u.permissions.includes("admin")) return;
+					if (type === "banned" && !u.banned) return;
+					state.users[u.discordID] = u;
+				});
+				usersPage.renderUsersTable();
+			} catch (err) {
+				console.error("User search failed:", err);
+				addAlert("Failed to load users.", "error");
+			}
+		},
+
+		renderUsersTable() {
+			const usersTableContainer = document.getElementById("usersTableContainer");
+			if (!usersTableContainer) return;
+
+			const entries = Object.values(state.users);
+			if (entries.length === 0) {
+				usersTableContainer.innerHTML = `<p class="empty-message">No users found.</p>`;
+				return;
+			}
+
+			usersTableContainer.innerHTML = `
+				<table class="item-table">
+					<thead><tr><th>Username</th><th>Status</th></tr></thead>
+					<tbody>
+						${entries.map((u) => {
+				const badges = [
+					u.banned ? `<span class="badge bg-danger">Banned</span>` : "",
+					u.permissions.includes("admin") ? `<span class="badge bg-success">Admin</span>` : "",
+				].join(" ");
+				return `<tr class="item-table-row" data-userid="${u.discordID}"><td>${u.discordUsername}</td><td>${badges}</td></tr>`;
+			}).join("")}
+					</tbody>
+				</table>`;
+
+			usersTableContainer.querySelectorAll(".item-table-row").forEach((row) => {
+				row.addEventListener("click", () => usersPage.inspectUserDetails(row.dataset.userid));
+			});
+
+			usersPage.inspectUserDetails(entries[0].discordID);
+		},
+
+		async inspectUserDetails(discordID) {
+			const user = state.users[discordID];
+			const display = document.getElementById("userDisplay");
+			if (!display || !user) return;
+
+			const banBadge = `<span class="badge ${user.banned ? "bg-danger" : "bg-success"}">${user.banned ? "Banned" : "Active"}</span>`;
+			const adminBadge = `<span class="badge ${user.permissions.includes("admin") ? "bg-success" : "bg-secondary"}">${user.permissions.includes("admin") ? "Admin" : "User"}</span>`;
+
+			display.innerHTML = `
+				<div class="detail-inner">
+					<div class="detail-header">
+						<h3 class="detail-name">${user.discordUsername}</h3>
+						<div class="detail-meta">${banBadge} ${adminBadge}</div>
+					</div>
+					<p>Discord ID: <code>${user.discordID}</code></p>
+					<p>Joined: ${new Date(user.joinedAt).toLocaleString()}</p>
+					<h4 class="section-title">Stats</h4>
+					<div id="userStats">${spinnerHtml}</div>
+				</div>`;
+
+			await usersPage.updateActionsBar(discordID);
+
+			try {
+				if (state.userCache[discordID]) {
+					usersPage.populateUserDetailsStats(state.userCache[discordID]);
+				} else {
+					const result = await apiPost("/api/users", { action: "usersDetails", userID: discordID });
+					if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+					state.userCache[discordID] = result;
+					usersPage.populateUserDetailsStats(result);
+				}
+			} catch (err) {
+				console.error("Error loading user stats:", err);
+				const stats = document.getElementById("userStats");
+				if (stats) stats.innerHTML = `<em>Failed to load stats.</em>`;
+			}
+		},
+
+		populateUserDetailsStats(userData) {
+			const statsEl = document.getElementById("userStats");
+			if (!statsEl) return;
+			const { stats } = userData;
+
+			const versionsHtml = (stats.modVersions ?? []).map((v) => `
+				<tr>
+					<td>${v.modName}</td>
+					<td>${v.version.modData.version}</td>
+					<td>${new Date(v.version.uploadTime).toLocaleString()}</td>
+				</tr>`).join("");
+
+			statsEl.innerHTML = `
+				<p>Mods uploaded: <strong>${stats.modsUploaded}</strong></p>
+				<p>Mod versions uploaded: <strong>${stats.modVersionsUploaded}</strong></p>
+				${stats.modVersionsUploaded > 0 ? `
+					<table class="item-table table-sm">
+						<thead><tr><th>Mod Name</th><th>Version</th><th>Upload Time</th></tr></thead>
+						<tbody>${versionsHtml}</tbody>
+					</table>` : ""}`;
+		},
+
+		async updateActionsBar(discordID) {
+			const bar = document.getElementById("userDisplayActions");
+			if (!bar) return;
+			const user = state.users[discordID];
+
+			bar.innerHTML = `
+				<div class="details-action-group">
+					<button class="btn btn-success btn-sm" id="btnCopyUserId">Copy ID</button>
+				</div>
+				<div class="details-action-group">
+					${user.banned
+					? `<button class="btn btn-success btn-sm" id="btnUnbanUser">Unban User</button>`
+					: `<button class="btn btn-danger btn-sm" id="btnBanUser">Ban User</button>`}
+					${user.permissions.includes("admin")
+					? `<button class="btn btn-warning btn-sm" id="btnRemoveAdmin">Remove Admin</button>`
+					: `<button class="btn btn-primary btn-sm" id="btnSetAdmin">Set as Admin</button>`}
+				</div>`;
+
+			document.getElementById("btnCopyUserId").addEventListener("click", () => { navigator.clipboard.writeText(discordID); addAlert("ID copied!", "success"); });
+
+			if (user.banned) {
+				document.getElementById("btnUnbanUser").addEventListener("click", () => usersPage.unbanUser(discordID));
+			} else {
+				document.getElementById("btnBanUser").addEventListener("click", () => usersPage.banUser(discordID));
+			}
+
+			if (user.permissions.includes("admin")) {
+				document.getElementById("btnRemoveAdmin").addEventListener("click", () => usersPage.removeUserAdmin(discordID));
+			} else {
+				document.getElementById("btnSetAdmin").addEventListener("click", () => usersPage.setUserAdmin(discordID));
+			}
+		},
+
+		async banUser(discordID) {
+			if (!await confirmAction("Ban this user? They will be prevented from uploading mods.")) return;
+			try {
+				const result = await apiPost("/api/admin/actions", { action: "banAuthor", authorID: discordID });
+				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+				state.users[discordID].banned = true;
+				delete state.userCache[discordID];
+				addAlert("User banned.", "success");
+				await usersPage.inspectUserDetails(discordID);
+			} catch (err) { console.error(err); addAlert("Failed to ban user.", "error"); }
+		},
+
+		async unbanUser(discordID) {
+			if (!await confirmAction("Unban this user?")) return;
+			try {
+				const result = await apiPost("/api/admin/actions", { action: "unbanUser", authorID: discordID });
+				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+				state.users[discordID].banned = false;
+				delete state.userCache[discordID];
+				addAlert("User unbanned.", "success");
+				await usersPage.inspectUserDetails(discordID);
+			} catch (err) { console.error(err); addAlert("Failed to unban user.", "error"); }
+		},
+
+		async setUserAdmin(discordID) {
+			if (!await confirmAction("Grant admin to this user?")) return;
+			try {
+				const result = await apiPost("/api/admin/actions", { action: "setAdmin", authorID: discordID });
+				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+				if (!state.users[discordID].permissions.includes("admin")) state.users[discordID].permissions.push("admin");
+				delete state.userCache[discordID];
+				addAlert("Admin granted.", "success");
+				await usersPage.inspectUserDetails(discordID);
+			} catch (err) { console.error(err); addAlert("Failed to set admin.", "error"); }
+		},
+
+		async removeUserAdmin(discordID) {
+			if (!await confirmAction("Remove admin from this user?")) return;
+			try {
+				const result = await apiPost("/api/admin/actions", { action: "removeAdmin", authorID: discordID });
+				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+				state.users[discordID].permissions = state.users[discordID].permissions.filter((p) => p !== "admin");
+				delete state.userCache[discordID];
+				addAlert("Admin removed.", "success");
+				await usersPage.inspectUserDetails(discordID);
+			} catch (err) { console.error(err); addAlert("Failed to remove admin.", "error"); }
+		},
+
+		async banUser(authorID) {
+			if (!await confirmAction("Ban this author?")) return;
+			try {
+				const result = await apiPost("/api/admin/actions", { action: "banAuthor", authorID });
+				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+				addAlert("Author banned.", "success");
+			} catch (err) { console.error(err); addAlert("Failed to ban author.", "error"); }
+		},
+
+		// Called from the Bans page
+		async unbanFromList(discordID) {
+			if (!await confirmAction("Unban this user?")) return;
+			try {
+				const result = await apiPost("/api/admin/actions", { action: "unbanUser", authorID: discordID });
+				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+				addAlert("User unbanned.", "success");
+				await bansPage.load();
+			} catch (err) { console.error(err); addAlert("Failed to unban user.", "error"); }
+		},
+	};
+
+	const actionsPage = {
+		async load(page = 1) {
+			state.currentPage = page;
+			try {
+				const result = await apiPost("/api/actions", { page, size: state.pageSize });
+				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+				state.actions = result.actions;
+				state.totalPages = result.pagination.totalAdminPages;
+				actionsPage.render();
+			} catch (err) {
+				console.error("Error loading actions:", err);
+				addAlert("Failed to load actions.", "error");
+			}
+		},
+
+		render() {
+			const actionsTable = document.getElementById("actionsTable");
+			if (!actionsTable) return;
+
+			actionsTable.innerHTML = `
+				<table class="item-table table table-striped">
+					<thead><tr><th>User ID</th><th>Action</th><th>Time</th></tr></thead>
+					<tbody>
+						${state.actions.map((a) => `
+							<tr>
+								<td><code>${a.discordID}</code></td>
+								<td>${a.action}</td>
+								<td>${new Date(a.time).toLocaleString()}</td>
+							</tr>`).join("")}
+					</tbody>
+				</table>`;
+
+			const paginationEl = document.getElementById("actionsPagination");
+			if (!paginationEl) return;
+
+			const { currentPage, totalPages } = state;
+			const pages = [];
+			pages.push(`<li class="page-item ${currentPage === 1 ? "disabled" : ""}">
+				<a class="page-link" href="#" data-page="${currentPage - 1}">Previous</a></li>`);
+
+			for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
+				pages.push(`<li class="page-item ${i === currentPage ? "active" : ""}">
+					<a class="page-link" href="#" data-page="${i}">${i}</a></li>`);
+			}
+
+			pages.push(`<li class="page-item ${currentPage === totalPages ? "disabled" : ""}">
+				<a class="page-link" href="#" data-page="${currentPage + 1}">Next</a></li>`);
+
+			paginationEl.innerHTML = pages.join("");
+			paginationEl.querySelectorAll("[data-page]").forEach((a) => {
+				a.addEventListener("click", (e) => {
+					e.preventDefault();
+					const p = parseInt(e.currentTarget.dataset.page);
+					if (p >= 1 && p <= state.totalPages) actionsPage.load(p);
+				});
+			});
+		},
+	};
+
+	const bansPage = {
+		async load() {
+			try {
+				const result = await apiPost("/api/users", { action: "listUsers" });
+				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+				const banned = (result.users ?? []).filter((u) => u.banned);
+				bansPage.render(banned);
+			} catch (err) {
+				console.error("Error loading bans:", err);
+				addAlert("Failed to load banned users.", "error");
+			}
+		},
+
+		render(bannedUsers) {
+			const list = document.getElementById("bannedUsersList");
+			if (!list) return;
+
+			if (bannedUsers.length === 0) {
+				list.innerHTML = `<p class="empty-message">No banned users.</p>`;
+				return;
+			}
+
+			list.innerHTML = `
+				<table class="item-table table table-striped">
+					<thead><tr><th>Username</th><th>Discord ID</th><th>Joined</th><th>Actions</th></tr></thead>
+					<tbody>
+						${bannedUsers.map((u) => `
+							<tr>
+								<td>${u.discordUsername}</td>
+								<td><code>${u.discordID}</code></td>
+								<td>${new Date(u.joinedAt).toLocaleString()}</td>
+								<td><button class="btn btn-success btn-sm" data-unban="${u.discordID}">Unban</button></td>
+							</tr>`).join("")}
+					</tbody>
+				</table>`;
+
+			list.querySelectorAll("[data-unban]").forEach((btn) => {
+				btn.addEventListener("click", () => usersPage.unbanFromList(btn.dataset.unban));
+			});
+		},
+	};
+
+	const configPage = {
+		async load() {
+			try {
+				const result = await apiPost("/api/config", { action: "getConfig" });
+				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+				const formatted = JSON.stringify(JSON.parse(result.config), null, 2);
+				state.configEditor?.setValue(formatted);
+			} catch (err) {
+				console.error("Error loading config:", err);
+				state.configEditor?.setValue("// Error loading config: " + err.message);
+			}
+		},
+
+		async save() {
+			if (!await confirmAction("Save changes to the config? This could affect site functionality.")) return;
+			const content = state.configEditor?.getValue() ?? "";
+			try { JSON.parse(content); } catch (e) { addAlert("Invalid JSON: " + e.message, "error"); return; }
+
+			try {
+				const result = await apiPost("/api/config", { config: content });
+				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+				addAlert("Config saved! A server restart may be required.", "success");
+			} catch (err) {
+				console.error("Error saving config:", err);
+				addAlert("Failed to save config: " + err.message, "error");
+			}
+		},
+	};
+
+	// -------------------- Interface --------------------
+
+	function init() {
+		pageControl.dashboard.activate();
+
+		document.getElementById("btnSelection").addEventListener("click", () => {
+			pageControl.dashboard.activate();
 		});
-
-		var result = await response.json();
-		if (result.error) {
-			alert("Error: " + result.error);
-			return;
-		}
-
-		alert("User banned successfully!");
-		// Update the user in the cache
-		globalThis.users[discordID].banned = true;
-		await globalThis.displayUser(discordID);
-	} catch (error) {
-		console.error("Error banning user:", error);
-		alert("An error occurred while banning the user.");
-	}
-};
-
-globalThis.unbanUser = async function (discordID) {
-	if (!confirm("Are you sure you want to unban this user?")) {
-		return;
 	}
 
-	try {
-		var response = await fetch("/api/admin/actions", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ action: "unbanUser", authorID: discordID }),
-		});
+	return { init };
+})();
 
-		var result = await response.json();
-		if (result.error) {
-			alert("Error: " + result.error);
-			return;
-		}
-
-		alert("User unbanned successfully!");
-		// Update the user in the cache
-		globalThis.users[discordID].banned = false;
-		await globalThis.displayUser(discordID);
-	} catch (error) {
-		console.error("Error unbanning user:", error);
-		alert("An error occurred while unbanning the user.");
-	}
-};
-
-globalThis.setAdmin = async function (discordID) {
-	if (!confirm("Are you sure you want to set this user as an admin?")) {
-		return;
-	}
-
-	try {
-		var response = await fetch("/api/admin/actions", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ action: "setAdmin", authorID: discordID }),
-		});
-
-		var result = await response.json();
-		if (result.error) {
-			alert("Error: " + result.error);
-			return;
-		}
-
-		alert("User set as admin successfully!");
-		// Update the user in the cache
-		if (!globalThis.users[discordID].permissions.includes("admin")) {
-			globalThis.users[discordID].permissions.push("admin");
-		}
-		await globalThis.displayUser(discordID);
-	} catch (error) {
-		console.error("Error setting admin:", error);
-		alert("An error occurred while setting the user as admin.");
-	}
-};
-
-globalThis.removeAdmin = async function (discordID) {
-	if (!confirm("Are you sure you want to remove admin status from this user?")) {
-		return;
-	}
-
-	try {
-		var response = await fetch("/api/admin/actions", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ action: "removeAdmin", authorID: discordID }),
-		});
-
-		var result = await response.json();
-		if (result.error) {
-			alert("Error: " + result.error);
-			return;
-		}
-
-		alert("Admin status removed successfully!");
-		// Update the user in the cache
-		globalThis.users[discordID].permissions = globalThis.users[discordID].permissions.filter((p) => p !== "admin");
-		await globalThis.displayUser(discordID);
-	} catch (error) {
-		console.error("Error removing admin:", error);
-		alert("An error occurred while removing admin status.");
-	}
-};
-
-// ------------------------------------------ Site Actions ------------------------------------------
-
-globalThis.loadActions = async function (page = 1) {
-	globalThis.currentPage = page;
-
-	try {
-		var response = await fetch("/api/actions", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				page: page,
-				size: globalThis.pageSize,
-			}),
-		});
-		var result = await response.json();
-
-		if (result.error) {
-			console.error("Error loading actions:", result.error);
-			alert("Error: " + result.error);
-			return;
-		}
-
-		globalThis.actions = result.actions;
-		globalThis.totalAdminPages = result.pagination.totalAdminPages;
-
-		updateActionsList();
-	} catch (error) {
-		console.error("Error loading actions:", error);
-	}
-};
-
-globalThis.updateActionsList = function () {
-	var actionsList = document.getElementById("actionsList");
-	var actionsItems = "";
-
-	globalThis.actions.forEach((action) => {
-		actionsItems += `<tr>
-            <td>${action.discordID}</td>
-            <td>${action.action}</td>
-            <td>${new Date(action.time).toLocaleString()}</td>
-        </tr>`;
-	});
-
-	actionsList.innerHTML = `<table class="table table-striped">
-        <thead>
-            <tr>
-                <th>User ID</th>
-                <th>Action</th>
-                <th>Time</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${actionsItems}
-        </tbody>
-    </table>`;
-
-	// Update pagination
-	var pagination = document.getElementById("actionsPagination");
-	var paginationHtml = "";
-
-	// Previous button
-	paginationHtml += `<li class="page-item ${globalThis.currentPage === 1 ? "disabled" : ""}">
-        <a class="page-link" href="#" onclick="globalThis.LoadActions(${globalThis.currentPage - 1}); return false;">Previous</a>
-    </li>`;
-
-	// Page numbers
-	for (let i = Math.max(1, globalThis.currentPage - 2); i <= Math.min(globalThis.totalAdminPages, globalThis.currentPage + 2); i++) {
-		paginationHtml += `<li class="page-item ${i === globalThis.currentPage ? "active" : ""}">
-            <a class="page-link" href="#" onclick="globalThis.LoadActions(${i}); return false;">${i}</a>
-        </li>`;
-	}
-
-	// Next button
-	paginationHtml += `<li class="page-item ${globalThis.currentPage === globalThis.totalAdminPages ? "disabled" : ""}">
-        <a class="page-link" href="#" onclick="globalThis.loadActions(${globalThis.currentPage + 1}); return false;">Next</a>
-    </li>`;
-
-	pagination.innerHTML = paginationHtml;
-};
-
-// ------------------------------------------Banned Users ------------------------------------------
-
-globalThis.loadBannedUsers = async function () {
-	try {
-		var response = await fetch("/api/users", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ action: "listUsers" }),
-		});
-		var result = await response.json();
-
-		if (result.error) {
-			console.error("Error loading banned users:", result.error);
-			alert("Error: " + result.error);
-			return;
-		}
-
-		// Filter for banned users
-		var bannedUsers = result.users.filter((user) => user.banned);
-
-		updateBannedUsersList(bannedUsers);
-	} catch (error) {
-		console.error("Error loading banned users:", error);
-	}
-};
-
-globalThis.updateBannedUsersList = function (bannedUsers) {
-	var bannedUsersList = document.getElementById("bannedUsersList");
-
-	if (bannedUsers.length === 0) {
-		bannedUsersList.innerHTML = "<p>No banned users found.</p>";
-		return;
-	}
-
-	var bannedUsersItems = "";
-
-	bannedUsers.forEach((user) => {
-		bannedUsersItems += `<tr>
-            <td>${user.discordUsername}</td>
-            <td>${user.discordID}</td>
-            <td>${new Date(user.joinedAt).toLocaleString()}</td>
-            <td>
-                <button class="btn btn-success btn-sm" onclick='globalThis.unbanUserFromList("${user.discordID}")'>Unban</button>
-            </td>
-        </tr>`;
-	});
-
-	bannedUsersList.innerHTML = `<table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Username</th>
-                <th>discord ID</th>
-                <th>Joined At</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${bannedUsersItems}
-        </tbody>
-    </table>`;
-};
-
-globalThis.unbanUserFromList = async function (discordID) {
-	if (!confirm("Are you sure you want to unban this user?")) {
-		return;
-	}
-
-	try {
-		var response = await fetch("/api/admin/actions", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ action: "unbanUser", authorID: discordID }),
-		});
-
-		var result = await response.json();
-		if (result.error) {
-			alert("Error: " + result.error);
-			return;
-		}
-
-		alert("User unbanned successfully!");
-		// Reload the banned users list
-		await globalThis.loadBannedUsers();
-	} catch (error) {
-		console.error("Error unbanning user:", error);
-		alert("An error occurred while unbanning the user.");
-	}
-};
-
-// ------------------------------------------ Config ------------------------------------------
-
-globalThis.loadConfig = async function () {
-	try {
-		var response = await fetch("/api/config", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ action: "getConfig" }),
-		});
-		var result = await response.json();
-
-		if (result.error) {
-			console.error("Error loading config:", result.error);
-			alert("Error: " + result.error);
-			return;
-		}
-
-		// Format the JSON for better readability
-		var formattedConfig = JSON.stringify(JSON.parse(result.config), null, 2);
-
-		// Set the editor content
-		if (globalThis.configEditor) {
-			globalThis.configEditor.setValue(formattedConfig);
-		}
-	} catch (error) {
-		console.error("Error loading config:", error);
-		if (globalThis.configEditor) {
-			globalThis.configEditor.setValue("// Error loading config: " + error.message);
-		}
-	}
-};
-
-globalThis.saveConfig = async function () {
-	if (!confirm("Are you sure you want to save changes to the config file? This could affect the site's functionality.")) {
-		return;
-	}
-
-	try {
-		var configContent = globalThis.configEditor.getValue();
-
-		// Validate JSON
-		try {
-			JSON.parse(configContent);
-		} catch (e) {
-			alert("Invalid JSON format: " + e.message);
-			return;
-		}
-
-		var response = await fetch("/api/config", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ config: configContent }),
-		});
-
-		var result = await response.json();
-		if (result.error) {
-			alert("Error: " + result.error);
-			return;
-		}
-
-		alert("Config saved successfully! You may need to restart the server for some changes to take effect.");
-	} catch (error) {
-		console.error("Error saving config:", error);
-		alert("An error occurred while saving the config: " + error.message);
-	}
-};
-
-// ------------------------------------------ Initialization ------------------------------------------
-
-document.addEventListener("DOMContentLoaded", async () => {
-	console.log("admin page loaded");
-	globalThis.adminPages.Selection.action();
+document.addEventListener("DOMContentLoaded", () => {
+	AdminPage.init();
 });

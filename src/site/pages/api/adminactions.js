@@ -6,6 +6,7 @@ const logger = new Utils.Log("pages.adminactions");
 
 module.exports = {
 	paths: ["/api/admin/actions"],
+
 	/**
 	 * @param {import("http").IncomingMessage} req
 	 * @param {import("http").ServerResponse} res

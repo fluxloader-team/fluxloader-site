@@ -1,0 +1,58 @@
+.mod-list {
+	width: 50%;
+	height: calc(100% - 45px);
+	display: flex;
+	flex-direction: column;
+	padding: 10px;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	scrollbar-width: none;
+}
+
+.mod-list-item {
+	cursor: pointer;
+}
+
+.mod-list-item:hover {
+	background-color: var(--color-bg-light-hover-lighter);
+}
+
+.mods-container {
+	height: calc(100%);
+	display: flex;
+	flex-direction: row;
+	gap: 0px;
+	background-color: var(--color-bg-light);
+}
+
+.mod-display {
+	width: calc(50%);
+	height: calc(100% - 50px);
+	overflow-x: hidden;
+	overflow-y: scroll;
+	scrollbar-width: none;
+	background-color: var(--color-bg-medium);
+}
+
+.mod-display-data {
+	padding: 20px;
+	scrollbar-width: none;
+	width: 100%;
+	height: calc(100% - 50px);
+	display: flex;
+	flex-direction: column;
+	overflow-x: hidden;
+}
+
+.mod-display-actions {
+	background-color: #222222;
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	width: calc(50%);
+	height: 50px;
+	display: flex;
+	flex-direction: row;
+	gap: 10px;
+}
+

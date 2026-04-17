@@ -1,180 +1,389 @@
-.adminpage {
-	display: flex;
-	flex-direction: row;
-	width: 100%;
-	height: 100%;
+:root {
+	--admin-border: 8px solid #1a1d24;
+	--admin-list-width: 500px;
+	--admin-action-bar-height: 55px;
+	--admin-header-height: 60px;
+	--admin-radius: 4px;
+	--admin-row-hover: #424655;
+	--admin-row-border: 1px solid #32363f;
 }
 
-.adminpageColumn {
-	display: flex;
-	flex-direction: column;
-	overflow-x: hidden;
-	overflow-y: scroll;
-	scrollbar-width: none;
-	height: 100%;
-	background-color: var(--color-bg-light);
-}
-
-/* ----------------------------------- Page/User Management ----------------------------------- */
-
-.adminpage.adminpage-user-management {
-	height: calc(100% - 45px);
-}
-
-.adminpage-user-management .adminpageColumn {
-	border: 10px solid #222222;
-}
-
-.userList {
-	width: 50%;
-	height: calc(100% - 45px);
-	display: flex;
-	flex-direction: column;
-	padding: 10px;
-	border: 10px solid #222222;
-	overflow-x: hidden;
-	overflow-y: scroll;
-	scrollbar-width: none;
-}
-
-.userListItem {
-	border-bottom: 3px solid #2c2c2c;
-}
-
-.userListItem:hover {
-	background-color: #494949;
-}
-
-.userDisplay {
-	width: calc(100%);
-	height: calc(100%);
-	overflow-x: hidden;
-	overflow-y: scroll;
-	scrollbar-width: none;
-}
-
-.userDisplayData {
-	padding: 10px;
-	scrollbar-width: none;
-	width: 100%;
-	height: calc(100% - 50px);
-	display: flex;
-	flex-direction: column;
-	overflow-x: hidden;
-}
-
-.userDisplayActions {
-	background-color: #222222;
-	position: absolute;
-	bottom: 0;
-	right: 0;
-	width: calc(100% - 500px);
-	height: 155px;
-	display: flex;
-	flex-direction: row;
-	gap: 10px;
-}
-
-/* ----------------------------------- Page/Si Actions ----------------------------------- */
-
-.adminpage.adminpage-site-actions {
-	flex-direction: column;
-	height: calc(100% - 45px);
-	overflow-y: auto;
-}
-
-.adminpage-site-actions .adminpageColumn {
-	border: 10px solid #222222;
-	padding: 20px;
-}
-
-.adminpage-site-actions .pagination {
-	margin-top: 20px;
+.admin-page-site-actions .pagination {
+	margin-top: 1.25rem;
 	justify-content: center;
 }
 
-/* ----------------------------------- Page/Bans ----------------------------------- */
-
-.adminpage.adminpage-bans {
-	flex-direction: column;
-	height: calc(100% - 45px);
-	overflow-y: auto;
-}
-
-.adminpage-bans .adminpageColumn {
-	border: 10px solid #222222;
-	padding: 20px;
-}
-
-/* ----------------------------------- Page/Config ----------------------------------- */
-
-.adminpage.adminpage-config {
-	flex-direction: column;
-	height: calc(100% - 45px);
-	overflow-y: auto;
-}
-
-.adminpage-config .adminpageColumn {
-	border: 10px solid #222222;
-	padding: 20px;
-}
-
-/* ----------------------------------- Page/Mods ----------------------------------- */
-
-.adminpage.adminpage-mods {
-	height: calc(100% - 45px);
-}
-
-.adminpage-mods .adminpageColumn {
-	border: 10px solid #222222;
-}
-
-.adminpage-mods .modList {
-	width: 50%;
-	height: calc(100% - 45px);
+.access-denied-message {
 	display: flex;
 	flex-direction: column;
-	padding: 10px;
-	border: 10px solid #222222;
-	overflow-x: hidden;
-	overflow-y: scroll;
-	scrollbar-width: none;
+	align-items: center;
+	justify-content: center;
+	height: 100vh;
+	gap: 0.75rem;
+	color: #c0c0c0;
 }
 
-.adminpage-mods .modListItem {
-	border-bottom: 3px solid #2c2c2c;
+.empty-message {
+	color: #6b7280;
+	text-align: center;
+	padding: 2rem;
+	font-size: 0.9rem;
 }
 
-.adminpage-mods .modListItem:hover {
-	background-color: #494949;
-}
-
-.adminpage-mods .modDisplay {
-	width: calc(100%);
-	height: calc(100%);
-	overflow-x: hidden;
-	overflow-y: scroll;
-	scrollbar-width: none;
-}
-
-.adminpage-mods.modDisplayData {
-	padding: 10px;
-	scrollbar-width: none;
-	width: 100%;
-	height: calc(100% - 50px);
+.spinner-holder {
 	display: flex;
-	flex-direction: column;
-	overflow-x: hidden;
+	justify-content: center;
+	padding: 2rem;
 }
 
-.adminpage-mods .modDisplayActions {
-	background-color: #222222;
-	position: absolute;
-	bottom: 0;
-	right: 0;
-	width: calc(100% - 500px);
-	height: 155px;
+/* -------------------- Layout -------------------- */
+
+.admin-page {
 	display: flex;
 	flex-direction: row;
-	gap: 10px;
+	width: 100%;
+	height: calc(100% - var(--admin-header-height));
+}
+
+.admin-page-site-actions,
+.admin-page-bans,
+.admin-page-config {
+	flex-direction: column;
+	overflow-y: auto;
+}
+
+.full-page {
+	width: 100%;
+	padding: 24px 28px;
+	border: var(--admin-border);
+	background-color: var(--color-bg-light);
+	overflow-y: auto;
+}
+
+.left-split-page,
+.right-split-page {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+	border: var(--admin-border);
+}
+
+.left-split-page {
+	width: var(--admin-list-width);
+	flex-shrink: 0;
+	background-color: var(--color-bg-light);
+}
+
+.right-split-page {
+	flex: 1;
+	position: relative;
+	background-color: var(--color-bg-medium);
+}
+
+.page-title {
+	font-size: 1.1rem;
+	font-weight: 600;
+	color: #c8ccda;
+	margin-bottom: 0;
+}
+
+/* -------------------- Alerts -------------------- */
+
+#alertArea {
+	position: fixed;
+	bottom: 1.25rem;
+	right: 1.25rem;
+	z-index: 9999;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	pointer-events: none;
+}
+
+.admin-alert {
+	padding: 0.6rem 1.1rem;
+	border-radius: var(--admin-radius);
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: #fff;
+	background: #3a3d49;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+	opacity: 0;
+	transform: translateY(8px);
+	transition:
+		opacity 0.2s ease,
+		transform 0.2s ease;
+}
+
+.admin-alert.admin-alert-show {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.admin-alert-success {
+	background: #1e6e42;
+}
+
+.admin-alert-error {
+	background: #8b1e1e;
+}
+
+.admin-alert-info {
+	background: #3a3d49;
+}
+
+/* -------------------- Search bar -------------------- */
+
+.search-bar {
+	display: flex;
+	gap: 0.5rem;
+	padding: 10px;
+	background-color: var(--color-bg-dark);
+	flex-shrink: 0;
+}
+
+.search-input {
+	flex: 1;
+	min-width: 0;
+	background-color: var(--color-bg-dark2);
+	border: 1px solid #3a3d49;
+	border-radius: var(--admin-radius);
+	color: #e0e0e0;
+	padding: 0.35rem 0.6rem;
+	font-size: 0.875rem;
+}
+
+.search-input:focus {
+	outline: none;
+	border-color: #5a7aab;
+}
+
+.search-select {
+	background-color: var(--color-bg-dark2);
+	border: 1px solid #3a3d49;
+	border-radius: var(--admin-radius);
+	color: #e0e0e0;
+	padding: 0.35rem 0.5rem;
+	font-size: 0.875rem;
+	flex-shrink: 0;
+}
+
+/* -------------------- Item tables -------------------- */
+
+.item-table-container {
+	flex: 1;
+	overflow-y: auto;
+	scrollbar-width: none;
+}
+
+.item-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.875rem;
+}
+
+.item-table thead th {
+	background-color: var(--color-bg-dark);
+	color: #9aa0b0;
+	padding: 8px 12px;
+	text-align: left;
+	font-weight: 600;
+	font-size: 0.78rem;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	position: sticky;
+	top: 0;
+	z-index: 1;
+}
+
+.item-table tbody td {
+	padding: 8px 12px;
+	border-bottom: var(--admin-row-border);
+	color: #d0d4de;
+}
+
+.item-table-row {
+	cursor: pointer;
+	transition: background 0.1s;
+}
+
+.item-table-row:hover {
+	background-color: var(--admin-row-hover);
+}
+
+/* -------------------- Item details -------------------- */
+
+.detail-page {
+	height: calc(100% - var(--admin-action-bar-height));
+	overflow-y: auto;
+	scrollbar-width: none;
+}
+
+.detail-inner {
+	padding: 20px 24px;
+}
+
+.detail-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-bottom: 0.5rem;
+}
+
+.detail-name {
+	margin: 0;
+	font-size: 1.25rem;
+	color: #e8eaf0;
+}
+
+.detail-meta {
+	display: flex;
+	gap: 0.3rem;
+	flex-shrink: 0;
+}
+
+.detail-short-desc {
+	color: #9aa0b0;
+	margin-bottom: 0.75rem;
+	font-size: 0.9rem;
+}
+
+.detail-tags {
+	margin-bottom: 1rem;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.3rem;
+}
+
+.section-title {
+	margin-top: 1.5rem;
+	margin-bottom: 0.5rem;
+	font-size: 0.95rem;
+	color: #c0c4d0;
+	font-weight: 600;
+}
+
+.markdown-content {
+	font-size: 0.9rem;
+	line-height: 1.65;
+	color: #c8ccda;
+}
+
+.markdown-content pre {
+	background: var(--color-bg-dark2);
+	padding: 0.75rem 1rem;
+	border-radius: var(--admin-radius);
+	overflow-x: auto;
+}
+
+.markdown-content code {
+	background: var(--color-bg-dark2);
+	padding: 0.1em 0.35em;
+	border-radius: 3px;
+	font-size: 0.85em;
+}
+
+.details-action-bar {
+	height: var(--admin-action-bar-height);
+	background-color: var(--color-bg-dark2);
+	display: flex;
+	align-items: center;
+	padding: 0 12px;
+	gap: 12px;
+	flex-shrink: 0;
+	text-wrap-mode: nowrap;
+}
+
+.details-action-group {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.details-action-group + .details-action-group {
+	border-left: 1px solid #333740;
+	padding-left: 10px;
+}
+
+/* --------------------Actions panel -------------------- */
+
+.actions-table {
+	margin-top: 0.75rem;
+}
+
+/* -------------------- Selection panel -------------------- */
+
+.admin-page-dashboard {
+	align-items: center;
+	justify-content: center;
+}
+
+.dashboard-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2rem;
+}
+
+.dashboard-title {
+	color: #c8ccda;
+	font-size: 1.4rem;
+	font-weight: 600;
+	margin: 0;
+}
+
+.dashboard-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 180px);
+	gap: 1rem;
+}
+
+.dashboard-card {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 0.6rem;
+	height: 120px;
+	background-color: var(--color-bg-medium);
+	border: 1px solid #3a3d49;
+	border-radius: 6px;
+	cursor: pointer;
+	transition:
+		background 0.15s,
+		border-color 0.15s,
+		transform 0.1s;
+	color: #c8ccda;
+}
+
+.dashboard-card:hover {
+	background-color: var(--color-bg-light-hover-lighter);
+	border-color: #5a7aab;
+	transform: translateY(-2px);
+}
+
+.dashboard-icon {
+	font-size: 1.8rem;
+}
+
+.dashboard-label {
+	font-size: 0.85rem;
+	font-weight: 500;
+}
+
+/* -------------------- Config panel -------------------- */
+
+.monaco-container {
+	width: 100%;
+	height: 500px;
+	border: 1px solid #3a3d49;
+	border-radius: var(--admin-radius);
+}
+
+.config-actions {
+	display: flex;
+	gap: 0.5rem;
+	margin-top: 1rem;
 }

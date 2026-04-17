@@ -1,12 +1,17 @@
 const http = require("http");
 const fs = require("fs");
 const Utils = require("./common/utils.js");
+const { getPublicFile } = require("./common/files.js");
 const path = require("path");
 const discord = require("./discord/discordbot.js");
 const { file } = require("jszip");
 
 const CONFIG_PATH = path.join(__dirname, "config.json");
+
 const DEFAULT_CONFIG = {
+	dev: {
+		hotReload: false,
+	},
 	discord: {
 		clientId: "CLIENT_ID",
 		clientSecret: "CLIENT_SECRET",
@@ -40,8 +45,6 @@ globalThis.public = {};
 globalThis.timers = [];
 globalThis.server = null;
 
-// --------------------------------------------------------------------------------------
-
 function loadConfig() {
 	if (!fs.existsSync(CONFIG_PATH)) {
 		logger.info("Config file not found, generating default config.json...");
@@ -68,7 +71,8 @@ function loadResources() {
 		if (entry.isDirectory()) return;
 		templateFileNames.push(entry.name);
 		const filePath = path.resolve(entry.parentPath, entry.name);
-		templates[entry.name] = { content: fs.readFileSync(filePath, "utf8"), path: filePath };
+		const content = globalThis.config.dev?.hotReload == true ? null : fs.readFileSync(filePath, "utf8");
+		templates[entry.name] = { content, path: filePath };
 	});
 
 	logger.info(`templates loaded: [ ${templateFileNames.join(", ")} ]`);
@@ -78,7 +82,8 @@ function loadResources() {
 		if (entry.isDirectory()) return;
 		publicFileNames.push(entry.name);
 		const filePath = path.resolve(entry.parentPath, entry.name);
-		public[entry.name] = fs.readFileSync(filePath, "utf8");
+		const content = globalThis.config.dev?.hotReload == true ? null : fs.readFileSync(filePath, "utf8");
+		public[entry.name] = { content, path: filePath };
 	});
 
 	logger.info(`public files loaded: [ ${publicFileNames.join(", ")} ]`);
@@ -93,6 +98,10 @@ function loadResources() {
 	});
 
 	logger.info(`Timers loaded: [ ${timerNames.join(", ")} ]`);
+
+	if (globalThis.config.dev?.hotReload == true) {
+		logger.info(`Hot reload is enabled`);
+	}
 }
 
 /**
@@ -110,7 +119,7 @@ function handleWebRequests(req, res) {
 		return page.run(req, res);
 	}
 
-	var publicFile = public[urlName.replace("/", "")];
+	var publicFile = getPublicFile(urlName.replace("/", ""));
 	if (publicFile) {
 		const type =
 			{
@@ -123,7 +132,7 @@ function handleWebRequests(req, res) {
 			}[path.extname(urlName)] || "text/html";
 		logger.debug(`Received request for public file: ${url} (Content-Type: ${type})`);
 		res.writeHead(200, { "Content-Type": type });
-		res.end(publicFile);
+		res.end(publicFile.content);
 		return;
 	}
 

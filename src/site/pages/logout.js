@@ -2,6 +2,11 @@ const { getSessionFromRequest, removeSession } = require("../../common/session")
 
 module.exports = {
 	paths: ["/logout"],
+
+	/**
+	 * @param {import("http").IncomingMessage} req
+	 * @param {import("http").ServerResponse} res
+	 */
 	run: async (req, res) => {
 		const session = await getSessionFromRequest(req);
 

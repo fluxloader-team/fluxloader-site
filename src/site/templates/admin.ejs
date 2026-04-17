@@ -2,33 +2,61 @@
 <html lang="en" data-bs-theme="dark">
 	<head>
 		<%- include("header") %>
-		<title>Fluxloader Site | Admin</title>
+		<title>Fluxloader | Admin</title>
 	</head>
 
 	<body>
 		<link rel="stylesheet" href="admin.css" />
 
 		<% if (!hasAdminPermissions) { %>
-		<h1 style="text-align: center; margin-top: 50px">Access Denied</h1>
-		<p style="text-align: center">You do not have permission to access this page.</p>
-		<%- include("footer") %> <% } else { %>
-		<div class="pageContainer">
-			<div class="headerContainer">
-				<a class="btn btn-secondary headerButton" href="/">Mod List</a>
+			<div class="access-denied-message">
+				<h1>Access Denied</h1>
+				<p>You do not have permission to access this page.</p>
+				<a class="btn btn-secondary" href="/">Return to Mod List</a>
+			</div>
+			<%- include("footer") %>
 
-				<a class="btn btn-secondary headerButton" onclick="globalThis.adminPages.Selection.action();">Selection menu</a>
-
-				<div class="rightContainer">
-					<a class="btn btn-primary" target="_blank" title="Download the App" href="https://github.com/fluxloader-team/fluxloader/releases/latest/">Fluxloader</a>
-					<%- include("discord", { user }) %>
+		<% } else { %>
+			<div class="page-container">
+				<div class="header-container">
+					<div class="header-left">
+						<a class="btn btn-secondary" href="/">Mod List</a>
+						<a class="btn btn-secondary" id="btnSelection">Selection menu</a>
+					</div>
+					<div class="header-right">
+						<a class="btn btn-primary" target="_blank" href="https://github.com/fluxloader-team/fluxloader/releases/latest/">Fluxloader</a>
+						<%- include("discord", { user }) %>
+					</div>
 				</div>
+
+				<div id="alertArea" aria-live="polite"></div>
+				
+				<div id="adminPageContent" class="admin-page"></div>
 			</div>
 
-			<div id="adminPageContent" class="adminpage fullpage"></div>
-		</div>
+			<!-- EJS templates the JS can use -->
+			<template id="tpl-dashboard">
+				<%- include("admin-page-dashboard") %>
+			</template>
+			<template id="tpl-mod-management">
+				<%- include("admin-page-mods") %>
+			</template>
+			<template id="tpl-user-management">
+				<%- include("admin-page-users") %>
+			</template>
+			<template id="tpl-site-actions">
+				<%- include("admin-page-actions") %>
+			</template>
+			<template id="tpl-bans">
+				<%- include("admin-page-bans") %>
+			</template>
+			<template id="tpl-config">
+				<%- include("admin-page-config") %>
+			</template>
 
-		<script src="admin.js"></script>
+			<script src="admin.js"></script>
 
-		<%- include("footer") %> <% } %>
+			<%- include("footer") %>
+		<% } %>
 	</body>
 </html>

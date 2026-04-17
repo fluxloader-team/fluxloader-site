@@ -5,6 +5,7 @@ const logger = new Utils.Log("pages.search");
 
 module.exports = {
 	paths: ["/api/mods"],
+
 	/**
 	 * @param {import("http").IncomingMessage} req
 	 * @param {import("http").ServerResponse} res

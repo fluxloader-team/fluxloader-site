@@ -8,6 +8,7 @@ const logger = new Utils.Log("pages.config");
 
 module.exports = {
 	paths: ["/api/config"],
+
 	/**
 	 * @param {import("http").IncomingMessage} req
 	 * @param {import("http").ServerResponse} res
