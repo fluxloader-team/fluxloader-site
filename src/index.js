@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const http = require("http");
 const fs = require("fs");
 const Utils = require("./common/utils.js");
@@ -47,7 +49,36 @@ function loadConfig() {
 		fs.writeFileSync(CONFIG_PATH, JSON.stringify(DEFAULT_CONFIG, null, 2), "utf-8");
 	}
 
-	globalThis.config = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf-8"));
+	// globalThis.config = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf-8"));
+	const config_file = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf-8"));
+
+	const config = {
+		discord: {
+			clientId: process.env.DISCORD_CLIENTID ?? config_file.clientId,
+			clientSecret: process.env.DISCORD_CLIENTSECRET ?? config_file.clientSecret,
+			redirectUri: process.env.DISCORD_REDIRECTURI ?? config_file.redirectUri,
+			token: process.env.DISCORD_TOKEN ?? config_file.token,
+			runbot: process.env.DISCORD_RUNBOT ?? config_file.runbot,
+			serverLog: process.env.DISCORD_SERVERLOG ?? config_file.serverLog,
+			serverLogChannel: process.env.DISCORD_SERVERLOGCHANNEL ?? config_file.serverLogChannel,
+			serverActionsChannel: process.env.DISCORD_SERVERACTIONSCHANNEL ?? config_file.serverActionsChannel,
+			server: process.env.DISCORD_SERVER ?? config_file.server,
+		},
+		mongodb: {
+			uri: process.env.MONGODB_URI ?? config_file.uri,
+		},
+		git: {
+			// Loose comparison
+			pull: process.env.GIT_PULL ?? config_file.pull,
+		},
+		modSettings: {
+			validationTime: process.env.MODSETTINGS_VALIDATIONTIME ?? config_file.validationTime,
+		},
+		requireGithubSecretForReload: process.env.REQUIREGITHUBSECRETFORRELOAD ?? config_file.requireGithubSecretForReload,
+		githubSecret: process.env.GITHUBSECRET ?? config_file.githubSecret,
+	};
+
+	globalThis.config = config
 }
 
 function loadResources() {
