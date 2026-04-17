@@ -3,7 +3,6 @@ const fs = require("fs");
 const Utils = require("./common/utils.js");
 const path = require("path");
 const discord = require("./discord/discordbot.js");
-const { file } = require("jszip");
 
 const CONFIG_PATH = path.join(__dirname, "config.json");
 const DEFAULT_CONFIG = {
