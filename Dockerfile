@@ -6,8 +6,6 @@ WORKDIR /app
 
 ENV NODE_ENV="production"
 
-EXPOSE 20221
-
 COPY package*.json ./
 
 # Clean install
