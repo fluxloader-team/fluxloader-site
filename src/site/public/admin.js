@@ -101,7 +101,7 @@ const AdminPage = (() => {
 				await bansPage.load();
 			},
 		},
-		"config": {
+		config: {
 			async activate() {
 				loadTemplate("tpl-config", "admin-page-config");
 				document.getElementById("btnSaveConfig").addEventListener("click", () => configPage.save());
@@ -163,16 +163,16 @@ const AdminPage = (() => {
 					<thead><tr><th>Name</th><th>Author</th><th>Version</th></tr></thead>
 					<tbody>
 						${entries
-					.map(
-						(m) => `
+							.map(
+								(m) => `
 							<tr class="item-table-row" data-modid="${m.modID}">
 								<td>${m.modData.name}</td>
 								<td>${m.modData.author}</td>
 								<td>${m.modData.version}</td>
 							</tr>
 						`,
-					)
-					.join("")}
+							)
+							.join("")}
 					</tbody>
 				</table>`;
 
@@ -456,11 +456,11 @@ const AdminPage = (() => {
 					<thead><tr><th>Username</th><th>Status</th></tr></thead>
 					<tbody>
 						${entries
-					.map((u) => {
-						const badges = [u.banned ? `<span class="badge bg-danger">Banned</span>` : "", u.permissions.includes("admin") ? `<span class="badge bg-success">Admin</span>` : ""].join(" ");
-						return `<tr class="item-table-row" data-userid="${u.discordID}"><td>${u.discordUsername}</td><td>${badges}</td></tr>`;
-					})
-					.join("")}
+							.map((u) => {
+								const badges = [u.banned ? `<span class="badge bg-danger">Banned</span>` : "", u.permissions.includes("admin") ? `<span class="badge bg-success">Admin</span>` : ""].join(" ");
+								return `<tr class="item-table-row" data-userid="${u.discordID}"><td>${u.discordUsername}</td><td>${badges}</td></tr>`;
+							})
+							.join("")}
 					</tbody>
 				</table>`;
 
@@ -531,13 +531,14 @@ const AdminPage = (() => {
 			statsEl.innerHTML = `
 				<p>Mods uploaded: <strong>${stats.modsUploaded}</strong></p>
 				<p>Mod versions uploaded: <strong>${stats.modVersionsUploaded}</strong></p>
-				${stats.modVersionsUploaded > 0
-					? `
+				${
+					stats.modVersionsUploaded > 0
+						? `
 					<table class="item-table table-sm">
 						<thead><tr><th>Mod Name</th><th>Version</th><th>Upload Time</th></tr></thead>
 						<tbody>${versionsHtml}</tbody>
 					</table>`
-					: ""
+						: ""
 				}`;
 		},
 
@@ -705,15 +706,15 @@ const AdminPage = (() => {
 					<thead><tr><th>User ID</th><th>Action</th><th>Time</th></tr></thead>
 					<tbody>
 						${state.actions
-					.map(
-						(a) => `
+							.map(
+								(a) => `
 							<tr>
 								<td><code>${a.discordID}</code></td>
 								<td>${a.action}</td>
 								<td>${new Date(a.time).toLocaleString()}</td>
 							</tr>`,
-					)
-					.join("")}
+							)
+							.join("")}
 					</tbody>
 				</table>`;
 
@@ -774,16 +775,16 @@ const AdminPage = (() => {
 					<thead><tr><th>Username</th><th>Discord ID</th><th>Joined</th><th>Actions</th></tr></thead>
 					<tbody>
 						${bannedUsers
-					.map(
-						(u) => `
+							.map(
+								(u) => `
 							<tr>
 								<td>${u.discordUsername}</td>
 								<td><code>${u.discordID}</code></td>
 								<td>${new Date(u.joinedAt).toLocaleString()}</td>
 								<td><button class="btn btn-success btn-sm" data-unban="${u.discordID}">Unban</button></td>
 							</tr>`,
-					)
-					.join("")}
+							)
+							.join("")}
 					</tbody>
 				</table>`;
 
@@ -797,7 +798,10 @@ const AdminPage = (() => {
 		async load() {
 			try {
 				const result = await apiPost("/api/config", { action: "getConfig" });
-				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+				if (result.error) {
+					addAlert("Error: " + result.error, "error");
+					return;
+				}
 				const formatted = JSON.stringify(JSON.parse(result.config), null, 2);
 				state.configEditor?.setValue(formatted);
 			} catch (err) {
@@ -807,13 +811,21 @@ const AdminPage = (() => {
 		},
 
 		async save() {
-			if (!await confirmAction("Save changes to the config? This could affect site functionality.")) return;
+			if (!(await confirmAction("Save changes to the config? This could affect site functionality."))) return;
 			const content = state.configEditor?.getValue() ?? "";
-			try { JSON.parse(content); } catch (e) { addAlert("Invalid JSON: " + e.message, "error"); return; }
+			try {
+				JSON.parse(content);
+			} catch (e) {
+				addAlert("Invalid JSON: " + e.message, "error");
+				return;
+			}
 
 			try {
 				const result = await apiPost("/api/config", { config: content });
-				if (result.error) { addAlert("Error: " + result.error, "error"); return; }
+				if (result.error) {
+					addAlert("Error: " + result.error, "error");
+					return;
+				}
 				addAlert("Config saved! A server restart may be required.", "success");
 			} catch (err) {
 				console.error("Error saving config:", err);
