@@ -3,6 +3,8 @@
 .gitlab-ci.yml
 .prettierignore
 .prettierrc
+.env
+docker.example.env
 
 Dockerfile
 src/fluxloader.log
@@ -11,6 +13,7 @@ jsdoc.json
 
 test/
 scripts/
+nginx/
 
 .devcontainer/
 .github/
