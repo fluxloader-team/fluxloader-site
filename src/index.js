@@ -1,4 +1,4 @@
-require('dotenv').config()
+require("dotenv").config();
 
 const http = require("http");
 const fs = require("fs");
@@ -78,7 +78,7 @@ function loadConfig() {
 		githubSecret: process.env.GITHUBSECRET ?? config_file.githubSecret,
 	};
 
-	globalThis.config = config
+	globalThis.config = config;
 }
 
 function loadResources() {
