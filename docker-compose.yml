@@ -1,10 +1,8 @@
 services:
     fluxloader:
-        image: ghcr.io/fluxloader-team/fluxloader-site:latest
+        image: ghcr.io/fluxloader-team/fluxloader-site:lateste
         # In our production environment we using container name and docker dns to resolve the ip of the container
         container_name: fluxloader
-        networks:
-            - fluxloader
         restart: unless-stopped
         # Docker will load .env files and populate them into environment vars
         environment:
@@ -19,7 +17,7 @@ services:
             - DISCORD_SERVER=${DISCORD_SERVER}
 
             # Should resolve to the mongo container
-            - MONGODB_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo:27017/
+            - MONGODB_URI=mongodb://mongo:27017/
             - GIT_PULL=${GIT_PULL}
             - MODSETTINGS_VALIDATIONTIME=${MODSETTINGS_VALIDATIONTIME}
             - REQUIREGITHUBSECRETFORRELOAD=${REQUIREGITHUBSECRETFORRELOAD}
@@ -33,21 +31,11 @@ services:
         volumes:
             - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
             - ./nginx/certs:/etc/nginx/certs:ro
-        networks:
-            - fluxloader
     mongo:
         image: mongo:8.0-noble
         container_name: mongo
         volumes:
             - mongodb:/data/db
-        networks:
-            - fluxloader
-        environment:
-            - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
-            - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
-
-networks:
-    fluxloader:
 
 volumes:
     mongodb:
