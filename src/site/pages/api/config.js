@@ -34,7 +34,7 @@ module.exports = {
 						// Handle different actions
 						if (data.action === "getConfig") {
 							// Get config.json content
-							const configPath = path.join(__dirname, "..", "config.json");
+							const configPath = path.join(__dirname, "..", "..", "..", "config.json");
 							const configContent = fs.readFileSync(configPath, "utf8");
 
 							// Log the action
@@ -61,7 +61,7 @@ module.exports = {
 							}
 
 							// Write to config.json
-							const configPath = path.join(__dirname, "..", "config.json");
+							const configPath = path.join(__dirname, "..", "..", "..", "config.json");
 							fs.writeFileSync(configPath, configContent, "utf8");
 
 							// Log the action

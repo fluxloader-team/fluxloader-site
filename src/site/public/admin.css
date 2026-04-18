@@ -372,3 +372,18 @@
 	font-size: 0.85rem;
 	font-weight: 500;
 }
+
+/* -------------------- Config panel -------------------- */
+
+.monaco-container {
+	width: 100%;
+	height: 500px;
+	border: 1px solid #3a3d49;
+	border-radius: var(--admin-radius);
+}
+
+.config-actions {
+	display: flex;
+	gap: 0.5rem;
+	margin-top: 1rem;
+}
