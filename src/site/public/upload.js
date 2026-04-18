@@ -155,12 +155,13 @@ function displayModData(modData) {
             <tr>
               <th scope="row">Dependencies</th>
               <td>
-                ${modData.dependencies && Object.keys(modData.dependencies).length
-			? Object.entries(modData.dependencies)
-				.map(([key, value]) => `<span class="badge bg-info">${key}: ${value}</span>`)
-				.join(" ")
-			: "<em>No dependencies.</em>"
-		}
+                ${
+					modData.dependencies && Object.keys(modData.dependencies).length
+						? Object.entries(modData.dependencies)
+								.map(([key, value]) => `<span class="badge bg-info">${key}: ${value}</span>`)
+								.join(" ")
+						: "<em>No dependencies.</em>"
+				}
               </td>
             </tr>
           </tbody>
