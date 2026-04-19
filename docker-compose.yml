@@ -22,6 +22,8 @@ services:
             - MODSETTINGS_VALIDATIONTIME=${MODSETTINGS_VALIDATIONTIME}
             - REQUIREGITHUBSECRETFORRELOAD=${REQUIREGITHUBSECRETFORRELOAD}
             - GITHUBSECRET=${GITHUBSECRET}
+        depends_on:
+            - mongo
 
     nginx:
         image: nginx:1.30-alpine
@@ -31,6 +33,9 @@ services:
         volumes:
             - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
             - ./nginx/certs:/etc/nginx/certs:ro
+        depends_on:
+            - nginx
+
     mongo:
         image: mongo:8.0-noble
         container_name: mongo
