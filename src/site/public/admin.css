@@ -1,5 +1,4 @@
 :root {
-	--admin-border: 8px solid #1a1d24;
 	--admin-list-width: 500px;
 	--admin-action-bar-height: 55px;
 	--admin-header-height: 60px;
@@ -8,9 +7,21 @@
 	--admin-row-border: 1px solid #32363f;
 }
 
+/* -------------------- Shared -------------------- */
+
 .admin-page-site-actions .pagination {
 	margin-top: 1.25rem;
 	justify-content: center;
+}
+
+.admin-page-site-actions .pagination .page-num {
+	width: 35px !important;
+}
+
+.admin-page-site-actions .pagination .page-num a {
+	padding-left: 0 !important;
+	padding-right: 0 !important;
+	text-align: center;
 }
 
 .access-denied-message {
@@ -55,7 +66,6 @@
 .full-page {
 	width: 100%;
 	padding: 24px 28px;
-	border: var(--admin-border);
 	background-color: var(--color-bg-light);
 	overflow-y: auto;
 }
@@ -66,7 +76,6 @@
 	flex-direction: column;
 	height: 100%;
 	overflow: hidden;
-	border: var(--admin-border);
 }
 
 .left-split-page {
@@ -85,7 +94,7 @@
 	font-size: 1.1rem;
 	font-weight: 600;
 	color: #c8ccda;
-	margin-bottom: 0;
+	margin-bottom: 0.75rem;
 }
 
 /* -------------------- Alerts -------------------- */
@@ -305,12 +314,6 @@
 .details-action-group + .details-action-group {
 	border-left: 1px solid #333740;
 	padding-left: 10px;
-}
-
-/* --------------------Actions panel -------------------- */
-
-.actions-table {
-	margin-top: 0.75rem;
 }
 
 /* -------------------- Selection panel -------------------- */

@@ -2,12 +2,12 @@ const AdminPage = (() => {
 	const state = {
 		mods: {},
 		modCache: {},
+
 		users: {},
 		userCache: {},
+
 		actions: [],
-		currentPage: 1,
-		pageSize: 50,
-		totalPages: 1,
+		actionsPagination: { page: 1, size: 50, totalCount: 1 }
 	};
 
 	// -------------------- Utility --------------------
@@ -65,12 +65,14 @@ const AdminPage = (() => {
 
 	const pageControl = {
 		dashboard: {
-			activate() {
-				loadTemplate("tpl-dashboard", "admin-page-dashboard");
+			setup() {
 				getAdminPageContent().addEventListener("click", (e) => {
 					const card = e.target.closest("[data-page]");
 					if (card) pageControl[card.dataset.page]?.activate();
 				});
+			},
+			activate() {
+				loadTemplate("tpl-dashboard", "admin-page-dashboard");
 			},
 		},
 		"mod-management": {
@@ -107,7 +109,6 @@ const AdminPage = (() => {
 				document.getElementById("btnSaveConfig").addEventListener("click", () => configPage.save());
 				document.getElementById("btnReloadConfig").addEventListener("click", () => configPage.load());
 
-				// TODO: Check works
 				require.config({ paths: { vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs" } });
 				require(["vs/editor/editor.main"], () => {
 					state.configEditor = monaco.editor.create(document.getElementById("configEditor"), {
@@ -163,16 +164,16 @@ const AdminPage = (() => {
 					<thead><tr><th>Name</th><th>Author</th><th>Version</th></tr></thead>
 					<tbody>
 						${entries
-							.map(
-								(m) => `
+					.map(
+						(m) => `
 							<tr class="item-table-row" data-modid="${m.modID}">
 								<td>${m.modData.name}</td>
 								<td>${m.modData.author}</td>
 								<td>${m.modData.version}</td>
 							</tr>
 						`,
-							)
-							.join("")}
+					)
+					.join("")}
 					</tbody>
 				</table>`;
 
@@ -210,7 +211,7 @@ const AdminPage = (() => {
 					<div class="detail-tags" id="modDetails-tags">${tagsHtml}</div>
 
 					<h5 class="section-title">Dependencies</h5>
-					<div id="modDependencies" class="actions-table"></div>
+					<div id="modDependencies"></div>
 
 					<h5 class="section-title">Readme</h5>
 					<hr>
@@ -456,11 +457,11 @@ const AdminPage = (() => {
 					<thead><tr><th>Username</th><th>Status</th></tr></thead>
 					<tbody>
 						${entries
-							.map((u) => {
-								const badges = [u.banned ? `<span class="badge bg-danger">Banned</span>` : "", u.permissions.includes("admin") ? `<span class="badge bg-success">Admin</span>` : ""].join(" ");
-								return `<tr class="item-table-row" data-userid="${u.discordID}"><td>${u.discordUsername}</td><td>${badges}</td></tr>`;
-							})
-							.join("")}
+					.map((u) => {
+						const badges = [u.banned ? `<span class="badge bg-danger">Banned</span>` : "", u.permissions.includes("admin") ? `<span class="badge bg-success">Admin</span>` : ""].join(" ");
+						return `<tr class="item-table-row" data-userid="${u.discordID}"><td>${u.discordUsername}</td><td>${badges}</td></tr>`;
+					})
+					.join("")}
 					</tbody>
 				</table>`;
 
@@ -531,14 +532,13 @@ const AdminPage = (() => {
 			statsEl.innerHTML = `
 				<p>Mods uploaded: <strong>${stats.modsUploaded}</strong></p>
 				<p>Mod versions uploaded: <strong>${stats.modVersionsUploaded}</strong></p>
-				${
-					stats.modVersionsUploaded > 0
-						? `
+				${stats.modVersionsUploaded > 0
+					? `
 					<table class="item-table table-sm">
 						<thead><tr><th>Mod Name</th><th>Version</th><th>Upload Time</th></tr></thead>
 						<tbody>${versionsHtml}</tbody>
 					</table>`
-						: ""
+					: ""
 				}`;
 		},
 
@@ -681,15 +681,19 @@ const AdminPage = (() => {
 
 	const actionsPage = {
 		async load(page = 1) {
-			state.currentPage = page;
+			state.actionsPagination.page = page;
+
 			try {
-				const result = await apiPost("/api/actions", { page, size: state.pageSize });
+				const result = await apiPost("/api/actions", {
+					page: state.actionsPagination.page,
+					size: state.actionsPagination.size
+				});
 				if (result.error) {
 					addAlert("Error: " + result.error, "error");
 					return;
 				}
 				state.actions = result.actions;
-				state.totalPages = result.pagination.totalAdminPages;
+				state.actionsPagination = result.pagination;
 				actionsPage.render();
 			} catch (err) {
 				console.error("Error loading actions:", err);
@@ -706,40 +710,45 @@ const AdminPage = (() => {
 					<thead><tr><th>User ID</th><th>Action</th><th>Time</th></tr></thead>
 					<tbody>
 						${state.actions
-							.map(
-								(a) => `
+					.map(
+						(a) => `
 							<tr>
 								<td><code>${a.discordID}</code></td>
 								<td>${a.action}</td>
 								<td>${new Date(a.time).toLocaleString()}</td>
 							</tr>`,
-							)
-							.join("")}
+					)
+					.join("")}
 					</tbody>
 				</table>`;
 
 			const paginationEl = document.getElementById("actionsPagination");
 			if (!paginationEl) return;
 
-			const { currentPage, totalPages } = state;
-			const pages = [];
-			pages.push(`<li class="page-item ${currentPage === 1 ? "disabled" : ""}">
-				<a class="page-link" href="#" data-page="${currentPage - 1}">Previous</a></li>`);
+			const { page, totalCount } = state.actionsPagination;
 
-			for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
-				pages.push(`<li class="page-item ${i === currentPage ? "active" : ""}">
+			const pages = [];
+			pages.push(`<li class="page-item${page === 1 ? " disabled" : ""}">
+				<a class="page-link" href="#" data-page="${page - 1}">Previous</a></li>`);
+
+			const totalAllowed = 5;
+
+			const pageStart = Math.max(1, page - Math.floor(totalAllowed / 2));
+			const pageEnd = Math.min(totalCount, pageStart + totalAllowed) - 1;
+			for (let i = pageStart; i <= pageEnd; i++) {
+				pages.push(`<li class="page-item ${i === page ? "active" : ""} page-num">
 					<a class="page-link" href="#" data-page="${i}">${i}</a></li>`);
 			}
 
-			pages.push(`<li class="page-item ${currentPage === totalPages ? "disabled" : ""}">
-				<a class="page-link" href="#" data-page="${currentPage + 1}">Next</a></li>`);
+			pages.push(`<li class="page-item ${page === totalCount ? "disabled" : ""}">
+				<a class="page-link" href="#" data-page="${page + 1}">Next</a></li>`);
 
 			paginationEl.innerHTML = pages.join("");
 			paginationEl.querySelectorAll("[data-page]").forEach((a) => {
 				a.addEventListener("click", (e) => {
 					e.preventDefault();
 					const p = parseInt(e.currentTarget.dataset.page);
-					if (p >= 1 && p <= state.totalPages) actionsPage.load(p);
+					if (p >= 1 && p <= state.actionsPagination.totalCount) actionsPage.load(p);
 				});
 			});
 		},
@@ -775,16 +784,16 @@ const AdminPage = (() => {
 					<thead><tr><th>Username</th><th>Discord ID</th><th>Joined</th><th>Actions</th></tr></thead>
 					<tbody>
 						${bannedUsers
-							.map(
-								(u) => `
+					.map(
+						(u) => `
 							<tr>
 								<td>${u.discordUsername}</td>
 								<td><code>${u.discordID}</code></td>
 								<td>${new Date(u.joinedAt).toLocaleString()}</td>
 								<td><button class="btn btn-success btn-sm" data-unban="${u.discordID}">Unban</button></td>
 							</tr>`,
-							)
-							.join("")}
+					)
+					.join("")}
 					</tbody>
 				</table>`;
 
@@ -837,9 +846,10 @@ const AdminPage = (() => {
 	// -------------------- Interface --------------------
 
 	function init() {
+		pageControl.dashboard.setup();
 		pageControl.dashboard.activate();
 
-		document.getElementById("btnSelection").addEventListener("click", () => {
+		document.getElementById("dashboardBtn").addEventListener("click", () => {
 			pageControl.dashboard.activate();
 		});
 	}

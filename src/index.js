@@ -39,7 +39,7 @@ const DEFAULT_CONFIG = {
 
 const logger = new Utils.Log("main");
 
-globalThis.config = DEFAULT_CONFIG;
+globalThis.config = {};
 globalThis.pages = {};
 globalThis.templates = {};
 globalThis.public = {};
@@ -94,7 +94,7 @@ function loadResources() {
 	logger.info(`Timers loaded: [ ${timerNames.join(", ")} ]`);
 
 	if (globalThis.config.dev?.hotReload == true) {
-		logger.info(`Hot reload is enabled`);
+		logger.info(`⏳ Hot reload is enabled ⏳`);
 	}
 }
 
@@ -155,7 +155,7 @@ function main() {
 		}
 	});
 
-	loadConfig(DEFAULT_CONFIG, CONFIG_PATH);
+	globalThis.config = loadConfig(DEFAULT_CONFIG, CONFIG_PATH);
 
 	loadResources();
 

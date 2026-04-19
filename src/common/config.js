@@ -1,4 +1,8 @@
 const fs = require("fs");
+const Utils = require("./utils.js");
+const { AutoEncryptionLoggerLevel } = require("mongodb");
+
+const logger = new Utils.Log("config");
 
 function isObject(v) {
 	return v && typeof v === "object" && !Array.isArray(v);
@@ -54,10 +58,10 @@ function loadConfig(DEFAULT_CONFIG, CONFIG_PATH) {
 	// Read config file and apply first
 	if (CONFIG_PATH && fs.existsSync(CONFIG_PATH)) {
 		const fileContent = fs.readFileSync(CONFIG_PATH, "utf-8");
-		if (fileContent) {
-			const fileConfig = JSON.parse(fileContent);
-			mergeObjects(config, fileConfig);
-		}
+		const fileConfig = JSON.parse(fileContent);
+		mergeObjects(config, fileConfig);
+	} else {
+		logger.warn(`Could not find config file at ${CONFIG_PATH}`);
 	}
 
 	// Walk over the config and use env vars
