@@ -60,7 +60,7 @@ function loadConfig(DEFAULT_CONFIG, CONFIG_PATH) {
 		const fileConfig = JSON.parse(fileContent);
 		mergeObjects(config, fileConfig);
 	} else {
-		logger.warn(`Could not find config file at ${CONFIG_PATH}. Using default config and environment variables`);
+		logger.warn(`Could not find config file at ${CONFIG_PATH}. Relying on default config and environment variables`);
 	}
 
 	// Walk over the config and use env vars
