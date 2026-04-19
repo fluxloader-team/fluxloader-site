@@ -1,6 +1,5 @@
 const fs = require("fs");
 const Utils = require("./utils.js");
-const { AutoEncryptionLoggerLevel } = require("mongodb");
 
 const logger = new Utils.Log("config");
 
