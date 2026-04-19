@@ -84,15 +84,21 @@ class Log {
 		this.saveQueue.push(`${prefix} | ${input}`);
 		try {
 			console.log(colorFn(`${prefix} | `) + input);
-		} catch {}
+		} catch { }
+	}
+
+	debug(msg) {
+		if (this.logLevel === "debug") this.log(colors.yellow, "debug", msg);
 	}
 
 	info(msg) {
 		this.log(colors.green, "info", msg);
 	}
-	debug(msg) {
-		if (this.logLevel === "debug") this.log(colors.yellow, "debug", msg);
+
+	warn(msg) {
+		this.log(colors.yellow, "error", msg);
 	}
+
 	error(msg) {
 		this.log(colors.red, "error", msg);
 	}
