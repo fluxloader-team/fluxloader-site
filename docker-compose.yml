@@ -42,5 +42,18 @@ services:
         volumes:
             - mongodb:/data/db
 
+    mongo-express:
+        image: mongo-express
+        container_name: mongo-express
+        #* Ports to expose if not using a reverse proxy
+        # ports:
+        #   - 8081:8081
+        environment:
+            #! In our production environment this is protected via cloudflare access.
+            # This setting should be modified as per your own environment
+            - ME_CONFIG_BASICAUTH_ENABLED=false
+        depends_on:
+            - mongo
+
 volumes:
     mongodb:
