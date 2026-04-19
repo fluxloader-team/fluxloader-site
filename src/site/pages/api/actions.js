@@ -56,7 +56,6 @@ module.exports = {
 					await DB.actions.add(actionEntry);
 
 					// Return actions with pagination info
-					console.log(totalCount);
 					res.writeHead(200, { "Content-Type": "application/json" });
 					res.end(
 						JSON.stringify({
