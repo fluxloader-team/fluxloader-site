@@ -7,7 +7,7 @@ const AdminPage = (() => {
 		userCache: {},
 
 		actions: [],
-		actionsPagination: { page: 1, size: 50, totalCount: 1 }
+		actionsPagination: { page: 1, size: 50, totalCount: 1 },
 	};
 
 	// -------------------- Utility --------------------
@@ -177,8 +177,8 @@ const AdminPage = (() => {
 					<thead><tr><th>Name</th><th>Author</th><th>Version</th><th>Verified</th></tr></thead>
 					<tbody>
 						${entries
-					.map(
-						(m) => `
+							.map(
+								(m) => `
 							<tr class="item-table-row" data-modid="${m.modID}">
 								<td>${m.modData.name}</td>
 								<td>${m.modData.author}</td>
@@ -186,8 +186,8 @@ const AdminPage = (() => {
 								<td>${modsPage.verifiedBadge(m.verified)}</td>
 							</tr>
 						`,
-					)
-					.join("")}
+							)
+							.join("")}
 					</tbody>
 				</table>`;
 
@@ -482,11 +482,11 @@ const AdminPage = (() => {
 					<thead><tr><th>Username</th><th>Status</th></tr></thead>
 					<tbody>
 						${entries
-					.map((u) => {
-						const badges = [u.banned ? `<span class="badge bg-danger">Banned</span>` : "", u.permissions.includes("admin") ? `<span class="badge bg-success">Admin</span>` : ""].join(" ");
-						return `<tr class="item-table-row" data-userid="${u.discordID}"><td>${u.discordUsername}</td><td>${badges}</td></tr>`;
-					})
-					.join("")}
+							.map((u) => {
+								const badges = [u.banned ? `<span class="badge bg-danger">Banned</span>` : "", u.permissions.includes("admin") ? `<span class="badge bg-success">Admin</span>` : ""].join(" ");
+								return `<tr class="item-table-row" data-userid="${u.discordID}"><td>${u.discordUsername}</td><td>${badges}</td></tr>`;
+							})
+							.join("")}
 					</tbody>
 				</table>`;
 
@@ -556,13 +556,14 @@ const AdminPage = (() => {
 			statsEl.innerHTML = `
 				<p>Mods uploaded: <strong>${stats.modsUploaded}</strong></p>
 				<p>Mod versions uploaded: <strong>${stats.modVersionsUploaded}</strong></p>
-				${stats.modVersionsUploaded > 0
-					? `
+				${
+					stats.modVersionsUploaded > 0
+						? `
 					<table class="item-table table-sm">
 						<thead><tr><th>Mod Name</th><th>Version</th><th>Upload Time</th></tr></thead>
 						<tbody>${versionsHtml}</tbody>
 					</table>`
-					: ""
+						: ""
 				}`;
 		},
 
@@ -688,7 +689,7 @@ const AdminPage = (() => {
 			try {
 				const result = await postOrThrow("/api/actions", {
 					page: state.actionsPagination.page,
-					size: state.actionsPagination.size
+					size: state.actionsPagination.size,
 				});
 				if (result.error) {
 					addAlert("Error: " + result.error, "error");
@@ -712,15 +713,15 @@ const AdminPage = (() => {
 					<thead><tr><th>User ID</th><th>Action</th><th>Time</th></tr></thead>
 					<tbody>
 						${state.actions
-					.map(
-						(a) => `
+							.map(
+								(a) => `
 							<tr>
 								<td><code>${a.discordID}</code></td>
 								<td>${a.action}</td>
 								<td>${new Date(a.time).toLocaleString()}</td>
 							</tr>`,
-					)
-					.join("")}
+							)
+							.join("")}
 					</tbody>
 				</table>`;
 
@@ -786,16 +787,16 @@ const AdminPage = (() => {
 					<thead><tr><th>Username</th><th>Discord ID</th><th>Joined</th><th>Actions</th></tr></thead>
 					<tbody>
 						${bannedUsers
-					.map(
-						(u) => `
+							.map(
+								(u) => `
 							<tr>
 								<td>${u.discordUsername}</td>
 								<td><code>${u.discordID}</code></td>
 								<td>${new Date(u.joinedAt).toLocaleString()}</td>
 								<td><button class="btn btn-success btn-sm" data-unban="${u.discordID}">Unban</button></td>
 							</tr>`,
-					)
-					.join("")}
+							)
+							.join("")}
 					</tbody>
 				</table>`;
 
