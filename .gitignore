@@ -3,3 +3,4 @@ config.json
 .vscode
 *.log
 deploy.trigger
+.env

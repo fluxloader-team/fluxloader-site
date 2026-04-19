@@ -1,9 +1,10 @@
+require("dotenv").config();
+
 const http = require("http");
 const fs = require("fs");
 const Utils = require("./common/utils.js");
 const path = require("path");
 const discord = require("./discord/discordbot.js");
-const { file } = require("jszip");
 const { loadConfig } = require("./common/config.js");
 
 const CONFIG_PATH = path.join(__dirname, "config.json");
