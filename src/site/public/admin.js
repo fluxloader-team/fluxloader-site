@@ -70,7 +70,7 @@ const AdminPage = (() => {
 	// -------------------- Pages --------------------
 
 	const pageControl = {
-		"dashboard": {
+		dashboard: {
 			setup() {
 				getAdminPageContent().addEventListener("click", (e) => {
 					const card = e.target.closest("[data-page]");
@@ -103,13 +103,13 @@ const AdminPage = (() => {
 				await actionsPage.load(1);
 			},
 		},
-		"bans": {
+		bans: {
 			async activate() {
 				loadTemplate("tpl-bans", "admin-page-bans");
 				await bansPage.load();
 			},
 		},
-		"config": {
+		config: {
 			async activate() {
 				loadTemplate("tpl-config", "admin-page-config");
 				document.getElementById("btnSaveConfig").addEventListener("click", () => configPage.save());
@@ -493,7 +493,6 @@ const AdminPage = (() => {
 			usersTableContainer.querySelectorAll(".item-table-row").forEach((row) => {
 				row.addEventListener("click", () => usersPage.inspectUserDetails(row.dataset.userid));
 			});
-
 		},
 
 		async inspectUserDetails(discordID) {
