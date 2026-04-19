@@ -2,7 +2,6 @@ const Utils = require("../common/utils.js");
 const DB = require("../common/db");
 
 const logger = new Utils.Log("timers.validate");
-var validationTime = globalThis.config.modSettings.validationTime;
 
 module.exports = {
 	async run() {
@@ -25,7 +24,7 @@ module.exports = {
 					var uploadTime = new Date(modVersion.uploadTime);
 					var elapsedTime = now - uploadTime;
 
-					if (elapsedTime > validationTime) {
+					if (elapsedTime > globalThis.config.modSettings.validationTime) {
 						// Update the mod to be verified
 						mod.verified = true;
 						await DB.mods.data.update(mod.modID, mod);

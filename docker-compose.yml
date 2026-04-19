@@ -33,12 +33,14 @@ services:
         volumes:
             - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
             - ./nginx/certs:/etc/nginx/certs:ro
+        restart: unless-stopped
         depends_on:
             - fluxloader
 
     mongo:
         image: mongo:8.0-noble
         container_name: mongo
+        restart: unless-stopped
         volumes:
             - mongodb:/data/db
 
@@ -48,10 +50,14 @@ services:
         #* Ports to expose if not using a reverse proxy
         # ports:
         #   - 8081:8081
+        restart: unless-stopped
         environment:
             #! In our production environment this is protected via cloudflare access.
             # This setting should be modified as per your own environment
-            - ME_CONFIG_BASICAUTH_ENABLED=false
+            - ME_CONFIG_BASICAUTH=false
+            # Only available in newer version but because the docker image is old its valid. https://github.com/mongo-express/mongo-express/issues/1727#issuecomment-2873296216
+            # - ME_CONFIG_BASICAUTH_ENABLED=false
+
         depends_on:
             - mongo
 

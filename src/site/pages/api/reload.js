@@ -3,14 +3,12 @@ const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 
-const GITHUB_SECRET = globalThis.config.githubSecret;
-
 const logger = new Utils.Log("pages.reload");
 
 function verifySignature(req, body) {
 	const signature = req.headers["x-hub-signature-256"];
 	if (!signature) return false;
-	const hmac = crypto.createHmac("sha256", GITHUB_SECRET);
+	const hmac = crypto.createHmac("sha256", globalThis.config.githubSecret);
 	const digest = "sha256=" + hmac.update(body).digest("hex");
 	return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
 }
