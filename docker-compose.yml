@@ -54,7 +54,10 @@ services:
         environment:
             #! In our production environment this is protected via cloudflare access.
             # This setting should be modified as per your own environment
-            - ME_CONFIG_BASICAUTH_ENABLED=false
+            - ME_CONFIG_BASICAUTH=false
+            # Only available in newer version but because the docker image is old its valid. https://github.com/mongo-express/mongo-express/issues/1727#issuecomment-2873296216
+            # - ME_CONFIG_BASICAUTH_ENABLED=false
+
         depends_on:
             - mongo
 
