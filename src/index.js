@@ -4,6 +4,7 @@ const Utils = require("./common/utils.js");
 const path = require("path");
 const discord = require("./discord/discordbot.js");
 const { file } = require("jszip");
+const { loadConfig } = require("./common/config.js");
 
 const CONFIG_PATH = path.join(__dirname, "config.json");
 const DEFAULT_CONFIG = {
@@ -41,15 +42,6 @@ globalThis.timers = [];
 globalThis.server = null;
 
 // --------------------------------------------------------------------------------------
-
-function loadConfig() {
-	if (!fs.existsSync(CONFIG_PATH)) {
-		logger.info("Config file not found, generating default config.json...");
-		fs.writeFileSync(CONFIG_PATH, JSON.stringify(DEFAULT_CONFIG, null, 2), "utf-8");
-	}
-
-	globalThis.config = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf-8"));
-}
 
 function loadResources() {
 	let pageNames = [];
@@ -152,7 +144,8 @@ function main() {
 		}
 	});
 
-	loadConfig();
+	loadConfig(DEFAULT_CONFIG, CONFIG_PATH);
+
 	loadResources();
 
 	if (globalThis.config.discord.runbot) {
