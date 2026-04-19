@@ -127,7 +127,7 @@ module.exports = {
 							return;
 						}
 
-						// Update userToUnban's banned status
+						// Update user's banned status
 						await DB.users.unban(authorID);
 
 						// Log the action
