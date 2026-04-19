@@ -113,7 +113,7 @@ module.exports = {
 				});
 				return res.end();
 			} catch (err) {
-				logger.info(`Error during discord OAuth2 process: ${err.message}`);
+				logger.error(`Unhandled error during discord OAuth2 process: ${err.message}`);
 				res.writeHead(500, { "Content-Type": "text/html" });
 				return res.end("<h1>Error: An error occurred during the Discord authentication process.</h1>");
 			}

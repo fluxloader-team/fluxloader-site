@@ -82,7 +82,7 @@ globalThis.performSearch = async function (pageToget = 1, perPage = 5000) {
 			if (pageToget === 1) {
 				modList.innerHTML = `<div class="alert alert-danger">Search error: ${result.error}</div>`;
 			} else {
-				document.getElementById("modListTable").innerHTML += `
+				document.getElementById("modTableContainer").innerHTML += `
 							<tr>
 								<td colspan="4">Search error: ${result.error}</td>
 							</tr>
@@ -96,7 +96,7 @@ globalThis.performSearch = async function (pageToget = 1, perPage = 5000) {
 			if (pageToget === 1) {
 				modList.innerHTML = `<div class="alert alert-info">No mods found matching your search.</div>`;
 			} else {
-				document.getElementById("modListTable").innerHTML += `
+				document.getElementById("modTableContainer").innerHTML += `
 							<tr>
 								<td colspan="4">All mods loaded</td>
 							</tr>
@@ -141,7 +141,7 @@ globalThis.downloadMod = async function (modID, version) {
 
 globalThis.updateModDisplayActions = async function (modID) {
 	var mod = globalThis.modCache[modID];
-	var modDisplayActions = document.getElementById("modDisplayActions");
+	var modDisplayActions = document.getElementById("modDetailsActions");
 	modDisplayActions.innerHTML = `
 						<div class="btn-group" role="group" style="padding-left: 15px;margin-top:5px; height: 40px;">
 							<button class="btn btn-primary" onclick='globalThis.downloadMod("${modID}","${mod.modData.version}")'>Download</button>
@@ -154,14 +154,14 @@ globalThis.updateModDisplayActions = async function (modID) {
 
 globalThis.displayMod = async function (modID) {
 	var mod = globalThis.mods[modID];
-	var modDisplay = document.getElementById("modDisplay");
+	var modDisplay = document.getElementById("modDetails");
 	modDisplay.innerHTML = `
 						<div class="displayInner">
 							<h3 id="modDisplayModName">${mod.modData.name}
 								<span class="badge text-bg-info">${mod.modData.version}</span><a> </a><span class="badge text-bg-warning">${mod.modData.author}</span>
 							</h3>
 							<h6 id="modDisplayshortDescription">${mod.modData.shortDescription}</h6>
-							<h6 id="modDisplayTags"><span class="badge text-bg-primary">${mod.modData.tags.join('</span><a> </a><span class="badge text-bg-primary">')}</span></h6>
+							<h6 id="modDetails-tags"><span class="badge text-bg-primary">${mod.modData.tags.join('</span><a> </a><span class="badge text-bg-primary">')}</span></h6>
 							<br>
 							<h5>Dependencies</h5>
 							<div id="dependencies"></div>
@@ -194,7 +194,7 @@ globalThis.displayMod = async function (modID) {
 globalThis.displayModAPI = async function (mod) {
 	document.getElementById("modDisplayModName").innerHTML = `${mod.modData.name}<a> </a><span class="badge text-bg-info">${mod.modData.version}</span><a> </a><span class="badge text-bg-warning">${mod.modData.author}</span>`;
 	document.getElementById("modDisplayshortDescription").innerHTML = `${mod.modData.shortDescription}`;
-	document.getElementById("modDisplayTags").innerHTML = `<span class="badge text-bg-primary">${mod.modData.tags.join('</span><a> </a><span class="badge text-bg-primary">')}</span>`;
+	document.getElementById("modDetails-tags").innerHTML = `<span class="badge text-bg-primary">${mod.modData.tags.join('</span><a> </a><span class="badge text-bg-primary">')}</span>`;
 	document.getElementById("modDisplayDescription").innerHTML = `${marked.parse(mod.modData.description)}`;
 
 	await globalThis.updateModDisplayActions(mod.modID);
@@ -231,7 +231,7 @@ globalThis.updateModList = function (onPage = 1) {
 	if (mods.length === 0) {
 		if (onPage === 1) {
 			modList.innerHTML = `<div class="alert alert-info">No mods found matching your search criteria.</div>`;
-			document.getElementById("modDisplay").innerHTML = `
+			document.getElementById("modDetails").innerHTML = `
 							<div class="alert alert-secondary">
 								<h4>No mod selected</h4>
 								<p>Search for mods using the search box above.</p>
@@ -243,9 +243,9 @@ globalThis.updateModList = function (onPage = 1) {
 								</p>
 							</div>
 						`;
-			document.getElementById("modDisplayActions").innerHTML = "";
+			document.getElementById("modDetailsActions").innerHTML = "";
 		} else {
-			document.getElementById("modListTable").innerHTML += `
+			document.getElementById("modTableContainer").innerHTML += `
 							<tr>
 								<td colspan="4">No more mods to load.</td>
 							</tr>
@@ -258,7 +258,7 @@ globalThis.updateModList = function (onPage = 1) {
 	mods.forEach((mod) => {
 		var tagList = mod.modData.tags && mod.modData.tags.length > 0 ? mod.modData.tags.slice(0, Math.min(mod.modData.tags.length, 4)).join('</span><a> </a><span class="badge text-bg-secondary">') : "";
 
-		modItems += `<tr class="modListItem" onclick='globalThis.displayMod("${mod.modID}")'>
+		modItems += `<tr class="mod-list-item" onclick='globalThis.displayMod("${mod.modID}")'>
 							<td>${mod.modData.name}</td>
 							<td>${mod.modData.author}</td>
 							<td>${mod.modData.version}</td>
@@ -266,7 +266,7 @@ globalThis.updateModList = function (onPage = 1) {
 						</tr>`;
 	});
 	modList.innerHTML = `
-						<table class="displayInner" id="modListTable">
+						<table class="displayInner" id="modTableContainer">
 							<tr>
 								<th>Name</th>
 								<th>Author</th>

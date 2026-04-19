@@ -2,35 +2,41 @@
 <html lang="en" data-bs-theme="dark">
 	<head>
 		<%- include("header") %>
+		<link rel="stylesheet" href="home.css" />
 		<title>Fluxloader Site | Home</title>
 	</head>
 
 	<body>
-		<div class="pageContainer">
-			<div class="headerContainer">
-				<a class="btn btn-secondary headerButton" href="/">Mod List</a>
+		<div class="page-container">
+			<div class="header-container">
+				<div class="header-left">
+					<a class="btn btn-secondary" href="/">Mod List</a>
+					<% if (hasAdminPermissions) { %>
+						<a class="btn btn-secondary" href="/admin">Admin</a>
+					<% } %>
+				</div>
 
 				<div class="input-group" style="width: 50%">
 					<input type="text" class="form-control" id="searchInput" placeholder="Search by name, author, or #tag1 #tag2 for multiple tags" onchange="globalThis.performSearch()" />
 					<button class="btn btn-outline-secondary" type="button" onclick="globalThis.performSearch()">Search</button>
 				</div>
 
-				<div class="rightContainer">
+				<div class="header-right">
 					<a class="btn btn-primary" target="_blank" title="Download the App" href="https://github.com/fluxloader-team/fluxloader/releases/latest/">Fluxloader</a>
 					<%- include("discord", { user }) %>
 				</div>
 			</div>
 
-			<div class="modDisplayHolder">
-				<div class="modList" id="modList">
+			<div class="mods-container">
+				<div class="mod-list" id="modList">
 					<div class="d-flex justify-content-center">
 						<div class="spinner-border" role="status">
 							<span class="visually-hidden">Loading...</span>
 						</div>
 					</div>
 				</div>
-				<div class="modDisplay">
-					<div class="modDisplayData" id="modDisplay">
+				<div class="mod-display">
+					<div class="mod-display-data" id="modDetails">
 						<div class="d-flex justify-content-center">
 							<div class="spinner-border" role="status">
 								<span class="visually-hidden">Loading...</span>
@@ -39,7 +45,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="modDisplayActions" id="modDisplayActions"></div>
+			<div class="mod-display-actions" id="modDetailsActions"></div>
 		</div>
 
 		<script src="home.js"></script>
@@ -47,4 +53,3 @@
 		<%- include("footer") %>
 	</body>
 </html>
-

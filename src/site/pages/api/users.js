@@ -6,6 +6,7 @@ const logger = new Utils.Log("pages.users");
 
 module.exports = {
 	paths: ["/api/users"],
+
 	/**
 	 * @param {import("http").IncomingMessage} req
 	 * @param {import("http").ServerResponse} res
@@ -99,7 +100,7 @@ module.exports = {
 					res.end(JSON.stringify({ users: users }));
 				} else if (data.action === "listUsers") {
 					// Get all users (limited to 50)
-					const users = await DB.users.List();
+					const users = await DB.users.list();
 
 					// Log the action
 					var actionEntry = {
@@ -117,7 +118,7 @@ module.exports = {
 					res.end(JSON.stringify({ error: "Invalid action" }));
 				}
 			} catch (error) {
-				logger.info(`Error ${error}`);
+				logger.error(`Unhandled Error: ${error}`);
 				res.writeHead(500, { "Content-Type": "application/json" });
 				res.end(JSON.stringify({ error: "Server error" }));
 			}

@@ -17,6 +17,7 @@ function verifySignature(req, body) {
 
 module.exports = {
 	paths: ["/api/reload"],
+
 	/**
 	 * @param {import("http").IncomingMessage} req
 	 * @param {import("http").ServerResponse} res
@@ -27,7 +28,7 @@ module.exports = {
 		let body = "";
 		req.on("data", (chunk) => (body += chunk));
 		req.on("end", () => {
-			if (!(globalThis.requireGithubSecretForReload === false)) {
+			if (!(globalThis.config.requireGithubSecretForReload === false)) {
 				if (!verifySignature(req, body)) {
 					res.writeHead(401);
 					logger.info("Invalid signature on reload request");

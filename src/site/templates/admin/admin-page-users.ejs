@@ -1,0 +1,20 @@
+<div class="left-split-page">
+	<div class="search-bar">
+		<input type="text" id="userSearchInput" class="search-input" placeholder="Search users..." />
+
+		<select id="userSearchType" class="search-select">
+			<option value="all">All</option>
+			<option value="admin">Admins</option>
+			<option value="banned">Banned</option>
+		</select>
+	</div>
+
+	<div id="usersTableContainer" class="item-table-container"></div>
+</div>
+
+<div class="right-split-page">
+	<div id="userDisplay" class="detail-page"><%- include("admin-spinner") %></div>
+
+	<div id="userDisplayActions" class="details-action-bar"></div>
+</div>
+

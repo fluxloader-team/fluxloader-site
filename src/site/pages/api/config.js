@@ -8,6 +8,7 @@ const logger = new Utils.Log("pages.config");
 
 module.exports = {
 	paths: ["/api/config"],
+
 	/**
 	 * @param {import("http").IncomingMessage} req
 	 * @param {import("http").ServerResponse} res
@@ -33,7 +34,7 @@ module.exports = {
 						// Handle different actions
 						if (data.action === "getConfig") {
 							// Get config.json content
-							const configPath = path.join(__dirname, "..", "config.json");
+							const configPath = path.join(__dirname, "..", "..", "..", "config.json");
 							const configContent = fs.readFileSync(configPath, "utf8");
 
 							// Log the action
@@ -60,7 +61,7 @@ module.exports = {
 							}
 
 							// Write to config.json
-							const configPath = path.join(__dirname, "..", "config.json");
+							const configPath = path.join(__dirname, "..", "..", "..", "config.json");
 							fs.writeFileSync(configPath, configContent, "utf8");
 
 							// Log the action
@@ -78,7 +79,7 @@ module.exports = {
 							res.end(JSON.stringify({ error: "Invalid request" }));
 						}
 					} catch (error) {
-						logger.info(`Error ${error}`);
+						logger.error(`Unhandled Error: ${error}`);
 						res.writeHead(500, { "Content-Type": "application/json" });
 						res.end(JSON.stringify({ error: "Server error" }));
 					}
@@ -88,7 +89,7 @@ module.exports = {
 				res.end(JSON.stringify({ error: "Method not allowed" }));
 			}
 		} catch (error) {
-			logger.info(`Error ${error}`);
+			logger.error(`Unhandled Error: ${error}`);
 			res.writeHead(500, { "Content-Type": "application/json" });
 			res.end(JSON.stringify({ error: "Server error" }));
 		}

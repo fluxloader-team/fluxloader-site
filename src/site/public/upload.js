@@ -1,7 +1,7 @@
 let currentModData = null;
 
 async function performUpload() {
-	var fileInput = document.getElementById("ModFile");
+	var fileInput = document.getElementById("modFile");
 	var file = fileInput.files[0];
 
 	if (!file || (file.type !== "application/zip" && file.type !== "application/x-zip-compressed")) {
@@ -68,7 +68,7 @@ function showError(message) {
 				<strong>Error:</strong> ${message}
 				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 			`;
-	document.querySelector(".modUploadForm").prepend(errorDiv);
+	document.querySelector(".mod-upload-form").prepend(errorDiv);
 
 	// Auto-dismiss after 5 seconds
 	setTimeout(() => {
@@ -84,7 +84,7 @@ function showSuccess(message) {
 				<strong>Success:</strong> ${message}
 				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 			`;
-	document.querySelector(".modUploadForm").prepend(successDiv);
+	document.querySelector(".mod-upload-form").prepend(successDiv);
 
 	// Auto-dismiss after 5 seconds
 	setTimeout(() => {
@@ -110,7 +110,7 @@ function displayModData(modData) {
 	// Check if modID is defined
 	const modIDStatus = modData.modID ? `<span class="badge bg-success">ModID: ${modData.modID}</span>` : `<span class="badge bg-danger">Missing ModID!</span>`;
 
-	var container = document.getElementById("ModInfo");
+	var container = document.getElementById("modInfo");
 	container.innerHTML = `
     <div class="card">
       <div class="card-header">
@@ -176,7 +176,7 @@ function displayModData(modData) {
   `;
 }
 
-document.getElementById("ModFile").addEventListener("change", async function (event) {
+document.getElementById("modFile").addEventListener("change", async function (event) {
 	var file = event.target.files[0];
 	if (!file) {
 		alert("No file selected!");

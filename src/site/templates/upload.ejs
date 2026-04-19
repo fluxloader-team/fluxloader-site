@@ -2,28 +2,34 @@
 <html lang="en" data-bs-theme="dark">
 	<head>
 		<%- include("header") %>
+		<link rel="stylesheet" href="upload.css" />
 		<title>Fluxloader Site | Upload</title>
 	</head>
 
 	<body>
-		<div class="pageContainer">
-			<div class="headerContainer">
-				<a class="btn btn-secondary headerButton" href="/">Mod List</a>
+		<div class="page-container">
+			<div class="header-container">
+				<div class="header-left">
+					<a class="btn btn-secondary" href="/">Mod List</a>
+					<% if (hasAdminPermissions) { %>
+						<a class="btn btn-secondary" href="/admin">Admin</a>
+					<% } %>
+				</div>
 
-				<div class="rightContainer">
+				<div class="header-right">
 					<a class="btn btn-primary" target="_blank" title="Download the App" href="https://github.com/fluxloader-team/fluxloader/releases/latest/">Fluxloader</a>
 					<%- include("discord", { user }) %>
 				</div>
 			</div>
 
-			<div class="modUploadForm">
+			<div class="mod-upload-form">
 				<div class="row mb-3">
-					<label for="ModFile" class="col-sm-2 col-form-label">Mod File</label>
+					<label for="modFile" class="col-sm-2 col-form-label">Mod File</label>
 					<div class="col-sm-10">
-						<input type="file" class="form-control" id="ModFile" />
+						<input type="file" class="form-control" id="modFile" />
 					</div>
 				</div>
-				<div class="mb-3" id="ModInfo">
+				<div class="mb-3" id="modInfo">
 					<h3>Mod Information</h3>
 					<div class="alert alert-info"><strong>Important:</strong> Your mod must have a unique <code>modID</code> defined in the <code>modinfo.json</code> file. This ID is used to identify your mod and track updates.</div>
 					<pre id="modDataContent" style="white-space: pre-wrap"></pre>

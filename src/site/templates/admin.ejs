@@ -2,33 +2,78 @@
 <html lang="en" data-bs-theme="dark">
 	<head>
 		<%- include("header") %>
-		<title>Fluxloader Site | Admin</title>
+		<link rel="stylesheet" href="admin.css" />
+		<title>Fluxloader | Admin</title>
 	</head>
 
 	<body>
-		<link rel="stylesheet" href="admin.css" />
-
 		<% if (!hasAdminPermissions) { %>
-		<h1 style="text-align: center; margin-top: 50px">Access Denied</h1>
-		<p style="text-align: center">You do not have permission to access this page.</p>
-		<%- include("footer") %> <% } else { %>
-		<div class="pageContainer">
-			<div class="headerContainer">
-				<a class="btn btn-secondary headerButton" href="/">Mod List</a>
-
-				<a class="btn btn-secondary headerButton" onclick="globalThis.adminPages.Selection.action();">Selection menu</a>
-
-				<div class="rightContainer">
-					<a class="btn btn-primary" target="_blank" title="Download the App" href="https://github.com/fluxloader-team/fluxloader/releases/latest/">Fluxloader</a>
-					<%- include("discord", { user }) %>
-				</div>
+			<div class="access-denied-message">
+				<h1>Access Denied</h1>
+				<p>You do not have permission to access this page.</p>
+				<a class="btn btn-secondary" href="/">Return to Mod List</a>
 			</div>
 
-			<div id="adminPageContent" class="adminpage fullpage"></div>
-		</div>
+			<%- include("footer") %>
+		<% } else { %>
+			<div class="page-container">
+				<div class="header-container">
+					<div class="header-left">
+						<a class="btn btn-secondary" href="/">Mod List</a>
+						<a class="btn btn-secondary" id="btnDashboard">Selection menu</a>
+					</div>
+					<div class="header-right">
+						<a class="btn btn-primary" target="_blank" href="https://github.com/fluxloader-team/fluxloader/releases/latest/">Fluxloader</a>
+						<%- include("discord", { user }) %>
+					</div>
+				</div>
 
-		<script src="admin.js"></script>
+				<div id="alertArea" aria-live="polite"></div>
+				
+				<div id="adminPageContent" class="admin-page"></div>
+			</div>
 
-		<%- include("footer") %> <% } %>
+			<!-- EJS templates the JS can use -->
+			<template id="tpl-dashboard">
+				<%- include("admin-page-dashboard") %>
+			</template>
+			<template id="tpl-mod-management">
+				<%- include("admin-page-mods") %>
+			</template>
+			<template id="tpl-user-management">
+				<%- include("admin-page-users") %>
+			</template>
+			<template id="tpl-site-actions">
+				<%- include("admin-page-actions") %>
+			</template>
+			<template id="tpl-bans">
+				<%- include("admin-page-bans") %>
+			</template>
+			<template id="tpl-config">
+				<%- include("admin-page-config") %>
+			</template>
+
+			<!-- Ensure we load the other modules before we load monaco -->
+			<%- include("footer") %>
+
+			<!-- Load monaco and safely extract the require -->
+			<!-- Load monaco and safely extract the require -->
+			<script>
+				const oldRequire = globalThis.require;
+				const oldDefine = globalThis.define;
+			</script>
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/loader.min.js"></script>
+			<script>
+				const monacoRequire = require;
+				if (oldRequire) require = oldRequire;
+				else delete globalThis.require;
+
+				const monacoDefine = define;
+				if (oldDefine) define = oldDefine;
+				else delete globalThis.define;
+			</script>
+			
+			<script src="admin.js"></script>
+		<% } %>
 	</body>
 </html>

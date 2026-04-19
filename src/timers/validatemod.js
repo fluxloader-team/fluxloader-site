@@ -45,7 +45,7 @@ module.exports = {
 				}
 			}
 		} catch (error) {
-			logger.info(`Error verifying mods: ${error.message}`);
+			logger.error(`Unhandled Error verifying mods: ${error.message}`);
 		}
 	},
 };

@@ -6,6 +6,7 @@ const logger = new Utils.Log("pages.adminactions");
 
 module.exports = {
 	paths: ["/api/admin/actions"],
+
 	/**
 	 * @param {import("http").IncomingMessage} req
 	 * @param {import("http").ServerResponse} res
@@ -31,10 +32,10 @@ module.exports = {
 		req.on("end", async () => {
 			try {
 				res.writeHead(200, { "Content-Type": "application/json" });
-				var data = await JSON.parse(body);
-				var action = data.action;
-				var modID = data.modID;
-				var authorID = data.authorID;
+				const data = await JSON.parse(body);
+				const action = data.action;
+				const modID = data.modID;
+				const authorID = data.authorID;
 
 				// Handle different admin actions
 				switch (action) {
@@ -45,24 +46,23 @@ module.exports = {
 						}
 
 						// Get the mod
-						var mod = await DB.mods.data.one(modID);
-						if (!mod) {
+						const modToVerify = await DB.mods.data.one(modID);
+						if (!modToVerify) {
 							res.end(JSON.stringify({ error: "Mod not found" }));
 							return;
 						}
 
 						// Update the mod's verified status
-						mod.verified = true;
-						await DB.mods.data.update(modID, mod);
+						modToVerify.verified = true;
+						await DB.mods.data.update(modID, modToVerify);
 
 						// Log the action
-						var actionEntry = {
+						await DB.actions.add({
 							discordID: user.discordID,
-							action: `Verified mod ${mod.modData.name} (${modID})`,
+							action: `Verified mod ${modToVerify.modData.name} (${modID})`,
 							time: new Date(),
 							logged: false,
-						};
-						await DB.actions.add(actionEntry);
+						});
 
 						res.end(JSON.stringify({ success: true, message: "Mod verified successfully" }));
 						break;
@@ -74,8 +74,8 @@ module.exports = {
 						}
 
 						// Get the mod
-						var mod = await DB.mods.data.one(modID);
-						if (!mod) {
+						const modToDelete = await DB.mods.data.one(modID);
+						if (!modToDelete) {
 							res.end(JSON.stringify({ error: "Mod not found" }));
 							return;
 						}
@@ -84,13 +84,12 @@ module.exports = {
 						await DB.mods.delete(modID);
 
 						// Log the action
-						var actionEntry = {
+						await DB.actions.add({
 							discordID: user.discordID,
-							action: `Denied and deleted mod ${mod.modData.name} (${modID})`,
+							action: `Denied and deleted mod ${modToDelete.modData.name} (${modID})`,
 							time: new Date(),
 							logged: false,
-						};
-						await DB.actions.add(actionEntry);
+						});
 
 						res.end(JSON.stringify({ success: true, message: "Mod denied and deleted successfully" }));
 						break;
@@ -105,13 +104,12 @@ module.exports = {
 						await DB.users.ban(authorID);
 
 						// Log the action
-						var actionEntry = {
+						await DB.actions.add({
 							discordID: user.discordID,
 							action: `Banned author with ID ${authorID}`,
 							time: new Date(),
 							logged: false,
-						};
-						await DB.actions.add(actionEntry);
+						});
 
 						res.end(JSON.stringify({ success: true, message: "Author banned successfully" }));
 						break;
@@ -123,8 +121,8 @@ module.exports = {
 						}
 
 						// Unban the user
-						var user = await DB.users.one(authorID);
-						if (!user) {
+						const userToUnban = await DB.users.one(authorID);
+						if (!userToUnban) {
 							res.end(JSON.stringify({ error: "User not found" }));
 							return;
 						}
@@ -133,13 +131,12 @@ module.exports = {
 						await DB.users.unban(authorID);
 
 						// Log the action
-						var actionEntry = {
-							discordID: user.discordID,
-							action: `Unbanned user with ID ${authorID}`,
+						await DB.actions.add({
+							discordID: userToUnban.discordID,
+							action: `Unbanned userToUnban with ID ${authorID}`,
 							time: new Date(),
 							logged: false,
-						};
-						await DB.actions.add(actionEntry);
+						});
 
 						res.end(JSON.stringify({ success: true, message: "User unbanned successfully" }));
 						break;
@@ -151,25 +148,24 @@ module.exports = {
 						}
 
 						// Get the user
-						var user = await DB.users.one(authorID);
-						if (!user) {
+						const userToAdmin = await DB.users.one(authorID);
+						if (!userToAdmin) {
 							res.end(JSON.stringify({ error: "User not found" }));
 							return;
 						}
 
 						// Update user's permissions
-						if (!user.permissions.includes("admin")) {
+						if (!userToAdmin.permissions.includes("admin")) {
 							await DB.users.updatePermissions(authorID, "admin", true);
 						}
 
 						// Log the action
-						var actionEntry = {
-							discordID: user.discordID,
+						await DB.actions.add({
+							discordID: userToAdmin.discordID,
 							action: `Set admin status for user with ID ${authorID}`,
 							time: new Date(),
 							logged: false,
-						};
-						await DB.actions.add(actionEntry);
+						});
 
 						res.end(JSON.stringify({ success: true, message: "User set as admin successfully" }));
 						break;
@@ -181,25 +177,24 @@ module.exports = {
 						}
 
 						// Get the user
-						var user = await DB.users.one(authorID);
-						if (!user) {
+						const userToRemoveAdmin = await DB.users.one(authorID);
+						if (!userToRemoveAdmin) {
 							res.end(JSON.stringify({ error: "User not found" }));
 							return;
 						}
 
 						// Update user's permissions
-						if (user.permissions.includes("admin")) {
+						if (userToRemoveAdmin.permissions.includes("admin")) {
 							await DB.users.updatePermissions(authorID, "admin", false);
 						}
 
 						// Log the action
-						var actionEntry = {
-							discordID: user.discordID,
+						await DB.actions.add({
+							discordID: userToRemoveAdmin.discordID,
 							action: `Removed admin status for user with ID ${authorID}`,
 							time: new Date(),
 							logged: false,
-						};
-						await DB.actions.add(actionEntry);
+						});
 
 						res.end(JSON.stringify({ success: true, message: "Admin status removed successfully" }));
 						break;
@@ -208,7 +203,7 @@ module.exports = {
 						res.end(JSON.stringify({ error: "Invalid action" }));
 				}
 			} catch (error) {
-				logger.info(`Error ${error}`);
+				logger.error(`Unhandled Error: ${error}`);
 				res.end(JSON.stringify({ error: "Invalid JSON format or server error" }));
 			}
 		});

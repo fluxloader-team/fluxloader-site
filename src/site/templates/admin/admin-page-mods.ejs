@@ -1,0 +1,20 @@
+<div class="left-split-page">
+	<div class="search-bar">
+		<input type="text" id="modSearchInput" class="search-input" placeholder="Search mods..." />
+
+		<select id="modSearchType" class="search-select">
+			<option value="all">All</option>
+			<option value="verified">Verified</option>
+			<option value="unverified">Unverified</option>
+		</select>
+	</div>
+
+	<div id="modTableContainer" class="item-table-container"></div>
+</div>
+
+<div class="right-split-page">
+	<div id="modDetails" class="detail-page"><%- include("admin-spinner") %></div>
+
+	<div id="modDetailsActions" class="details-action-bar"></div>
+</div>
+
