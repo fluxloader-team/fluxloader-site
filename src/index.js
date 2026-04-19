@@ -43,7 +43,6 @@ globalThis.server = null;
 
 // --------------------------------------------------------------------------------------
 
-
 function loadResources() {
 	let pageNames = [];
 	fs.readdirSync(path.join(__dirname, "./site/pages"), { withFileTypes: true, recursive: true }).forEach((entry) => {
