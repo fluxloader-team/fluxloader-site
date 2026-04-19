@@ -34,7 +34,7 @@ services:
             - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
             - ./nginx/certs:/etc/nginx/certs:ro
         depends_on:
-            - nginx
+            - fluxloader
 
     mongo:
         image: mongo:8.0-noble
