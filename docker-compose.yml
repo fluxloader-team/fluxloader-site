@@ -1,6 +1,6 @@
 services:
     fluxloader:
-        image: ghcr.io/fluxloader-team/fluxloader-site:lateste
+        image: ghcr.io/fluxloader-team/fluxloader-site:latest
         # In our production environment we using container name and docker dns to resolve the ip of the container
         container_name: fluxloader
         restart: unless-stopped
