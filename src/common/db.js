@@ -417,7 +417,7 @@ var mods = {
 				var existingMod = await modsCollection.findOne({ modID });
 
 				// If mod exists, check ownership
-				let updatingExisting = true;
+				let updatingExisting = false;
 				if (existingMod) {
 					if (existingMod.Author.discordID !== discordInfo.discordID) {
 						return "A mod with this modID already exists and belongs to another user. Please use a different modID.";
@@ -586,8 +586,8 @@ var users = {
 			var userCollection = db.collection("Users");
 			var query = search
 				? {
-						$or: [{ discordID: { $regex: search, $options: "i" } }, { discordUsername: { $regex: search, $options: "i" } }],
-					}
+					$or: [{ discordID: { $regex: search, $options: "i" } }, { discordUsername: { $regex: search, $options: "i" } }],
+				}
 				: {};
 			var result = await userCollection.find(query).limit(limit).toArray();
 			return result;
