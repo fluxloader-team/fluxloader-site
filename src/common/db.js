@@ -584,8 +584,8 @@ var users = {
 			var userCollection = db.collection("Users");
 			var query = search
 				? {
-					$or: [{ discordID: { $regex: search, $options: "i" } }, { discordUsername: { $regex: search, $options: "i" } }],
-				}
+						$or: [{ discordID: { $regex: search, $options: "i" } }, { discordUsername: { $regex: search, $options: "i" } }],
+					}
 				: {};
 			var result = await userCollection.find(query).limit(limit).toArray();
 			return result;

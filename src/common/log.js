@@ -84,7 +84,7 @@ class Log {
 		this.saveQueue.push(`${prefix} | ${input}`);
 		try {
 			console.log(colorFn(`${prefix} | `) + input);
-		} catch { }
+		} catch {}
 	}
 
 	debug(msg) {
