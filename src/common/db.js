@@ -6,8 +6,6 @@ const sanitizeHTML = require("sanitize-html");
 const logger = new Utils.Log("common.db");
 var modInfoSchema = require("./schema.mod-info.json");
 
-var mongoUri = globalThis.config.mongodb.uri;
-
 /** @type {import("mongodb").MongoClient | undefined} */
 let globalClient;
 
@@ -83,7 +81,7 @@ class ActionEntry {
  */
 async function runWithMongoClient(callback) {
 	if (!globalClient) {
-		globalClient = new MongoClient(mongoUri);
+		globalClient = new MongoClient(globalThis.config.mongodb.uri);
 		await globalClient.connect();
 	}
 	try {
@@ -586,8 +584,8 @@ var users = {
 			var userCollection = db.collection("Users");
 			var query = search
 				? {
-						$or: [{ discordID: { $regex: search, $options: "i" } }, { discordUsername: { $regex: search, $options: "i" } }],
-					}
+					$or: [{ discordID: { $regex: search, $options: "i" } }, { discordUsername: { $regex: search, $options: "i" } }],
+				}
 				: {};
 			var result = await userCollection.find(query).limit(limit).toArray();
 			return result;
