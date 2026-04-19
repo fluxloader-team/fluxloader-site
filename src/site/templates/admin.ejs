@@ -2,26 +2,25 @@
 <html lang="en" data-bs-theme="dark">
 	<head>
 		<%- include("header") %>
+		<link rel="stylesheet" href="admin.css" />
 		<title>Fluxloader | Admin</title>
 	</head>
 
 	<body>
-		<link rel="stylesheet" href="admin.css" />
-
 		<% if (!hasAdminPermissions) { %>
 			<div class="access-denied-message">
 				<h1>Access Denied</h1>
 				<p>You do not have permission to access this page.</p>
 				<a class="btn btn-secondary" href="/">Return to Mod List</a>
 			</div>
-			<%- include("footer") %>
 
+			<%- include("footer") %>
 		<% } else { %>
 			<div class="page-container">
 				<div class="header-container">
 					<div class="header-left">
 						<a class="btn btn-secondary" href="/">Mod List</a>
-						<a class="btn btn-secondary" id="dashboardBtn">Selection menu</a>
+						<a class="btn btn-secondary" id="btnDashboard">Selection menu</a>
 					</div>
 					<div class="header-right">
 						<a class="btn btn-primary" target="_blank" href="https://github.com/fluxloader-team/fluxloader/releases/latest/">Fluxloader</a>
@@ -54,10 +53,27 @@
 				<%- include("admin-page-config") %>
 			</template>
 
-			<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/loader.min.js"></script>
-			<script src="admin.js"></script>
-
+			<!-- Ensure we load the other modules before we load monaco -->
 			<%- include("footer") %>
+
+			<!-- Load monaco and safely extract the require -->
+			<!-- Load monaco and safely extract the require -->
+			<script>
+				const oldRequire = globalThis.require;
+				const oldDefine = globalThis.define;
+			</script>
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/loader.min.js"></script>
+			<script>
+				const monacoRequire = require;
+				if (oldRequire) require = oldRequire;
+				else delete globalThis.require;
+
+				const monacoDefine = define;
+				if (oldDefine) define = oldDefine;
+				else delete globalThis.define;
+			</script>
+			
+			<script src="admin.js"></script>
 		<% } %>
 	</body>
 </html>

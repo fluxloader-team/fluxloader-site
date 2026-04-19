@@ -28,14 +28,20 @@ const AdminPage = (() => {
 		el.replaceChildren(tpl.content.cloneNode(true));
 	}
 
-	async function apiFetch(url, options = {}) {
-		const res = await fetch(url, options);
-		if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
-		return res.json();
+	function maybeThrowFetchResult(result) {
+		if (!result.ok) {
+			throw new Error(`HTTP ${result.status}: ${url}`);
+		}
 	}
 
-	async function apiPost(url, body) {
-		return apiFetch(url, {
+	async function fetchOrThrow(url, options = {}) {
+		const result = await fetch(url, options);
+		maybeThrowFetchResult(result);
+		return result.json();
+	}
+
+	async function postOrThrow(url, body) {
+		return fetchOrThrow(url, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(body),
@@ -64,7 +70,7 @@ const AdminPage = (() => {
 	// -------------------- Pages --------------------
 
 	const pageControl = {
-		dashboard: {
+		"dashboard": {
 			setup() {
 				getAdminPageContent().addEventListener("click", (e) => {
 					const card = e.target.closest("[data-page]");
@@ -97,20 +103,20 @@ const AdminPage = (() => {
 				await actionsPage.load(1);
 			},
 		},
-		bans: {
+		"bans": {
 			async activate() {
 				loadTemplate("tpl-bans", "admin-page-bans");
 				await bansPage.load();
 			},
 		},
-		config: {
+		"config": {
 			async activate() {
 				loadTemplate("tpl-config", "admin-page-config");
 				document.getElementById("btnSaveConfig").addEventListener("click", () => configPage.save());
 				document.getElementById("btnReloadConfig").addEventListener("click", () => configPage.load());
 
-				require.config({ paths: { vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs" } });
-				require(["vs/editor/editor.main"], () => {
+				monacoRequire.config({ paths: { vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs" } });
+				monacoRequire(["vs/editor/editor.main"], () => {
 					state.configEditor = monaco.editor.create(document.getElementById("configEditor"), {
 						value: "// Loading config…",
 						language: "json",
@@ -133,11 +139,18 @@ const AdminPage = (() => {
 			const verifiedParam = verifiedType === "verified" ? "true" : verifiedType === "unverified" ? "false" : "null";
 
 			try {
-				const result = await apiFetch(`/api/mods?search=${queryParam}&verified=${verifiedParam}`);
+				const result = await fetch(`/api/mods?search=${queryParam}&verified=${verifiedParam}`);
+				if (!result.ok && result.status != 400) {
+					maybeThrowFetchResult(result);
+				}
+
 				state.mods = {};
-				(result.mods ?? []).forEach((m) => {
+				const resultData = await result.json();
+				const mods = resultData.mods ?? [];
+				mods.forEach((m) => {
 					state.mods[m.modID] = m;
 				});
+
 				modsPage.renderModTable();
 			} catch (err) {
 				console.error("Mod search failed:", err);
@@ -161,7 +174,7 @@ const AdminPage = (() => {
 
 			modTableContainer.innerHTML = `
 				<table class="item-table">
-					<thead><tr><th>Name</th><th>Author</th><th>Version</th></tr></thead>
+					<thead><tr><th>Name</th><th>Author</th><th>Version</th><th>Verified</th></tr></thead>
 					<tbody>
 						${entries
 					.map(
@@ -170,6 +183,7 @@ const AdminPage = (() => {
 								<td>${m.modData.name}</td>
 								<td>${m.modData.author}</td>
 								<td>${m.modData.version}</td>
+								<td>${modsPage.verifiedBadge(m.verified)}</td>
 							</tr>
 						`,
 					)
@@ -205,6 +219,7 @@ const AdminPage = (() => {
 						<div class="detail-meta">
 							<span class="badge text-bg-info">${version}</span>
 							<span class="badge text-bg-warning">${author}</span>
+							<span id="modVerifiedBadge">${modsPage.verifiedBadge(mod.verified)}</span>
 						</div>
 					</div>
 					<p class="detail-short-desc" id="modDetails-short-desc">${shortDescription}</p>
@@ -233,7 +248,7 @@ const AdminPage = (() => {
 				if (state.modCache[modID]) {
 					await modsPage.populateModDetails(state.modCache[modID]);
 				} else {
-					const result = await apiFetch(`/api/mods?modid=${modID}&option=info`);
+					const result = await fetchOrThrow(`/api/mods?modid=${modID}&option=info`);
 					if (result.mod) {
 						state.modCache[result.mod.modID] = result.mod;
 						await modsPage.populateModDetails(result.mod);
@@ -274,10 +289,13 @@ const AdminPage = (() => {
 				}
 			}
 
+			const verifiedEl = document.getElementById("modVerifiedBadge");
+			if (verifiedEl) verifiedEl.innerHTML = modsPage.verifiedBadge(mod.verified);
+
 			if (mod.modID) {
 				await modsPage.updateActionsBar(mod.modID);
 				try {
-					const result = await apiFetch(`/api/mods?modid=${mod.modID}&option=versions`);
+					const result = await fetchOrThrow(`/api/mods?modid=${mod.modID}&option=versions`);
 					if (result.versions) modsPage.updateVersionSelect(mod.modID, result.versions);
 				} catch (err) {
 					console.error("Error fetching versions:", err);
@@ -288,7 +306,7 @@ const AdminPage = (() => {
 		async getVersion(modID, version) {
 			if (!version || version === "Change Version") return;
 			try {
-				const result = await apiFetch(`/api/mods?modid=${modID}&option=info&version=${version}`);
+				const result = await fetchOrThrow(`/api/mods?modid=${modID}&option=info&version=${version}`);
 				if (result.mod) {
 					state.modCache[result.mod.modID] = result.mod;
 					await modsPage.populateModDetails(result.mod);
@@ -346,13 +364,13 @@ const AdminPage = (() => {
 			document.getElementById("versionSelection").addEventListener("change", (e) => modsPage.getVersion(modID, e.target.value));
 			document.getElementById("btnVerifyMod").addEventListener("click", () => modsPage.verifyMod(modID));
 			document.getElementById("btnDenyMod").addEventListener("click", () => modsPage.denyMod(modID));
-			if (authorId) document.getElementById("btnBanAuthor").addEventListener("click", () => usersPage.banUser(authorId));
+			if (authorId) document.getElementById("btnBanAuthor").addEventListener("click", () => usersPage.banAuthor(authorId));
 
 			// Now that the select exists, populate it if we have a cached version list
 			const cached = state.modCache[modID];
 			if (cached) {
 				try {
-					const result = await apiFetch(`/api/mods?modid=${modID}&option=versions`);
+					const result = await fetchOrThrow(`/api/mods?modid=${modID}&option=versions`);
 					if (result.versions) modsPage.updateVersionSelect(modID, result.versions);
 				} catch (e) {
 					// silently continue, versions are non-critical
@@ -387,7 +405,7 @@ const AdminPage = (() => {
 		async verifyMod(modID) {
 			if (!(await confirmAction("Verify this mod?"))) return;
 			try {
-				const result = await apiPost("/api/admin/actions", { action: "verify", modID });
+				const result = await postOrThrow("/api/admin/actions", { action: "verify", modID });
 				if (result.error) {
 					addAlert("Error: " + result.error, "error");
 					return;
@@ -403,7 +421,7 @@ const AdminPage = (() => {
 		async denyMod(modID) {
 			if (!(await confirmAction("Deny and permanently delete this mod? This cannot be undone."))) return;
 			try {
-				const result = await apiPost("/api/admin/actions", { action: "deny", modID });
+				const result = await postOrThrow("/api/admin/actions", { action: "deny", modID });
 				if (result.error) {
 					addAlert("Error: " + result.error, "error");
 					return;
@@ -415,6 +433,12 @@ const AdminPage = (() => {
 				addAlert("Failed to deny mod.", "error");
 			}
 		},
+
+		verifiedBadge(verified) {
+			if (verified === true) return `<span class="badge text-bg-success">Verified</span>`;
+			if (verified === false) return `<span class="badge text-bg-danger">Unverified</span>`;
+			return `<span class="badge text-bg-secondary">Unknown</span>`;
+		},
 	};
 
 	const usersPage = {
@@ -423,7 +447,7 @@ const AdminPage = (() => {
 			const type = document.getElementById("userSearchType")?.value ?? "all";
 
 			try {
-				const result = await apiPost("/api/users", { action: "searchUsers", search: query });
+				const result = await postOrThrow("/api/users", { action: "searchUsers", search: query });
 				if (result.error) {
 					addAlert("Error: " + result.error, "error");
 					return;
@@ -436,6 +460,7 @@ const AdminPage = (() => {
 					state.users[u.discordID] = u;
 				});
 				usersPage.renderUsersTable();
+				usersPage.inspectUserDetails(Object.keys(state.users)[0]);
 			} catch (err) {
 				console.error("User search failed:", err);
 				addAlert("Failed to load users.", "error");
@@ -469,7 +494,6 @@ const AdminPage = (() => {
 				row.addEventListener("click", () => usersPage.inspectUserDetails(row.dataset.userid));
 			});
 
-			usersPage.inspectUserDetails(entries[0].discordID);
 		},
 
 		async inspectUserDetails(discordID) {
@@ -498,7 +522,7 @@ const AdminPage = (() => {
 				if (state.userCache[discordID]) {
 					usersPage.populateUserDetailsStats(state.userCache[discordID]);
 				} else {
-					const result = await apiPost("/api/users", { action: "usersDetails", userID: discordID });
+					const result = await postOrThrow("/api/users", { action: "usersDetails", userID: discordID });
 					if (result.error) {
 						addAlert("Error: " + result.error, "error");
 						return;
@@ -577,7 +601,7 @@ const AdminPage = (() => {
 		async banUser(discordID) {
 			if (!(await confirmAction("Ban this user? They will be prevented from uploading mods."))) return;
 			try {
-				const result = await apiPost("/api/admin/actions", { action: "banAuthor", authorID: discordID });
+				const result = await postOrThrow("/api/admin/actions", { action: "banAuthor", authorID: discordID });
 				if (result.error) {
 					addAlert("Error: " + result.error, "error");
 					return;
@@ -585,6 +609,8 @@ const AdminPage = (() => {
 				state.users[discordID].banned = true;
 				delete state.userCache[discordID];
 				addAlert("User banned.", "success");
+
+				await usersPage.renderUsersTable();
 				await usersPage.inspectUserDetails(discordID);
 			} catch (err) {
 				console.error(err);
@@ -592,10 +618,10 @@ const AdminPage = (() => {
 			}
 		},
 
-		async unbanUser(discordID) {
+		async unbanUser(discordID, toInspect = true) {
 			if (!(await confirmAction("Unban this user?"))) return;
 			try {
-				const result = await apiPost("/api/admin/actions", { action: "unbanUser", authorID: discordID });
+				const result = await postOrThrow("/api/admin/actions", { action: "unbanUser", authorID: discordID });
 				if (result.error) {
 					addAlert("Error: " + result.error, "error");
 					return;
@@ -603,7 +629,11 @@ const AdminPage = (() => {
 				state.users[discordID].banned = false;
 				delete state.userCache[discordID];
 				addAlert("User unbanned.", "success");
-				await usersPage.inspectUserDetails(discordID);
+
+				if (toInspect) {
+					await usersPage.renderUsersTable();
+					await usersPage.inspectUserDetails(discordID);
+				}
 			} catch (err) {
 				console.error(err);
 				addAlert("Failed to unban user.", "error");
@@ -613,7 +643,7 @@ const AdminPage = (() => {
 		async setUserAdmin(discordID) {
 			if (!(await confirmAction("Grant admin to this user?"))) return;
 			try {
-				const result = await apiPost("/api/admin/actions", { action: "setAdmin", authorID: discordID });
+				const result = await postOrThrow("/api/admin/actions", { action: "setAdmin", authorID: discordID });
 				if (result.error) {
 					addAlert("Error: " + result.error, "error");
 					return;
@@ -621,6 +651,8 @@ const AdminPage = (() => {
 				if (!state.users[discordID].permissions.includes("admin")) state.users[discordID].permissions.push("admin");
 				delete state.userCache[discordID];
 				addAlert("Admin granted.", "success");
+
+				await usersPage.renderUsersTable();
 				await usersPage.inspectUserDetails(discordID);
 			} catch (err) {
 				console.error(err);
@@ -631,7 +663,7 @@ const AdminPage = (() => {
 		async removeUserAdmin(discordID) {
 			if (!(await confirmAction("Remove admin from this user?"))) return;
 			try {
-				const result = await apiPost("/api/admin/actions", { action: "removeAdmin", authorID: discordID });
+				const result = await postOrThrow("/api/admin/actions", { action: "removeAdmin", authorID: discordID });
 				if (result.error) {
 					addAlert("Error: " + result.error, "error");
 					return;
@@ -639,42 +671,12 @@ const AdminPage = (() => {
 				state.users[discordID].permissions = state.users[discordID].permissions.filter((p) => p !== "admin");
 				delete state.userCache[discordID];
 				addAlert("Admin removed.", "success");
+
+				await usersPage.renderUsersTable();
 				await usersPage.inspectUserDetails(discordID);
 			} catch (err) {
 				console.error(err);
 				addAlert("Failed to remove admin.", "error");
-			}
-		},
-
-		async banUser(authorID) {
-			if (!(await confirmAction("Ban this author?"))) return;
-			try {
-				const result = await apiPost("/api/admin/actions", { action: "banAuthor", authorID });
-				if (result.error) {
-					addAlert("Error: " + result.error, "error");
-					return;
-				}
-				addAlert("Author banned.", "success");
-			} catch (err) {
-				console.error(err);
-				addAlert("Failed to ban author.", "error");
-			}
-		},
-
-		// Called from the Bans page
-		async unbanFromList(discordID) {
-			if (!(await confirmAction("Unban this user?"))) return;
-			try {
-				const result = await apiPost("/api/admin/actions", { action: "unbanUser", authorID: discordID });
-				if (result.error) {
-					addAlert("Error: " + result.error, "error");
-					return;
-				}
-				addAlert("User unbanned.", "success");
-				await bansPage.load();
-			} catch (err) {
-				console.error(err);
-				addAlert("Failed to unban user.", "error");
 			}
 		},
 	};
@@ -684,7 +686,7 @@ const AdminPage = (() => {
 			state.actionsPagination.page = page;
 
 			try {
-				const result = await apiPost("/api/actions", {
+				const result = await postOrThrow("/api/actions", {
 					page: state.actionsPagination.page,
 					size: state.actionsPagination.size
 				});
@@ -757,7 +759,7 @@ const AdminPage = (() => {
 	const bansPage = {
 		async load() {
 			try {
-				const result = await apiPost("/api/users", { action: "listUsers" });
+				const result = await postOrThrow("/api/users", { action: "listUsers" });
 				if (result.error) {
 					addAlert("Error: " + result.error, "error");
 					return;
@@ -798,7 +800,10 @@ const AdminPage = (() => {
 				</table>`;
 
 			list.querySelectorAll("[data-unban]").forEach((btn) => {
-				btn.addEventListener("click", () => usersPage.unbanFromList(btn.dataset.unban));
+				btn.addEventListener("click", async () => {
+					usersPage.unbanUser(btn.dataset.unban, false);
+					await bansPage.load();
+				});
 			});
 		},
 	};
@@ -806,7 +811,7 @@ const AdminPage = (() => {
 	const configPage = {
 		async load() {
 			try {
-				const result = await apiPost("/api/config", { action: "getConfig" });
+				const result = await postOrThrow("/api/config", { action: "getConfig" });
 				if (result.error) {
 					addAlert("Error: " + result.error, "error");
 					return;
@@ -830,7 +835,7 @@ const AdminPage = (() => {
 			}
 
 			try {
-				const result = await apiPost("/api/config", { config: content });
+				const result = await postOrThrow("/api/config", { config: content });
 				if (result.error) {
 					addAlert("Error: " + result.error, "error");
 					return;
@@ -849,7 +854,7 @@ const AdminPage = (() => {
 		pageControl.dashboard.setup();
 		pageControl.dashboard.activate();
 
-		document.getElementById("dashboardBtn").addEventListener("click", () => {
+		document.getElementById("btnDashboard").addEventListener("click", () => {
 			pageControl.dashboard.activate();
 		});
 	}

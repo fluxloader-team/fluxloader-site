@@ -328,7 +328,7 @@ var mods = {
 		/**
 		 * @param {UserEntry} discordInfo
 		 */
-		upload: async function (payload = { filename: "", filedata: "" }, discordInfo, bypassUpdateCheck = false) {
+		upload: async function (payload = { filename: "", filedata: "" }, discordInfo) {
 			var endresult = await runWithMongoClient(async (client) => {
 				var db = client.db("SandustryMods");
 				var modsCollection = db.collection("Mods");
@@ -416,21 +416,23 @@ var mods = {
 				// Check if a mod with this ID exists
 				var existingMod = await modsCollection.findOne({ modID });
 
-				// If mod exists, check ownership (unless bypassUpdateCheck is true)
-				if (existingMod && !bypassUpdateCheck) {
+				// If mod exists, check ownership
+				let updatingExisting = true;
+				if (existingMod) {
 					if (existingMod.Author.discordID !== discordInfo.discordID) {
 						return "A mod with this modID already exists and belongs to another user. Please use a different modID.";
 					} else {
 						if (existingMod.modData.version === modData.version) {
 							return "Mod with this modID and version already exists. Please update the version number.";
 						}
-						return "UPDATE_EXISTING_MOD:" + modID;
+						updatingExisting = true;
 					}
 				}
 
-				// Create a new mod entry
 				var modEntry = existingMod;
 				var uploadTime = new Date();
+
+				// Create a new mod entry
 				if (modEntry == null) {
 					modEntry = {
 						modID: modID,
@@ -467,7 +469,9 @@ var mods = {
 				action.action = `Uploaded mod ${modData.name} ID ${modID} version ${modData.version}`;
 				action.discordID = discordInfo.discordID;
 				actions.add(action);
-				return modID;
+
+				if (updatingExisting) return "UPDATE_EXISTING_MOD:" + modID;
+				else return modID;
 			});
 
 			return endresult;
@@ -582,8 +586,8 @@ var users = {
 			var userCollection = db.collection("Users");
 			var query = search
 				? {
-						$or: [{ discordID: { $regex: search, $options: "i" } }, { discordUsername: { $regex: search, $options: "i" } }],
-					}
+					$or: [{ discordID: { $regex: search, $options: "i" } }, { discordUsername: { $regex: search, $options: "i" } }],
+				}
 				: {};
 			var result = await userCollection.find(query).limit(limit).toArray();
 			return result;

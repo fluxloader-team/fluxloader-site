@@ -65,35 +65,28 @@ module.exports = {
 
 				// Upload the payload
 				var uploadResult = await DB.mods.data.upload(payload, user);
+				logger.info(`Upload result: ${uploadResult}`);
 				checkError(uploadResult);
 
-				// Check if this is an update to an existing mod
 				if (typeof uploadResult === "string" && uploadResult.startsWith("UPDATE_EXISTING_MOD:")) {
-					const modID = uploadResult.split(":")[1];
-
-					// Upload the payload (as an update using 3rd parameter as true)
-					uploadResult = await DB.mods.data.upload(payload, user, false);
-					checkError(uploadResult);
-
 					// Succesful upload as an update
 					res.writeHead(201, { "Content-Type": "application/json" });
 					res.end(
 						JSON.stringify({
 							message: `File ${filename} uploaded successfully.`,
 							isUpdate: true,
-							modID: modID,
+							modID: uploadResult.replace("UPDATE_EXISTING_MOD:", ""),
 						}),
 					);
-					return;
+				} else {
+					// Successful upload of a new mod
+					await res.writeHead(201, { "Content-Type": "application/json" });
+					await res.end(
+						JSON.stringify({
+							message: `File ${filename} uploaded successfully.`,
+						}),
+					);
 				}
-
-				// Successful upload of a new mod
-				await res.writeHead(201, { "Content-Type": "application/json" });
-				await res.end(
-					JSON.stringify({
-						message: `File ${filename} uploaded successfully.`,
-					}),
-				);
 			} catch (error) {
 				logger.error("Unhandled error in uploadmod API:" + error.stack ? error.stack : error.message);
 				await res.writeHead(400, { "Content-Type": "application/json" });

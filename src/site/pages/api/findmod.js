@@ -352,13 +352,13 @@ module.exports = {
 					}
 
 					var mods = [];
-					var VerifiedOnly = true;
+					var verifiedOnly = true;
 					if (querys["verified"]) {
 						if (querys["verified"] == "true") {
 						} else if (querys["verified"] == "false") {
-							VerifiedOnly = false;
+							verifiedOnly = false;
 						} else {
-							VerifiedOnly = null;
+							verifiedOnly = null;
 						}
 					}
 					if (!searchQuery || searchQuery.trim() === "") {
@@ -370,9 +370,9 @@ module.exports = {
 						if (querys["size"]) {
 							page.size = parseInt(querys["size"]);
 						}
-						mods = await DB.mods.data.search(searchQuery, VerifiedOnly, false, page);
+						mods = await DB.mods.data.search(searchQuery, verifiedOnly, false, page);
 					} else {
-						mods = await DB.mods.data.search(searchQuery, VerifiedOnly, false);
+						mods = await DB.mods.data.search(searchQuery, verifiedOnly, false);
 					}
 
 					if (mods.length === 0) {
