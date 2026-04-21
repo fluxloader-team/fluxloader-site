@@ -6,7 +6,7 @@ module.exports = {
 	 * @param {import("http").ServerResponse} res
 	 */
 	run: function (req, res) {
-		res.writeHead(200, { "Content-Type": "text/html" });
-		res.end("<h1>API base endpoint /api</h1>");
+		res.writeHead(200, { "Content-Type": "application/json" });
+		res.end(JSON.stringify({ message: "API alive" }));
 	},
 };
