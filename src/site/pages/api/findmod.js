@@ -1,6 +1,6 @@
 const Utils = require("../../../common/utils.js");
 const DB = require("../../../common/db");
-
+const { decompress } = require("@mongodb-js/zstd");
 const logger = new Utils.Log("pages.search");
 
 module.exports = {
@@ -93,7 +93,7 @@ module.exports = {
 								return;
 							}
 							logger.info(`Processing download for modID: ${modID}, version: ${querys["version"] || "latest"}, modfile length: ${modData.modfile ? modData.modfile.length : 0}`);
-							var zipBuffer = Buffer.from(modData.modfile, "base64");
+							const zipBuffer = await decompress(Buffer.from(modData.modfile, "base64"));
 							res.writeHead(200, {
 								"Content-Type": "application/zip",
 								"Content-Disposition": `attachment; filename=${modData.modID}.zip`,
