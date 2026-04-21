@@ -36,3 +36,19 @@ jobs:
                       ghcr.io/${{ github.repository }}:${{ github.sha }}
                   cache-from: type=gha
                   cache-to: type=gha,mode=max
+
+            # Modified from https://oneuptime.com/blog/post/2026-03-20-portainer-webhooks-github-actions/view
+            # Modified to set the tag to the commit hash: https://docs.portainer.io/user/docker/containers/webhooks
+            - name: Deploy via Portainer webhook
+              run: |
+                  HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+                      -X POST \
+                      --max-time 30 \
+                      "${{ secrets.PORTAINER_WEBHOOK_URL }}?tag=${{ github.sha }}")
+
+                  if [ "$HTTP_STATUS" == "204" ]; then
+                      echo "✓ Deployment triggered successfully"
+                  else
+                      echo "✗ Deployment trigger failed: HTTP $HTTP_STATUS"
+                      exit 1
+                  fi
