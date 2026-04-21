@@ -2,6 +2,7 @@ const { MongoClient } = require("mongodb");
 const Utils = require("../common/utils.js");
 const JSZip = require("jszip");
 const sanitizeHTML = require("sanitize-html");
+const { compress } = require("@mongodb-js/zstd");
 
 const logger = new Utils.Log("common.db");
 var modInfoSchema = require("./schema.mod-info.json");
@@ -453,10 +454,11 @@ var mods = {
 					await modsCollection.replaceOne({ modID: modID }, modEntry);
 				}
 
+				const compressedZipBuffer = await compress(zipBuffer, 10);
 				// Create a new mod version entry
 				var modVersionEntry = {
 					modID: modEntry.modID,
-					modfile: zipBuffer.toString("base64"),
+					modfile: compressedZipBuffer.toString("base64"),
 					modData: modData,
 					uploadTime: uploadTime,
 					downloadCount: 0,
