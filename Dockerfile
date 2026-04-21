@@ -13,4 +13,4 @@ RUN npm ci --production
 
 COPY ./ ./
 
-CMD [ "npm","run","deploy"]
+CMD [ "npm","start"]
